@@ -244,7 +244,7 @@ export default function Index() {
       const chat = store.chats.find((c) => c.id === chatId);
       const isTcgaDemo = chat?.title === "TCGA-BRCA outcomes";
 
-      store.addMessage(chatId, { role: "user", content });
+      store.addMessage(chatId, { role: "user", content }, store.activeBranchId);
       setIsLoading(true);
 
       // Check for graph/table/visualization keywords FIRST (applies to all chats)
