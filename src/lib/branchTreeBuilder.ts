@@ -205,7 +205,21 @@ export function buildBranchTreeFromMessages(
         false
       );
 
-      if (branchNodes.length === 0) continue;
+      // If branch has no messages yet, create a placeholder node
+      if (branchNodes.length === 0) {
+        branchChildren.push({
+          id: `branch-placeholder-${branch.id}`,
+          label: branch.label || "Branch",
+          status: "active",
+          branchLabel: branch.label || "Branch",
+          isBranch: true,
+          branchId: branch.id,
+          category: "exploration",
+          description: "New branch — no messages yet",
+          timestamp: branch.createdAt,
+        });
+        continue;
+      }
 
       // Set the first branch node's branchLabel
       branchNodes[0].branchLabel = branch.label || "Branch";
