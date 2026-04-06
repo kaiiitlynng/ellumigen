@@ -171,58 +171,56 @@ function NodeTree({
       {/* Connectors + children */}
       {(mainChild || branchChildren.length > 0) && (
         <div className="relative flex flex-col items-center">
-          {/* Vertical line from card down to dot / next node */}
-          <div className="w-px h-8 bg-border" />
+          {/* Vertical line segment: card bottom → dot center */}
+          <div className="w-px bg-border" style={{ height: branchChildren.length > 0 ? '24px' : '32px' }} />
 
-          {/* Branch point dot */}
+          {/* Branch point dot (acts as the junction) */}
           {branchChildren.length > 0 && (
-            <div className="w-3 h-3 rounded-full bg-border z-10 shrink-0" />
+            <div className="relative flex items-center justify-center">
+              <div className="w-3 h-3 rounded-full bg-border z-10 shrink-0" />
+
+              {/* SVG connector: horizontal line from dot → curve down to branch */}
+              <svg
+                className="absolute pointer-events-none overflow-visible"
+                style={{ left: '50%', top: '50%' }}
+                width="1"
+                height="1"
+                fill="none"
+              >
+                {branchChildren.map((_, i) => {
+                  const endX = (i + 1) * 320;
+                  const curveRadius = 40;
+                  return (
+                    <g key={i}>
+                      <path
+                        d={`M 0 0 L ${endX - curveRadius} 0 Q ${endX} 0 ${endX} ${curveRadius}`}
+                        stroke="hsl(var(--border))"
+                        strokeWidth="1"
+                        fill="none"
+                      />
+                      <circle cx={endX} cy={curveRadius} r="3.5" fill="hsl(var(--border))" />
+                    </g>
+                  );
+                })}
+              </svg>
+            </div>
           )}
 
-          {/* SVG curved connector going right to each branch */}
-          {branchChildren.length > 0 && (
-            <svg
-              className="absolute pointer-events-none overflow-visible"
-              style={{
-                top: '38px',
-                left: '50%',
-              }}
-              width="1"
-              height="1"
-              fill="none"
-            >
-              {branchChildren.map((_, i) => {
-                const endX = (i + 1) * 320;
-                return (
-                  <g key={i}>
-                    <path
-                      d={`M 0 0 L ${endX - 40} 0 Q ${endX} 0 ${endX} 40`}
-                      stroke="hsl(var(--border))"
-                      strokeWidth="1"
-                      fill="none"
-                    />
-                    <circle cx={endX} cy="40" r="3.5" fill="hsl(var(--border))" />
-                  </g>
-                );
-              })}
-            </svg>
-          )}
-
-          {/* Main label + vertical line continuing down */}
+          {/* Vertical line: dot → Main label → main child card */}
           {branchChildren.length > 0 && mainChild && (
             <>
-              <div className="w-px h-3 bg-border" />
+              <div className="w-px h-4 bg-border" />
               <div className="my-1">
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-foreground text-background font-medium">
                   Main
                 </span>
               </div>
-              <div className="w-px h-3 bg-border" />
+              <div className="w-px h-4 bg-border" />
             </>
           )}
 
-          {/* No branches: just straight connector (already drawn above) */}
-          {branchChildren.length === 0 && !mainChild && (
+          {/* If no main child, show add button */}
+          {branchChildren.length > 0 && !mainChild && (
             <>
               <div className="w-px h-4 bg-border" />
               <button
@@ -234,7 +232,7 @@ function NodeTree({
             </>
           )}
 
-          {/* Main child node directly below, centered */}
+          {/* Main child node directly below, stays centered */}
           {mainChild && (
             <NodeTree
               node={mainChild}
@@ -245,32 +243,37 @@ function NodeTree({
             />
           )}
 
-          {/* Branch columns positioned to the right */}
-          {branchChildren.map((branch, i) => (
-            <div
-              key={branch.id}
-              className="absolute flex flex-col items-center"
-              style={{
-                left: `calc(50% + ${(i + 1) * 320}px)`,
-                top: '82px',
-                transform: 'translateX(-50%)',
-              }}
-            >
-              <div className="mb-1">
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
-                  {branch.branchLabel || `Branch ${i + 1}`}
-                </span>
+          {/* Branch columns: positioned absolutely from the dot */}
+          {branchChildren.map((branch, i) => {
+            const curveRadius = 40;
+            return (
+              <div
+                key={branch.id}
+                className="absolute flex flex-col items-center"
+                style={{
+                  left: `calc(50% + ${(i + 1) * 320}px)`,
+                  // Position so top of branch label aligns right where the curve's dot ends
+                  top: `${(branchChildren.length > 0 ? 24 : 32) + 6 + curveRadius}px`,
+                  transform: 'translateX(-50%)',
+                }}
+              >
+                <div className="w-px h-3 bg-border" />
+                <div className="mb-1">
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
+                    {branch.branchLabel || `Branch ${i + 1}`}
+                  </span>
+                </div>
+                <div className="w-px h-4 bg-border" />
+                <NodeTree
+                  node={branch}
+                  nodeMap={nodeMap}
+                  activeNodeId={activeNodeId}
+                  onSelectNode={onSelectNode}
+                  onAddBranch={onAddBranch}
+                />
               </div>
-              <div className="w-px h-4 bg-border" />
-              <NodeTree
-                node={branch}
-                nodeMap={nodeMap}
-                activeNodeId={activeNodeId}
-                onSelectNode={onSelectNode}
-                onAddBranch={onAddBranch}
-              />
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
