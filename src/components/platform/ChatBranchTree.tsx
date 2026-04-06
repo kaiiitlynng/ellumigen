@@ -129,7 +129,7 @@ function BranchTreeLayout({
           <line
             x1={MAIN_X} y1={mainRowIndex[0] * ROW_HEIGHT + ROW_HEIGHT / 2}
             x2={MAIN_X} y2={mainRowIndex[mainChain.length - 1] * ROW_HEIGHT + ROW_HEIGHT / 2}
-            stroke="hsl(var(--primary))"
+            stroke="#0070C0"
             strokeWidth={2}
           />
         )}
@@ -148,7 +148,7 @@ function BranchTreeLayout({
               <path
                 d={`M ${MAIN_X} ${startY} Q ${BRANCH_X} ${startY}, ${BRANCH_X} ${firstBranchY}`}
                 fill="none"
-                stroke="hsl(var(--muted-foreground) / 0.4)"
+                stroke="#D9D9D9"
                 strokeWidth={2}
               />
               {/* Vertical line connecting branch nodes */}
@@ -156,7 +156,7 @@ function BranchTreeLayout({
                 <line
                   x1={BRANCH_X} y1={firstBranchY}
                   x2={BRANCH_X} y2={lastBranchY}
-                  stroke="hsl(var(--muted-foreground) / 0.4)"
+                  stroke="#D9D9D9"
                   strokeWidth={2}
                 />
               )}
@@ -256,13 +256,13 @@ function MainDot({ status, isActive }: { status: BranchTreeNode["status"]; isAct
 }
 
 function BranchDot({ status, isActive }: { status: BranchTreeNode["status"]; isActive?: boolean }) {
-  const base = "rounded-full bg-muted-foreground/50";
+  const color = { backgroundColor: "#D9D9D9" };
   if (status === "active" || isActive) {
     return (
       <span className="relative flex items-center justify-center w-[8px] h-[8px]">
-        <span className={cn("rounded-full bg-muted-foreground", "w-[8px] h-[8px]")} />
+        <span className="rounded-full w-[8px] h-[8px]" style={color} />
       </span>
     );
   }
-  return <span className={cn(base, "w-[8px] h-[8px]")} />;
+  return <span className="rounded-full w-[8px] h-[8px]" style={color} />;
 }
