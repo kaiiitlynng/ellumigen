@@ -265,6 +265,7 @@ export function branchTreeToMapNodes(
       children: childIds,
       branchLabel: node.branchLabel,
       isMain: node.isMain,
+      isBranch: node.isBranch,
     });
     if (node.children) {
       result.push(...branchTreeToMapNodes(node.children, node.id));

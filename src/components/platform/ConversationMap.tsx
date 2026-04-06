@@ -13,6 +13,7 @@ export interface MapNode {
   children: string[];
   isMain?: boolean;
   branchLabel?: string;
+  isBranch?: boolean;
 }
 
 interface ConversationMapProps {
@@ -141,7 +142,10 @@ function NodeTree({
   const children = node.children.map((id) => nodeMap[id]).filter(Boolean);
   const style = CATEGORY_STYLES[node.category];
   const isActive = node.id === activeNodeId;
-  const hasBranches = children.length > 1;
+
+  // Separate main continuation from branch children
+  const mainChild = children.find((c) => !c.isBranch);
+  const branchChildren = children.filter((c) => c.isBranch);
 
   return (
     <div className="flex flex-col items-center">
@@ -164,49 +168,74 @@ function NodeTree({
         <p className="text-xs text-muted-foreground mt-1">{node.description}</p>
       </motion.button>
 
-      {/* Connector line down */}
-      {children.length > 0 && (
-        <div className="w-px h-8 bg-border" />
-      )}
+      {/* Branch point: connector + horizontal branch lines */}
+      {(mainChild || branchChildren.length > 0) && (
+        <div className="flex items-start">
+          {/* Main column continues straight down */}
+          <div className="flex flex-col items-center">
+            <div className="w-px h-8 bg-border" />
+            {/* Dot at branch point if there are branches */}
+            {branchChildren.length > 0 && (
+              <div className="w-2.5 h-2.5 rounded-full bg-border -my-px z-10" />
+            )}
+            {mainChild && (
+              <>
+                {branchChildren.length > 0 && (
+                  <div className="mb-2 mt-1">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-foreground text-background font-medium">
+                      Main
+                    </span>
+                  </div>
+                )}
+                <NodeTree
+                  node={mainChild}
+                  nodeMap={nodeMap}
+                  activeNodeId={activeNodeId}
+                  onSelectNode={onSelectNode}
+                  onAddBranch={onAddBranch}
+                />
+              </>
+            )}
+            {!mainChild && (
+              <>
+                <div className="w-px h-4 bg-border" />
+                <button
+                  onClick={() => onAddBranch?.(node.id)}
+                  className="w-7 h-7 rounded-full border border-dashed border-border flex items-center justify-center hover:bg-secondary hover:border-muted-foreground transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5 text-muted-foreground" />
+                </button>
+              </>
+            )}
+          </div>
 
-      {/* Branch point */}
-      {hasBranches ? (
-        <div className="relative flex flex-col items-center">
-          {/* Horizontal line across branches */}
-          <div className="flex items-start gap-12">
-            {children.map((child, i) => (
-              <div key={child.id} className="flex flex-col items-center">
-                {/* Branch label */}
+          {/* Branch columns to the right */}
+          {branchChildren.map((branch, i) => (
+            <div key={branch.id} className="flex items-start">
+              {/* Horizontal connector line */}
+              <div className="w-16 h-px bg-border mt-[18px]" />
+              {/* Branch column */}
+              <div className="flex flex-col items-center">
                 <div className="mb-2">
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
-                    {child.branchLabel || `Branch ${i + 1}`}
+                    {branch.branchLabel || `Branch ${i + 1}`}
                   </span>
                 </div>
-                {/* Connector */}
                 <div className="w-px h-4 bg-border" />
-                {/* Recursive tree */}
                 <NodeTree
-                  node={child}
+                  node={branch}
                   nodeMap={nodeMap}
                   activeNodeId={activeNodeId}
                   onSelectNode={onSelectNode}
                   onAddBranch={onAddBranch}
                 />
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
-      ) : children.length === 1 ? (
-        <NodeTree
-          node={children[0]}
-          nodeMap={nodeMap}
-          activeNodeId={activeNodeId}
-          onSelectNode={onSelectNode}
-          onAddBranch={onAddBranch}
-        />
-      ) : null}
+      )}
 
-      {/* Add branch button at leaf nodes */}
+      {/* Add branch button at leaf nodes (no children at all) */}
       {children.length === 0 && (
         <>
           <div className="w-px h-4 bg-border" />
