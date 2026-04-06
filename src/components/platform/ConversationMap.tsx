@@ -170,23 +170,26 @@ function NodeTree({
 
       {/* Branch point: connector + horizontal branch lines */}
       {(mainChild || branchChildren.length > 0) && (
-        <div className="flex items-start">
+        <div className="relative flex items-start">
           {/* Main column continues straight down */}
           <div className="flex flex-col items-center">
-            <div className="w-px h-8 bg-border" />
-            {/* Dot at branch point if there are branches */}
-            {branchChildren.length > 0 && (
-              <div className="w-2.5 h-2.5 rounded-full bg-border -my-px z-10" />
-            )}
+            {/* Vertical connector with dot */}
+            <div className="relative flex flex-col items-center">
+              <div className="w-px h-8 bg-border" />
+              {branchChildren.length > 0 && (
+                <div className="w-3 h-3 rounded-full bg-border z-10" />
+              )}
+            </div>
             {mainChild && (
               <>
                 {branchChildren.length > 0 && (
-                  <div className="mb-2 mt-1">
+                  <div className="my-2">
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-foreground text-background font-medium">
                       Main
                     </span>
                   </div>
                 )}
+                {branchChildren.length > 0 && <div className="w-px h-2 bg-border" />}
                 <NodeTree
                   node={mainChild}
                   nodeMap={nodeMap}
@@ -209,13 +212,29 @@ function NodeTree({
             )}
           </div>
 
-          {/* Branch columns to the right */}
+          {/* Branch columns to the right with curved SVG connectors */}
           {branchChildren.map((branch, i) => (
-            <div key={branch.id} className="flex items-start">
-              {/* Horizontal connector line */}
-              <div className="w-16 h-px bg-border mt-[18px]" />
+            <div key={branch.id} className="flex items-start" style={{ marginLeft: '-1px' }}>
+              {/* Curved SVG connector from dot to branch */}
+              <svg
+                width="100"
+                height="60"
+                viewBox="0 0 100 60"
+                fill="none"
+                className="shrink-0"
+                style={{ marginTop: '26px' }}
+              >
+                <path
+                  d="M 0 0 C 0 30, 50 30, 50 50 L 50 50 C 50 55, 60 60, 100 60"
+                  stroke="hsl(var(--border))"
+                  strokeWidth="1"
+                  fill="none"
+                />
+                {/* Small dot at the end */}
+                <circle cx="50" cy="55" r="3" fill="hsl(var(--border))" />
+              </svg>
               {/* Branch column */}
-              <div className="flex flex-col items-center">
+              <div className="flex flex-col items-center" style={{ marginTop: '10px' }}>
                 <div className="mb-2">
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
                     {branch.branchLabel || `Branch ${i + 1}`}
