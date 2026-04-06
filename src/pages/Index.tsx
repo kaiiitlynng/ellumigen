@@ -416,8 +416,26 @@ export default function Index() {
     setShowConversationMap(false);
   }, [store]);
 
+  const mapNodes = useMemo(() => {
+    if (!store.activeChat) return [];
+    return branchTreeToMapNodes(buildBranchTreeFromMessages(store.activeChat.messages, store.activeChat.branches, isLoading, store.activeBranchId));
+  }, [store.activeChat, isLoading, store.activeBranchId]);
+
+  const handleSelectMapNode = useCallback((nodeId: string) => {
+    setActiveMapNodeId(nodeId);
+    // Find the map node to determine if it's a branch node
+    const mapNode = mapNodes.find((n) => n.id === nodeId);
+    if (mapNode?.branchId) {
+      // It's a branch node — switch to that branch
+      store.switchToBranch(mapNode.branchId);
+    } else {
+      // It's a main thread node — switch back to main
+      store.switchToBranch(null);
+    }
+    setShowConversationMap(false);
+  }, [mapNodes, store]);
+
   const handleAddMapBranch = useCallback((parentNodeId: string) => {
-    // In a real app, this would create a new branch node
     console.log("Add branch from node:", parentNodeId);
   }, []);
 
@@ -467,9 +485,9 @@ export default function Index() {
           <ConversationMap
             title={store.activeChat.title}
             subtitle=""
-            nodes={branchTreeToMapNodes(buildBranchTreeFromMessages(store.activeChat.messages, store.activeChat.branches, isLoading, store.activeBranchId))}
+            nodes={mapNodes}
             activeNodeId={activeMapNodeId}
-            onSelectNode={setActiveMapNodeId}
+            onSelectNode={handleSelectMapNode}
             onAddBranch={handleAddMapBranch}
             onBringToMain={handleBringToMain}
             onReturnToMain={handleReturnToMain}
