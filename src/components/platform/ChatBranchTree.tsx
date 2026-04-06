@@ -201,7 +201,7 @@ function BranchTreeLayout({
           >
             <MainDot status={item.status} isActive={item.isActive} />
           </div>
-          <span className="truncate text-muted-foreground text-xs ml-1" style={{ maxWidth: 100 }}>
+          <span className="truncate text-muted-foreground text-xs ml-2.5" style={{ maxWidth: 100 }}>
             {item.label}
           </span>
           {item.isMain && (
@@ -238,7 +238,7 @@ function BranchTreeLayout({
                 >
                   <BranchDot status={item.status} isActive={item.isActive} merged={branch.merged} />
                 </div>
-                <span className="truncate text-muted-foreground text-xs ml-1" style={{ maxWidth: 80 }}>
+                <span className="truncate text-muted-foreground text-xs ml-2.5" style={{ maxWidth: 80 }}>
                   {item.label}
                 </span>
                 {ci === 0 && branch.label && (
