@@ -99,7 +99,7 @@ function BranchTreeLayout({
   const totalRows = nextRow;
   const svgHeight = totalRows * ROW_HEIGHT;
 
-  const branchRenders: { mainIdx: number; chain: BranchTreeNode[]; label?: string; startRow: number }[] = [];
+  const branchRenders: { mainIdx: number; chain: BranchTreeNode[]; label?: string; startRow: number; merged?: boolean; mergeTargetMainIndex?: number }[] = [];
   branchesPerMain.forEach((branches, mainIdx) => {
     branches.forEach((branch) => {
       branchRenders.push({
@@ -107,6 +107,8 @@ function BranchTreeLayout({
         chain: branch.chain,
         label: branch.label,
         startRow: branchRowStart[mainIdx],
+        merged: branch.merged,
+        mergeTargetMainIndex: branch.mergeTargetMainIndex,
       });
     });
   });
