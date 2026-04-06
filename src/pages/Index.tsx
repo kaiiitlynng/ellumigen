@@ -436,8 +436,15 @@ export default function Index() {
   }, [mapNodes, store]);
 
   const handleAddMapBranch = useCallback((parentNodeId: string) => {
-    console.log("Add branch from node:", parentNodeId);
-  }, []);
+    // Find the node to determine context — navigate to the correct chat/branch to continue
+    const mapNode = mapNodes.find((n) => n.id === parentNodeId);
+    if (mapNode?.branchId) {
+      store.switchToBranch(mapNode.branchId);
+    } else {
+      store.switchToBranch(null);
+    }
+    setShowConversationMap(false);
+  }, [mapNodes, store]);
 
   const branchContext = activeView === "chat" && store.activeBranchId && store.activeBranch
     ? { isOnBranch: true, branchTitle: store.activeBranch.label, parentTitle: store.activeChat?.title || "" }
