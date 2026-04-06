@@ -136,22 +136,39 @@ function BranchTreeLayout({
           const startY = mainRowIndex[branch.mainIdx] * ROW_HEIGHT + ROW_HEIGHT / 2;
           const firstBranchY = branch.startRow * ROW_HEIGHT + ROW_HEIGHT / 2;
           const lastBranchY = (branch.startRow + branch.chain.length - 1) * ROW_HEIGHT + ROW_HEIGHT / 2;
+          const strokeColor = branch.merged ? "#0070C0" : "#D9D9D9";
+
+          // Calculate merge-back connector target
+          const mergeTargetY = branch.merged && branch.mergeTargetMainIndex != null && branch.mergeTargetMainIndex >= 0
+            ? mainRowIndex[branch.mergeTargetMainIndex] * ROW_HEIGHT + ROW_HEIGHT / 2
+            : null;
 
           return (
             <g key={bi}>
+              {/* Outgoing curve from main to branch */}
               <path
                 d={`M ${MAIN_X} ${startY} Q ${BRANCH_X} ${startY}, ${BRANCH_X} ${firstBranchY}`}
                 fill="none"
-                stroke="#D9D9D9"
+                stroke={strokeColor}
                 strokeWidth={2}
               />
+              {/* Vertical line through branch nodes */}
               {branch.chain.length > 1 && (
                 <line
                   x1={BRANCH_X}
                   y1={firstBranchY}
                   x2={BRANCH_X}
                   y2={lastBranchY}
-                  stroke="#D9D9D9"
+                  stroke={strokeColor}
+                  strokeWidth={2}
+                />
+              )}
+              {/* Merge-back curve from last branch node back to main */}
+              {mergeTargetY != null && (
+                <path
+                  d={`M ${BRANCH_X} ${lastBranchY} Q ${BRANCH_X} ${mergeTargetY}, ${MAIN_X} ${mergeTargetY}`}
+                  fill="none"
+                  stroke="#0070C0"
                   strokeWidth={2}
                 />
               )}
