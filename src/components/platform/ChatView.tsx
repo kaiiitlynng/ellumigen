@@ -2,6 +2,7 @@ import { useRef, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import { GitBranch, Copy, ThumbsUp, ThumbsDown, Bookmark } from "lucide-react";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import type { Chat, ChatMessage } from "@/types/chat";
 import { ChatInput } from "./ChatInput";
 import { SuggestionChips } from "./SuggestionChips";
@@ -269,13 +270,21 @@ function MessageBubble({
                 >
                   <Bookmark className={`w-3.5 h-3.5 ${message.bookmarked ? "fill-accent text-accent" : "text-muted-foreground"}`} />
                 </button>
-                <button
-                  onClick={onBranch}
-                  className="p-1 rounded hover:bg-secondary transition-colors"
-                  title="Branch conversation"
-                >
-                  <GitBranch className="w-3.5 h-3.5 text-muted-foreground" />
-                </button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={onBranch}
+                        className="p-1 rounded hover:bg-secondary transition-colors"
+                      >
+                        <GitBranch className="w-3.5 h-3.5 text-muted-foreground" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">
+                      <p>Branch</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             </div>
           </div>
