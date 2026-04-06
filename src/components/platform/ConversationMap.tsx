@@ -180,11 +180,9 @@ function NodeTree({
           <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded", style.bg, style.text)}>
             {style.label}
           </span>
-          {node.timestamp && (
-            <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
-              {formatTimeAgo(node.timestamp)}
-            </span>
-          )}
+          <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
+            {node.timestamp ? formatTimeAgo(node.timestamp instanceof Date ? node.timestamp : new Date(node.timestamp)) : "just now"}
+          </span>
         </div>
         <h3 className="text-sm font-semibold text-foreground mt-2">{node.label}</h3>
         <p className="text-xs text-muted-foreground mt-1">{node.description}</p>
