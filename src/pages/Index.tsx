@@ -10,9 +10,9 @@ import { HistoryView } from "@/components/platform/HistoryView";
 import { UseCasesView } from "@/components/platform/UseCasesView";
 import { ArtifactsView } from "@/components/platform/ArtifactsView";
 import { ConversationMap, type MapNode } from "@/components/platform/ConversationMap";
-import type { BranchTreeNode } from "@/components/platform/ChatBranchTree";
 import { PanelHeader } from "@/components/platform/ModeTabs";
 import { useChatStore } from "@/stores/chatStore";
+import { buildBranchTreeFromMessages, branchTreeToMapNodes } from "@/lib/branchTreeBuilder";
 import type { InterfaceMode, TaskStep, ThoughtEntry, DataTableConfig } from "@/types/chat";
 
 // ── Demo data ─────────────────────────────────────────────
@@ -110,120 +110,7 @@ const FIRST_EXCHANGE_RESPONSE = `Based on the **@TCGA-BRCA** dataset, I've perfo
 
 The analysis reveals significant differences in overall survival between Luminal A, Luminal B, HER2-enriched, and Basal-like subtypes (log-rank p < 0.001). Luminal A patients demonstrate the most favorable outcomes with a median survival of 15.2 years, while Basal-like subtype shows reduced survival at 8.7 years.`;
 
-// ── Demo branch tree for sidebar ──────────────────────────
-const DEMO_BRANCH_TREE: BranchTreeNode[] = [
-  {
-    id: "bt1",
-    label: "Preparing follow-up plan...",
-    status: "complete",
-    isMain: true,
-    emoji: "🟢",
-    category: "hypothesis",
-    description: "EMT signature in BRCA1-mutant tumors",
-    children: [
-      {
-        id: "bt2",
-        label: "Clarifying follow-up prompt, awaiting...",
-        status: "complete",
-        category: "data",
-        description: "RNA-seq-batch-3\nTCGA-BRCA-n42",
-        children: [
-          {
-            id: "bt3",
-            label: "User responds to follow-up prompt",
-            status: "complete",
-            category: "analysis",
-            description: "DESeq2 · FDR 0.05",
-            children: [
-              {
-                id: "bt4",
-                label: "Providing new response, awaiting...",
-                status: "active",
-                isActive: true,
-                category: "exploration",
-                description: "fgsea · Hallmarks",
-                branchLabel: "Branch 1",
-                children: [
-                  {
-                    id: "bt5",
-                    label: "Negative feedback, regenerating",
-                    status: "warning",
-                    emoji: "⚠️",
-                    category: "exploration",
-                    description: "Retry analysis path",
-                  },
-                  {
-                    id: "bt6",
-                    label: "Providing response, awaiting feedback",
-                    status: "complete",
-                    category: "exploration",
-                    description: "Results summary",
-                  },
-                  {
-                    id: "bt7",
-                    label: "Planning next step follow-up for prompt",
-                    status: "complete",
-                    category: "exploration",
-                    description: "Next steps planning",
-                  },
-                ],
-              },
-              {
-                id: "bt8b",
-                label: "UMAP clustering",
-                status: "warning",
-                emoji: "⚠️",
-                category: "exploration",
-                description: "Seurat · res 0.5",
-                branchLabel: "Branch 2",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        id: "bt8",
-        label: "Creating data visualization, preparing ...",
-        status: "warning",
-        emoji: "⚠️",
-        category: "data",
-        description: "Visualization pipeline",
-      },
-      {
-        id: "bt9",
-        label: "Summarizing dataset, preparing",
-        status: "idle",
-        category: "data",
-        description: "Dataset summary",
-      },
-    ],
-  },
-  { id: "bt10", label: "Inspected user provided dataset", status: "complete", category: "data", description: "Initial dataset review" },
-  { id: "bt11", label: "Followed up with dataset inquiry", status: "complete", category: "analysis", description: "Follow-up questions" },
-  { id: "bt12", label: "Differential Expression - Tumor vs Normal", status: "complete", category: "analysis", description: "DE analysis results" },
-];
 
-// ── Derive conversation map nodes from branch tree ──────────────────
-function branchTreeToMapNodes(nodes: BranchTreeNode[], parentId?: string): MapNode[] {
-  const result: MapNode[] = [];
-  for (const node of nodes) {
-    const children = node.children?.map((c) => c.id) || [];
-    result.push({
-      id: node.id,
-      label: node.label,
-      description: node.description || "",
-      category: node.category || "exploration",
-      parentId,
-      children,
-      branchLabel: node.branchLabel,
-      isMain: node.isMain,
-    });
-    if (node.children) {
-      result.push(...branchTreeToMapNodes(node.children, node.id));
-    }
-  }
-  return result;
-}
 
 // ── Component ─────────────────────────────────────────────
 
