@@ -157,6 +157,7 @@ function exchangesToNodes(
       category,
       description: buildDescription(exchange.assistant),
       emoji: status === "warning" ? "⚠️" : undefined,
+      timestamp: exchange.user.timestamp,
     };
   });
 }
@@ -266,6 +267,7 @@ export function branchTreeToMapNodes(
       branchLabel: node.branchLabel,
       isMain: node.isMain,
       isBranch: node.isBranch,
+      timestamp: node.timestamp,
     });
     if (node.children) {
       result.push(...branchTreeToMapNodes(node.children, node.id));
