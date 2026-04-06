@@ -1,7 +1,12 @@
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Plus } from "lucide-react";
 import type { BranchNodeCategory } from "@/types/chat";
+import { cn } from "@/lib/utils";
+
+const BRANCH_COLUMN_OFFSET = 320;
+const BRANCH_CURVE_RADIUS = 40;
+const MERGE_BEND_RADIUS = 40;
 
 function formatTimeAgo(date?: Date): string {
   if (!date) return "";
@@ -16,7 +21,6 @@ function formatTimeAgo(date?: Date): string {
   if (diffDays < 30) return `${diffDays}d ago`;
   return `${Math.floor(diffDays / 30)}mo ago`;
 }
-import { cn } from "@/lib/utils";
 
 export interface MapNode {
   id: string;
@@ -28,6 +32,7 @@ export interface MapNode {
   isMain?: boolean;
   branchLabel?: string;
   isBranch?: boolean;
+  branchId?: string;
   timestamp?: Date;
   merged?: boolean;
 }
@@ -45,12 +50,76 @@ interface ConversationMapProps {
   isOnBranch?: boolean;
 }
 
+interface MergeConnector {
+  id: string;
+  path: string;
+}
+
 const CATEGORY_STYLES: Record<BranchNodeCategory, { bg: string; text: string; label: string }> = {
   hypothesis: { bg: "bg-emerald-100", text: "text-emerald-700", label: "HYPOTHESIS" },
   data: { bg: "bg-amber-100", text: "text-amber-700", label: "DATA" },
   analysis: { bg: "bg-red-100", text: "text-red-700", label: "ANALYSIS" },
   exploration: { bg: "bg-violet-100", text: "text-violet-700", label: "EXPLORATION" },
 };
+
+function isMergedBranch(node: Pick<MapNode, "branchLabel" | "merged">): boolean {
+  return node.branchLabel === "merged" || !!node.merged;
+}
+
+function getMergeAnchorId(node: Pick<MapNode, "branchId" | "id">): string {
+  return node.branchId || node.id;
+}
+
+function measureMergeConnectors(container: HTMLDivElement): {
+  connectors: MergeConnector[];
+  width: number;
+  height: number;
+} {
+  const containerRect = container.getBoundingClientRect();
+  const targetElements = Array.from(container.querySelectorAll<HTMLElement>("[data-merge-target]"));
+  const targetMap = new Map(
+    targetElements.flatMap((element) => {
+      const mergeId = element.dataset.mergeTarget;
+      return mergeId ? [[mergeId, element] as const] : [];
+    })
+  );
+
+  const connectors: MergeConnector[] = [];
+  let width = container.scrollWidth;
+  let height = container.scrollHeight;
+
+  for (const sourceElement of Array.from(container.querySelectorAll<HTMLElement>("[data-merge-source]"))) {
+    const mergeId = sourceElement.dataset.mergeSource;
+    if (!mergeId) continue;
+
+    const targetElement = targetMap.get(mergeId);
+    if (!targetElement) continue;
+
+    const sourceRect = sourceElement.getBoundingClientRect();
+    const targetRect = targetElement.getBoundingClientRect();
+    const startX = sourceRect.left - containerRect.left + sourceRect.width / 2;
+    const startY = sourceRect.top - containerRect.top + sourceRect.height / 2;
+    const endX = targetRect.left - containerRect.left + targetRect.width / 2;
+    const endY = targetRect.top - containerRect.top + targetRect.height / 2;
+    const bendDirection = startX >= endX ? 1 : -1;
+    const bendRadius = Math.min(MERGE_BEND_RADIUS, Math.max(24, Math.abs(startX - endX) / 4));
+    const bendX = endX + bendRadius * bendDirection;
+
+    connectors.push({
+      id: mergeId,
+      path: `M ${startX} ${startY} L ${bendX} ${startY} Q ${endX} ${startY} ${endX} ${endY}`,
+    });
+
+    width = Math.max(width, startX + 24, endX + 24);
+    height = Math.max(height, startY + 24, endY + 24);
+  }
+
+  return {
+    connectors,
+    width: Math.ceil(width),
+    height: Math.ceil(height),
+  };
+}
 
 export function ConversationMap({
   title,
@@ -66,18 +135,70 @@ export function ConversationMap({
 }: ConversationMapProps) {
   const rootNodes = nodes.filter((n) => !n.parentId);
   const nodeMap = Object.fromEntries(nodes.map((n) => [n.id, n]));
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  const [mergeConnectors, setMergeConnectors] = useState<MergeConnector[]>([]);
+  const [overlaySize, setOverlaySize] = useState({ width: 0, height: 0 });
+
+  useLayoutEffect(() => {
+    const container = contentRef.current;
+    if (!container) return;
+
+    let frame = 0;
+
+    const updateConnectors = () => {
+      const nextMeasurement = measureMergeConnectors(container);
+      setMergeConnectors(nextMeasurement.connectors);
+      setOverlaySize({ width: nextMeasurement.width, height: nextMeasurement.height });
+    };
+
+    const scheduleUpdate = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(updateConnectors);
+    };
+
+    scheduleUpdate();
+
+    const resizeObserver = new ResizeObserver(scheduleUpdate);
+    resizeObserver.observe(container);
+    window.addEventListener("resize", scheduleUpdate);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", scheduleUpdate);
+    };
+  }, [activeNodeId, nodes]);
 
   return (
     <div className="flex flex-col h-full bg-background">
-      {/* Map title bar */}
       <div className="flex items-center gap-3 px-6 py-4">
         <div className="w-3 h-3 rounded-full bg-primary" />
         <h2 className="text-lg font-medium text-muted-foreground">{title}</h2>
       </div>
 
-      {/* Map content */}
       <div className="flex-1 overflow-auto px-6 py-4">
-        <div className="flex flex-col items-center gap-0 min-w-fit" style={{ paddingRight: '400px' }}>
+        <div
+          ref={contentRef}
+          className="relative flex flex-col items-center gap-0 min-w-fit"
+          style={{ paddingRight: "400px" }}
+        >
+          <svg
+            className="pointer-events-none absolute left-0 top-0 overflow-visible"
+            width={overlaySize.width || undefined}
+            height={overlaySize.height || undefined}
+            fill="none"
+          >
+            {mergeConnectors.map((connector) => (
+              <path
+                key={connector.id}
+                d={connector.path}
+                stroke="hsl(var(--border))"
+                strokeWidth="1"
+                fill="none"
+              />
+            ))}
+          </svg>
+
           {rootNodes.map((node) => (
             <NodeTree
               key={node.id}
@@ -110,13 +231,12 @@ function NodeTree({
   const children = node.children.map((id) => nodeMap[id]).filter(Boolean);
   const style = CATEGORY_STYLES[node.category];
   const isActive = node.id === activeNodeId;
-
-  const mainChild = children.find((c) => !c.isBranch);
-  const branchChildren = children.filter((c) => c.isBranch);
+  const mainChild = children.find((child) => !child.isBranch);
+  const branchChildren = children.filter((child) => child.isBranch);
+  const mergedBranches = mainChild ? branchChildren.filter(isMergedBranch) : [];
 
   return (
     <div className="flex flex-col items-center">
-      {/* Card */}
       <motion.button
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -140,37 +260,32 @@ function NodeTree({
         <p className="text-xs text-muted-foreground mt-1">{node.description}</p>
       </motion.button>
 
-      {/* Connectors + children */}
       {(mainChild || branchChildren.length > 0) && (
         <div className="relative flex flex-col items-center">
-          {/* Vertical line segment: card bottom → dot center */}
-          <div className="w-px bg-border" style={{ height: branchChildren.length > 0 ? '24px' : '32px' }} />
+          <div className="w-px bg-border" style={{ height: branchChildren.length > 0 ? "24px" : "32px" }} />
 
-          {/* Branch point dot (acts as the junction) */}
           {branchChildren.length > 0 && (
             <div className="relative flex items-center justify-center">
               <div className="w-3 h-3 rounded-full bg-border z-10 shrink-0" />
 
-              {/* SVG connector: horizontal line from dot → curve down to branch */}
               <svg
                 className="absolute pointer-events-none overflow-visible"
-                style={{ left: '50%', top: '50%' }}
+                style={{ left: "50%", top: "50%" }}
                 width="1"
                 height="1"
                 fill="none"
               >
-                {branchChildren.map((_, i) => {
-                  const endX = (i + 1) * 320;
-                  const curveRadius = 40;
+                {branchChildren.map((_, index) => {
+                  const endX = (index + 1) * BRANCH_COLUMN_OFFSET;
                   return (
-                    <g key={i}>
+                    <g key={index}>
                       <path
-                        d={`M 0 0 L ${endX - curveRadius} 0 Q ${endX} 0 ${endX} ${curveRadius}`}
+                        d={`M 0 0 L ${endX - BRANCH_CURVE_RADIUS} 0 Q ${endX} 0 ${endX} ${BRANCH_CURVE_RADIUS}`}
                         stroke="hsl(var(--border))"
                         strokeWidth="1"
                         fill="none"
                       />
-                      <circle cx={endX} cy={curveRadius} r="3.5" fill="hsl(var(--border))" />
+                      <circle cx={endX} cy={BRANCH_CURVE_RADIUS} r="3.5" fill="hsl(var(--border))" />
                     </g>
                   );
                 })}
@@ -178,7 +293,6 @@ function NodeTree({
             </div>
           )}
 
-          {/* Vertical line: dot → Main label → main child card */}
           {branchChildren.length > 0 && mainChild && (
             <>
               <div className="w-px h-4 bg-border" />
@@ -187,11 +301,19 @@ function NodeTree({
                   Main
                 </span>
               </div>
-              <div className="w-px h-4 bg-border" />
+              <div className="relative w-px h-4 bg-border">
+                {mergedBranches.map((branch) => (
+                  <span
+                    key={getMergeAnchorId(branch)}
+                    data-merge-target={getMergeAnchorId(branch)}
+                    className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-border"
+                    aria-hidden="true"
+                  />
+                ))}
+              </div>
             </>
           )}
 
-          {/* If no main child, show add button */}
           {branchChildren.length > 0 && !mainChild && (
             <>
               <div className="w-px h-4 bg-border" />
@@ -204,7 +326,6 @@ function NodeTree({
             </>
           )}
 
-          {/* Main child node directly below, stays centered */}
           {mainChild && (
             <NodeTree
               node={mainChild}
@@ -215,27 +336,25 @@ function NodeTree({
             />
           )}
 
-          {/* Branch columns */}
-          {branchChildren.map((branch, i) => {
-            const curveRadius = 40;
-            const dotTop = 24 + 6;
-            const curveEndY = dotTop + curveRadius;
-            const isMerged = branch.branchLabel === "merged" || !!branch.merged;
+          {branchChildren.map((branch, index) => {
+            const curveEndY = 24 + 6 + BRANCH_CURVE_RADIUS;
+            const isMerged = isMergedBranch(branch);
+            const mergeAnchorId = getMergeAnchorId(branch);
 
             return (
               <div
                 key={branch.id}
                 className="absolute flex flex-col items-center"
                 style={{
-                  left: `calc(50% + ${(i + 1) * 320}px)`,
+                  left: `calc(50% + ${(index + 1) * BRANCH_COLUMN_OFFSET}px)`,
                   top: `${curveEndY}px`,
-                  transform: 'translateX(-50%)',
+                  transform: "translateX(-50%)",
                 }}
               >
                 <div className="w-px h-4 bg-border" />
                 <div className="mb-1">
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
-                    {branch.branchLabel || `Branch ${i + 1}`}
+                    {branch.branchLabel || `Branch ${index + 1}`}
                   </span>
                 </div>
                 <div className="w-px h-4 bg-border" />
@@ -246,32 +365,15 @@ function NodeTree({
                   onSelectNode={onSelectNode}
                   onAddBranch={onAddBranch}
                 />
-
-                {/* Merge-back connector: curves from bottom of branch back to the next main node */}
                 {isMerged && mainChild && (
-                  <svg
-                    className="pointer-events-none overflow-visible"
-                    width="1"
-                    height="80"
-                    fill="none"
-                  >
-                    {(() => {
-                      const returnX = -((i + 1) * 320);
-                      const curveR = 40;
-                      return (
-                        <g>
-                          <line x1={0} y1={0} x2={0} y2={curveR} stroke="hsl(var(--border))" strokeWidth="1" />
-                          <path
-                            d={`M 0 ${curveR} Q 0 ${curveR * 2}, ${returnX + curveR} ${curveR * 2} L ${returnX} ${curveR * 2}`}
-                            stroke="hsl(var(--border))"
-                            strokeWidth="1"
-                            fill="none"
-                          />
-                          <circle cx={returnX} cy={curveR * 2} r="3.5" fill="hsl(var(--border))" />
-                        </g>
-                      );
-                    })()}
-                  </svg>
+                  <>
+                    <div className="w-px h-4 bg-border" />
+                    <span
+                      data-merge-source={mergeAnchorId}
+                      className="block h-2 w-2 rounded-full bg-border"
+                      aria-hidden="true"
+                    />
+                  </>
                 )}
               </div>
             );
@@ -279,7 +381,6 @@ function NodeTree({
         </div>
       )}
 
-      {/* Add branch button at leaf nodes */}
       {children.length === 0 && (
         <>
           <div className="w-px h-4 bg-border" />
