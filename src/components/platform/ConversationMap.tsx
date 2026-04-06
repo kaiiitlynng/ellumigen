@@ -379,7 +379,18 @@ function NodeTree({
         </div>
       )}
 
-      {children.length === 0 && (
+      {children.length === 0 && mergeSourceId && (
+        <>
+          <div className="w-px h-4 bg-border" />
+          <span
+            data-merge-source={mergeSourceId}
+            className="block h-2 w-2 rounded-full bg-border"
+            aria-hidden="true"
+          />
+        </>
+      )}
+
+      {children.length === 0 && !mergeSourceId && (
         <>
           <div className="w-px h-4 bg-border" />
           <button
