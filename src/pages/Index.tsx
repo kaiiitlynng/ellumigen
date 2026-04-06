@@ -111,6 +111,21 @@ const FIRST_EXCHANGE_RESPONSE = `Based on the **@TCGA-BRCA** dataset, I've perfo
 The analysis reveals significant differences in overall survival between Luminal A, Luminal B, HER2-enriched, and Basal-like subtypes (log-rank p < 0.001). Luminal A patients demonstrate the most favorable outcomes with a median survival of 15.2 years, while Basal-like subtype shows reduced survival at 8.7 years.`;
 
 
+  // When on a branch, show main messages up to the branch point + branch messages
+  const viewChat = useMemo(() => {
+    if (!store.activeChat) return null;
+    if (!store.activeBranchId || !store.activeBranch) return store.activeChat;
+
+    const branch = store.activeBranch;
+    // Find the index of the parent message in main thread
+    const parentIdx = store.activeChat.messages.findIndex((m) => m.id === branch.parentMessageId);
+    const mainPrefix = parentIdx >= 0 ? store.activeChat.messages.slice(0, parentIdx + 1) : store.activeChat.messages;
+
+    return {
+      ...store.activeChat,
+      messages: [...mainPrefix, ...branch.messages],
+    };
+  }, [store.activeChat, store.activeBranchId, store.activeBranch]);
 
 // ── Component ─────────────────────────────────────────────
 
