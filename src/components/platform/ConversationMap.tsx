@@ -70,6 +70,17 @@ function getMergeAnchorId(node: Pick<MapNode, "branchId" | "id">): string {
   return node.branchId || node.id;
 }
 
+/** Count the depth (number of nodes) in a branch chain */
+function getBranchDepth(node: MapNode, nodeMap: Record<string, MapNode>): number {
+  let depth = 1;
+  const children = node.children.map((id) => nodeMap[id]).filter(Boolean);
+  const mainChild = children.find((c) => !c.isBranch);
+  if (mainChild) {
+    depth += getBranchDepth(mainChild, nodeMap);
+  }
+  return depth;
+}
+
 function measureMergeConnectors(container: HTMLDivElement): {
   connectors: MergeConnector[];
   width: number;
