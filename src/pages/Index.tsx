@@ -9,6 +9,8 @@ import { WorkspaceView } from "@/components/platform/WorkspaceView";
 import { HistoryView } from "@/components/platform/HistoryView";
 import { UseCasesView } from "@/components/platform/UseCasesView";
 import { ArtifactsView } from "@/components/platform/ArtifactsView";
+import { ConversationMap, type MapNode } from "@/components/platform/ConversationMap";
+import type { BranchTreeNode } from "@/components/platform/ChatBranchTree";
 import { PanelHeader } from "@/components/platform/ModeTabs";
 import { useChatStore } from "@/stores/chatStore";
 import type { InterfaceMode, TaskStep, ThoughtEntry, DataTableConfig } from "@/types/chat";
