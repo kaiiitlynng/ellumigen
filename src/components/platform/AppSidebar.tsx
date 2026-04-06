@@ -16,6 +16,7 @@ import {
   PanelLeftOpen,
 } from "lucide-react";
 import type { Chat, Folder, BookmarkedMessage } from "@/types/chat";
+import { ChatBranchTree, type BranchTreeNode } from "./ChatBranchTree";
 import ellumigenLogo from "@/assets/EllumigenLogo.png";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -28,7 +29,9 @@ interface AppSidebarProps {
   bookmarkedMessages: BookmarkedMessage[];
   activeChatId: string | null;
   activeView: SidebarView;
+  branchTreeNodes?: BranchTreeNode[];
   onSelectChat: (id: string) => void;
+  onSelectBranchNode?: (nodeId: string) => void;
   onNewChat: () => void;
   onViewChange: (view: SidebarView) => void;
 }
@@ -39,7 +42,9 @@ export function AppSidebar({
   bookmarkedMessages,
   activeChatId,
   activeView,
+  branchTreeNodes,
   onSelectChat,
+  onSelectBranchNode,
   onNewChat,
   onViewChange,
 }: AppSidebarProps) {
