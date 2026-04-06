@@ -29,6 +29,7 @@ export interface MapNode {
   branchLabel?: string;
   isBranch?: boolean;
   timestamp?: Date;
+  merged?: boolean;
 }
 
 interface ConversationMapProps {
