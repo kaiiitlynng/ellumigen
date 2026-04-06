@@ -296,6 +296,7 @@ export function branchTreeToMapNodes(
       isMain: node.isMain,
       isBranch: node.isBranch,
       timestamp: node.timestamp,
+      merged: node.merged,
     });
     if (node.children) {
       result.push(...branchTreeToMapNodes(node.children, node.id));
