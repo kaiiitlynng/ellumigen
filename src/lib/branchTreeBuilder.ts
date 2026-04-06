@@ -1,4 +1,4 @@
-import type { ChatMessage } from "@/types/chat";
+import type { ChatMessage, ChatBranch } from "@/types/chat";
 import type { BranchTreeNode } from "@/components/platform/ChatBranchTree";
 import type { MapNode } from "@/components/platform/ConversationMap";
 import type { BranchNodeCategory } from "@/types/chat";
@@ -42,23 +42,15 @@ const CATEGORY_PATTERNS: { category: BranchNodeCategory; patterns: RegExp[] }[] 
 
 function detectCategory(text: string): BranchNodeCategory {
   const scores: Record<BranchNodeCategory, number> = {
-    hypothesis: 0,
-    data: 0,
-    analysis: 0,
-    exploration: 0,
+    hypothesis: 0, data: 0, analysis: 0, exploration: 0,
   };
-
   for (const { category, patterns } of CATEGORY_PATTERNS) {
     for (const pattern of patterns) {
-      if (pattern.test(text)) {
-        scores[category]++;
-      }
+      if (pattern.test(text)) scores[category]++;
     }
   }
-
   const best = (Object.entries(scores) as [BranchNodeCategory, number][])
     .sort((a, b) => b[1] - a[1])[0];
-
   return best[1] > 0 ? best[0] : "exploration";
 }
 
@@ -72,14 +64,12 @@ function detectStatus(
 ): BranchTreeNode["status"] {
   if (isLatest && isLoading) return "active";
   if (!assistantMsg) return isLatest ? "active" : "warning";
-
   const meta = assistantMsg.metadata;
   if (meta?.type === "executing") {
     const allDone = meta.executionSteps?.every((s) => s.status === "complete");
     return allDone ? "complete" : "active";
   }
   if (meta?.type === "plan") return "active";
-
   return "complete";
 }
 
@@ -87,16 +77,9 @@ function detectStatus(
 
 function summarize(text: string, maxLen = 45): string {
   if (!text) return "Processing...";
-  // Remove markdown formatting
-  const clean = text
-    .replace(/[#*_`~\[\]()]/g, "")
-    .replace(/\n+/g, " ")
-    .trim();
-
-  // Try to get the first meaningful sentence
+  const clean = text.replace(/[#*_`~\[\]()]/g, "").replace(/\n+/g, " ").trim();
   const firstSentence = clean.split(/[.!?]/)[0]?.trim();
   const label = firstSentence || clean;
-
   if (label.length <= maxLen) return label;
   return label.slice(0, maxLen).replace(/\s+\S*$/, "") + "...";
 }
@@ -106,7 +89,6 @@ function summarize(text: string, maxLen = 45): string {
 function buildDescription(assistantMsg: ChatMessage | undefined): string {
   if (!assistantMsg) return "Awaiting response...";
   const meta = assistantMsg.metadata;
-
   if (meta?.type === "plan" && meta.plan) {
     return meta.plan.approach?.slice(0, 2).join(" → ") || "Plan proposed";
   }
@@ -125,41 +107,42 @@ function buildDescription(assistantMsg: ChatMessage | undefined): string {
   if (meta?.contextUsed?.length) {
     return `Using: ${meta.contextUsed.join(", ")}`;
   }
-
-  // Summarize from content
   const clean = assistantMsg.content.replace(/[#*_`~\[\]()]/g, "").replace(/\n+/g, " ").trim();
   if (clean.length <= 60) return clean;
   return clean.slice(0, 60).replace(/\s+\S*$/, "") + "...";
 }
 
-// ── Main builder: messages → branch tree nodes ────────────────
+// ── Group messages into exchange pairs ────────────────────────
 
-export function buildBranchTreeFromMessages(
-  messages: ChatMessage[],
-  isLoading: boolean
-): BranchTreeNode[] {
-  if (messages.length === 0) return [];
+interface Exchange {
+  user: ChatMessage;
+  assistant?: ChatMessage;
+}
 
-  // Group messages into exchange pairs (user + assistant response)
-  const exchanges: { user: ChatMessage; assistant?: ChatMessage }[] = [];
-
+function groupExchanges(messages: ChatMessage[]): Exchange[] {
+  const exchanges: Exchange[] = [];
   for (let i = 0; i < messages.length; i++) {
     const msg = messages[i];
     if (msg.role === "user") {
       const nextMsg = messages[i + 1];
       const assistant = nextMsg?.role === "assistant" ? nextMsg : undefined;
       exchanges.push({ user: msg, assistant });
-      if (assistant) i++; // skip the assistant message
+      if (assistant) i++;
     } else if (msg.role === "assistant" && exchanges.length === 0) {
-      // Orphan assistant message (e.g. from createChat with pre-populated messages)
       exchanges.push({ user: msg, assistant: undefined });
     }
   }
+  return exchanges;
+}
 
-  if (exchanges.length === 0) return [];
+// ── Build nodes from exchanges ────────────────────────────────
 
-  // Build a linear chain of nodes (first node is "main")
-  const nodes: BranchTreeNode[] = exchanges.map((exchange, idx) => {
+function exchangesToNodes(
+  exchanges: Exchange[],
+  isLoading: boolean,
+  isMainThread: boolean
+): BranchTreeNode[] {
+  return exchanges.map((exchange, idx) => {
     const combinedText = exchange.user.content + " " + (exchange.assistant?.content || "");
     const category = detectCategory(combinedText);
     const isLatest = idx === exchanges.length - 1;
@@ -169,24 +152,96 @@ export function buildBranchTreeFromMessages(
       id: exchange.user.id,
       label: summarize(exchange.user.content),
       status,
-      isMain: idx === 0,
+      isMain: isMainThread && idx === 0,
       isActive: isLatest,
       category,
       description: buildDescription(exchange.assistant),
-      emoji: status === "warning" ? "⚠️" : status === "complete" && idx === 0 ? "🟢" : undefined,
+      emoji: status === "warning" ? "⚠️" : status === "complete" && idx === 0 && isMainThread ? "🟢" : undefined,
     };
   });
+}
 
-  // Build as a nested tree: each node is a child of the previous
-  // This creates a linear conversation flow
-  if (nodes.length === 1) return nodes;
+// ── Main builder: messages + branches → branch tree nodes ─────
 
-  // Nest them: last node is deepest child
-  for (let i = nodes.length - 2; i >= 0; i--) {
-    nodes[i].children = [nodes[i + 1]];
+export function buildBranchTreeFromMessages(
+  messages: ChatMessage[],
+  branches: ChatBranch[],
+  isLoading: boolean,
+  activeBranchId?: string | null
+): BranchTreeNode[] {
+  if (messages.length === 0) return [];
+
+  const mainExchanges = groupExchanges(messages);
+  if (mainExchanges.length === 0) return [];
+
+  const mainNodes = exchangesToNodes(mainExchanges, isLoading && !activeBranchId, true);
+
+  // Build a map of parentMessageId → branches
+  const branchMap = new Map<string, ChatBranch[]>();
+  for (const branch of branches) {
+    const existing = branchMap.get(branch.parentMessageId) || [];
+    existing.push(branch);
+    branchMap.set(branch.parentMessageId, existing);
   }
 
-  return [nodes[0]];
+  // Attach branches to the correct main node
+  // A branch's parentMessageId could be a user or assistant message.
+  // We match it to the exchange that contains that message.
+  for (const [parentMsgId, branchList] of branchMap) {
+    // Find which main node this branches from
+    const nodeIndex = mainExchanges.findIndex(
+      (ex) => ex.user.id === parentMsgId || ex.assistant?.id === parentMsgId
+    );
+    if (nodeIndex === -1) continue;
+
+    const branchChildren: BranchTreeNode[] = [];
+    for (const branch of branchList) {
+      const branchExchanges = groupExchanges(branch.messages);
+      const isActiveBranch = branch.id === activeBranchId;
+      const branchNodes = exchangesToNodes(
+        branchExchanges,
+        isLoading && isActiveBranch,
+        false
+      );
+
+      if (branchNodes.length === 0) continue;
+
+      // Set the first branch node's branchLabel
+      branchNodes[0].branchLabel = branch.label || "Branch";
+      branchNodes[0].isBranch = true;
+      branchNodes[0].branchId = branch.id;
+
+      // Nest branch nodes linearly
+      for (let i = branchNodes.length - 2; i >= 0; i--) {
+        branchNodes[i].children = [branchNodes[i + 1]];
+      }
+      branchChildren.push(branchNodes[0]);
+    }
+
+    if (branchChildren.length > 0) {
+      if (!mainNodes[nodeIndex].children) {
+        mainNodes[nodeIndex].children = [];
+      }
+      mainNodes[nodeIndex].branchChildren = branchChildren;
+    }
+  }
+
+  // Nest main nodes linearly
+  for (let i = mainNodes.length - 2; i >= 0; i--) {
+    mainNodes[i].children = [
+      ...(mainNodes[i].branchChildren || []),
+      mainNodes[i + 1],
+    ];
+  }
+  // Attach branch children of last node
+  if (mainNodes.length > 0) {
+    const last = mainNodes[mainNodes.length - 1];
+    if (last.branchChildren && last.branchChildren.length > 0) {
+      last.children = [...last.branchChildren];
+    }
+  }
+
+  return [mainNodes[0]];
 }
 
 // ── Convert branch tree to map nodes (for ConversationMap) ────
@@ -197,7 +252,10 @@ export function branchTreeToMapNodes(
 ): MapNode[] {
   const result: MapNode[] = [];
   for (const node of nodes) {
-    const childIds = node.children?.map((c) => c.id) || [];
+    const allChildren = [
+      ...(node.children || []),
+    ];
+    const childIds = allChildren.map((c) => c.id);
     result.push({
       id: node.id,
       label: node.label,
