@@ -64,7 +64,6 @@ export function ConversationMap({
   onClose,
   isOnBranch,
 }: ConversationMapProps) {
-  // Build a tree structure from flat nodes
   const rootNodes = nodes.filter((n) => !n.parentId);
   const nodeMap = Object.fromEntries(nodes.map((n) => [n.id, n]));
 
@@ -112,7 +111,6 @@ function NodeTree({
   const style = CATEGORY_STYLES[node.category];
   const isActive = node.id === activeNodeId;
 
-  // Separate main continuation from branch children
   const mainChild = children.find((c) => !c.isBranch);
   const branchChildren = children.filter((c) => c.isBranch);
 
@@ -161,18 +159,20 @@ function NodeTree({
                 height="1"
                 fill="none"
               >
-                {branchChildren.map((_, i) => {
+                {branchChildren.map((branch, i) => {
                   const endX = (i + 1) * 320;
                   const curveRadius = 40;
+                  const isMerged = branch.branchLabel === "merged" || branch.merged;
+                  const strokeColor = isMerged ? "#0070C0" : "hsl(var(--border))";
                   return (
                     <g key={i}>
                       <path
                         d={`M 0 0 L ${endX - curveRadius} 0 Q ${endX} 0 ${endX} ${curveRadius}`}
-                        stroke="hsl(var(--border))"
+                        stroke={strokeColor}
                         strokeWidth="1"
                         fill="none"
                       />
-                      <circle cx={endX} cy={curveRadius} r="3.5" fill="hsl(var(--border))" />
+                      <circle cx={endX} cy={curveRadius} r="3.5" fill={strokeColor} />
                     </g>
                   );
                 })}
@@ -217,23 +217,13 @@ function NodeTree({
             />
           )}
 
-          {/* Branch columns: positioned absolutely, cards aligned with main child */}
+          {/* Branch columns */}
           {branchChildren.map((branch, i) => {
-            // The curve goes from dot center (top: 24px + 6px = 30px from container top)
-            // down curveRadius pixels. Then we add connector + label + connector to match
-            // the main column's spacing so the cards are horizontally aligned.
             const curveRadius = 40;
-            const dotTop = 24 + 6; // vertical line + half dot
+            const dotTop = 24 + 6;
             const curveEndY = dotTop + curveRadius;
-            // Main column after dot: h-4(16) + label(~22) + my-1(8) + h-4(16) = 62px
-            // Branch column after curve dot: h-3(12) + label(~22) + mb-1(4) + h-4(16) = 54px
-            // Difference: 62 - 54 = 8px, but we also need to account for curve end
-            // We want: curveEndY + branchConnector = dotTop + 12(dot) + mainConnector
-            // So branch top = dotTop + 12 + 62 - 54 = dotTop + 20
-            // Simpler: just match the main card top position
-            // Main card top from container = 24(line) + 12(dot) + 16(h-4) + 8(my) + 22(label) + 8(my) + 16(h-4) = 106px
-            // Branch card top = curveEndY + 12(h-3) + 22(label) + 4(mb) + 16(h-4) = 70 + 54 = 124px → too low
-            // Let's just set branch top so its card starts at same Y as main card
+            const isMerged = branch.branchLabel === "merged" || branch.merged;
+
             return (
               <div
                 key={branch.id}
@@ -244,13 +234,21 @@ function NodeTree({
                   transform: 'translateX(-50%)',
                 }}
               >
-                <div className="w-px h-4 bg-border" />
+                <div className="w-px h-4" style={{ backgroundColor: isMerged ? '#0070C0' : 'hsl(var(--border))' }} />
                 <div className="mb-1">
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
+                  <span
+                    className={cn(
+                      "text-[10px] px-2 py-0.5 rounded-full font-medium",
+                      isMerged
+                        ? "text-white"
+                        : "bg-muted text-muted-foreground"
+                    )}
+                    style={isMerged ? { backgroundColor: '#0070C0' } : undefined}
+                  >
                     {branch.branchLabel || `Branch ${i + 1}`}
                   </span>
                 </div>
-                <div className="w-px h-4 bg-border" />
+                <div className="w-px h-4" style={{ backgroundColor: isMerged ? '#0070C0' : 'hsl(var(--border))' }} />
                 <NodeTree
                   node={branch}
                   nodeMap={nodeMap}
@@ -258,13 +256,40 @@ function NodeTree({
                   onSelectNode={onSelectNode}
                   onAddBranch={onAddBranch}
                 />
+
+                {/* Merge-back connector: curves from bottom of branch back to main line */}
+                {isMerged && (
+                  <svg
+                    className="pointer-events-none overflow-visible"
+                    width="1"
+                    height="80"
+                    fill="none"
+                  >
+                    {(() => {
+                      const returnX = -((i + 1) * 320);
+                      const curveR = 40;
+                      return (
+                        <g>
+                          <line x1={0} y1={0} x2={0} y2={curveR} stroke="#0070C0" strokeWidth="1" />
+                          <path
+                            d={`M 0 ${curveR} Q 0 ${curveR * 2}, ${returnX + curveR} ${curveR * 2} L ${returnX} ${curveR * 2}`}
+                            stroke="#0070C0"
+                            strokeWidth="1"
+                            fill="none"
+                          />
+                          <circle cx={returnX} cy={curveR * 2} r="3.5" fill="#0070C0" />
+                        </g>
+                      );
+                    })()}
+                  </svg>
+                )}
               </div>
             );
           })}
         </div>
       )}
 
-      {/* Add branch button at leaf nodes (no children at all) */}
+      {/* Add branch button at leaf nodes */}
       {children.length === 0 && (
         <>
           <div className="w-px h-4 bg-border" />
