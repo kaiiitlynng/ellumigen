@@ -467,9 +467,9 @@ export default function Index() {
           <ConversationMap
             title={store.activeChat.title}
             subtitle=""
-            nodes={branchTreeToMapNodes(buildBranchTreeFromMessages(store.activeChat.messages, store.activeChat.branches, isLoading, store.activeBranchId))}
+            nodes={mapNodes}
             activeNodeId={activeMapNodeId}
-            onSelectNode={setActiveMapNodeId}
+            onSelectNode={handleSelectMapNode}
             onAddBranch={handleAddMapBranch}
             onBringToMain={handleBringToMain}
             onReturnToMain={handleReturnToMain}
