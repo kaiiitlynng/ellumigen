@@ -101,7 +101,7 @@ function measureMergeConnectors(container: HTMLDivElement): {
     const startY = sourceRect.top - containerRect.top + sourceRect.height / 2;
     const endX = targetRect.left - containerRect.left + targetRect.width / 2;
     const endY = targetRect.top - containerRect.top + targetRect.height / 2;
-    const bendRadius = Math.min(MERGE_BEND_RADIUS, Math.max(24, Math.abs(startX - endX) / 4));
+    const bendRadius = Math.min(MERGE_BEND_RADIUS, Math.abs(startX - endX) / 2, Math.abs(endY - startY) / 2);
 
     // Mirror the branch-out curve: go down vertically from source, then curve horizontally into the main line
     connectors.push({
