@@ -1,7 +1,21 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Plus, ArrowLeft, Merge, Map } from "lucide-react";
 import type { BranchNodeCategory } from "@/types/chat";
+
+function formatTimeAgo(date?: Date): string {
+  if (!date) return "";
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 1) return "just now";
+  if (diffMin < 60) return `${diffMin} min ago`;
+  const diffHrs = Math.floor(diffMin / 60);
+  if (diffHrs < 24) return `${diffHrs}h ago`;
+  const diffDays = Math.floor(diffHrs / 24);
+  if (diffDays < 30) return `${diffDays}d ago`;
+  return `${Math.floor(diffDays / 30)}mo ago`;
+}
 import { cn } from "@/lib/utils";
 
 export interface MapNode {
@@ -14,6 +28,7 @@ export interface MapNode {
   isMain?: boolean;
   branchLabel?: string;
   isBranch?: boolean;
+  timestamp?: Date;
 }
 
 interface ConversationMapProps {
@@ -161,9 +176,16 @@ function NodeTree({
             : "border-border bg-background"
         )}
       >
-        <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded", style.bg, style.text)}>
-          {style.label}
-        </span>
+        <div className="flex items-start justify-between gap-2">
+          <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded", style.bg, style.text)}>
+            {style.label}
+          </span>
+          {node.timestamp && (
+            <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
+              {formatTimeAgo(node.timestamp)}
+            </span>
+          )}
+        </div>
         <h3 className="text-sm font-semibold text-foreground mt-2">{node.label}</h3>
         <p className="text-xs text-muted-foreground mt-1">{node.description}</p>
       </motion.button>
