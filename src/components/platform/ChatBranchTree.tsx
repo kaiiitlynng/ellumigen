@@ -68,11 +68,10 @@ function BranchTreeLayout({
     current = children.find((c) => !c.isBranch);
   }
 
-  // Collect branches: { mainIndex, branchChain[] }
-  const branches: { mainIndex: number; chain: BranchTreeNode[]; label?: string }[] = [];
-  mainChain.forEach((item, idx) => {
+  // Collect branches per main node
+  const branchesPerMain: { chain: BranchTreeNode[]; label?: string }[][] = mainChain.map((item) => {
     const branchKids = item.branchChildren || (item.children || []).filter((c) => c.isBranch);
-    branchKids.forEach((branch) => {
+    return branchKids.map((branch) => {
       const chain: BranchTreeNode[] = [];
       let c: BranchTreeNode | undefined = branch;
       while (c) {
@@ -80,15 +79,41 @@ function BranchTreeLayout({
         const ch = c.children || [];
         c = ch.find((x) => !x.isBranch);
       }
-      branches.push({ mainIndex: idx, chain, label: branch.branchLabel });
+      return { chain, label: branch.branchLabel };
     });
   });
 
-  const totalMainRows = mainChain.length;
-  // Branch rows start after the branch point
-  const totalBranchRows = branches.reduce((max, b) => Math.max(max, b.mainIndex + b.chain.length), 0);
-  const totalRows = Math.max(totalMainRows, totalBranchRows);
+  // Build row assignments: each main node gets a row, then its branches get rows after it
+  // mainRowIndex[i] = the row slot for main node i
+  // branchRowStart[i] = first row slot for branches of main node i
+  const mainRowIndex: number[] = [];
+  const branchRowStart: number[] = [];
+  let nextRow = 0;
+
+  for (let i = 0; i < mainChain.length; i++) {
+    mainRowIndex.push(nextRow);
+    nextRow++;
+    branchRowStart.push(nextRow);
+    // Count max branch chain length for this main node
+    const maxBranchLen = branchesPerMain[i].reduce((max, b) => Math.max(max, b.chain.length), 0);
+    nextRow += maxBranchLen;
+  }
+
+  const totalRows = nextRow;
   const svgHeight = totalRows * ROW_HEIGHT;
+
+  // Flatten branches with their computed row positions for rendering
+  const branchRenders: { mainIdx: number; chain: BranchTreeNode[]; label?: string; startRow: number }[] = [];
+  branchesPerMain.forEach((branches, mainIdx) => {
+    branches.forEach((branch) => {
+      branchRenders.push({
+        mainIdx,
+        chain: branch.chain,
+        label: branch.label,
+        startRow: branchRowStart[mainIdx],
+      });
+    });
+  });
 
   return (
     <div className="relative" style={{ minHeight: svgHeight }}>
@@ -102,18 +127,18 @@ function BranchTreeLayout({
         {/* Main vertical line */}
         {mainChain.length > 1 && (
           <line
-            x1={MAIN_X} y1={ROW_HEIGHT / 2}
-            x2={MAIN_X} y2={(mainChain.length - 1) * ROW_HEIGHT + ROW_HEIGHT / 2}
+            x1={MAIN_X} y1={mainRowIndex[0] * ROW_HEIGHT + ROW_HEIGHT / 2}
+            x2={MAIN_X} y2={mainRowIndex[mainChain.length - 1] * ROW_HEIGHT + ROW_HEIGHT / 2}
             stroke="hsl(var(--primary))"
             strokeWidth={2}
           />
         )}
 
         {/* Branch connectors */}
-        {branches.map((branch, bi) => {
-          const startY = branch.mainIndex * ROW_HEIGHT + ROW_HEIGHT / 2;
-          const firstBranchY = (branch.mainIndex + 1) * ROW_HEIGHT + ROW_HEIGHT / 2;
-          const lastBranchY = (branch.mainIndex + branch.chain.length) * ROW_HEIGHT + ROW_HEIGHT / 2;
+        {branchRenders.map((branch, bi) => {
+          const startY = mainRowIndex[branch.mainIdx] * ROW_HEIGHT + ROW_HEIGHT / 2;
+          const firstBranchY = branch.startRow * ROW_HEIGHT + ROW_HEIGHT / 2;
+          const lastBranchY = (branch.startRow + branch.chain.length - 1) * ROW_HEIGHT + ROW_HEIGHT / 2;
 
           return (
             <g key={bi}>
@@ -148,12 +173,11 @@ function BranchTreeLayout({
           }}
           className="absolute flex items-center gap-2 hover:bg-secondary rounded-md px-1 transition-colors"
           style={{
-            top: idx * ROW_HEIGHT,
+            top: mainRowIndex[idx] * ROW_HEIGHT,
             left: 0,
             height: ROW_HEIGHT,
           }}
         >
-          {/* Node circle */}
           <div
             className="shrink-0 rounded-full flex items-center justify-center"
             style={{
@@ -176,12 +200,11 @@ function BranchTreeLayout({
       ))}
 
       {/* Branch nodes */}
-      {branches.map((branch, bi) =>
+      {branchRenders.map((branch, bi) =>
         branch.chain.map((item, ci) => {
-          const rowIdx = branch.mainIndex + 1 + ci;
+          const rowIdx = branch.startRow + ci;
           return (
             <div key={`${bi}-${item.id}`} className="absolute" style={{ top: rowIdx * ROW_HEIGHT, left: 0, height: ROW_HEIGHT }}>
-              {/* Branch label on first node */}
               {ci === 0 && branch.label && (
                 <span
                   className="absolute text-[9px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground font-medium"
