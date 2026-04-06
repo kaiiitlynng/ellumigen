@@ -70,7 +70,7 @@ export function ChatView({
       ) : (
         <>
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-6">
-            <div className="max-w-3xl mx-auto space-y-6">
+            <div className="max-w-3xl mx-auto space-y-6 pb-12">
               <AnimatePresence initial={false}>
                 {chat.messages.map((msg, i) => (
                   <MessageBubble
