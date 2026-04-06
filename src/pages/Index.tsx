@@ -124,7 +124,7 @@ export default function Index() {
   const [collapsedPanels, setCollapsedPanels] = useState<Set<InterfaceMode>>(new Set());
   const [showConversationMap, setShowConversationMap] = useState(false);
   const [activeMapNodeId, setActiveMapNodeId] = useState<string>("mn4");
-  const [isOnBranch, setIsOnBranch] = useState(false);
+  
 
   // Auto-open canvas panel when dragging a visualization
   useEffect(() => {
