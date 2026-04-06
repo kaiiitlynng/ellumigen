@@ -300,7 +300,16 @@ function NodeTree({
                   Main
                 </span>
               </div>
-              <div className="w-px h-4 bg-border" />
+              <div className="relative w-px h-4 bg-border">
+                {mergedBranches.map((branch) => (
+                  <span
+                    key={getMergeAnchorId(branch)}
+                    data-merge-target={getMergeAnchorId(branch)}
+                    className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-border"
+                    aria-hidden="true"
+                  />
+                ))}
+              </div>
             </>
           )}
 
@@ -317,29 +326,13 @@ function NodeTree({
           )}
 
           {mainChild && (
-            <>
-              <NodeTree
-                node={mainChild}
-                nodeMap={nodeMap}
-                activeNodeId={activeNodeId}
-                onSelectNode={onSelectNode}
-                onAddBranch={onAddBranch}
-              />
-              {mergedBranches.length > 0 && (
-                <div className="relative flex flex-col items-center">
-                  <div className="w-px h-4 bg-border" />
-                  {mergedBranches.map((branch) => (
-                    <span
-                      key={getMergeAnchorId(branch)}
-                      data-merge-target={getMergeAnchorId(branch)}
-                      className="block h-2 w-2 rounded-full bg-border"
-                      aria-hidden="true"
-                    />
-                  ))}
-                  <div className="w-px h-4 bg-border" />
-                </div>
-              )}
-            </>
+            <NodeTree
+              node={mainChild}
+              nodeMap={nodeMap}
+              activeNodeId={activeNodeId}
+              onSelectNode={onSelectNode}
+              onAddBranch={onAddBranch}
+            />
           )}
 
           {branchChildren.map((branch, index) => {
