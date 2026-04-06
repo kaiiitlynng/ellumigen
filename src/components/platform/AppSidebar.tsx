@@ -32,6 +32,7 @@ interface AppSidebarProps {
   branchTreeNodes?: BranchTreeNode[];
   onSelectChat: (id: string) => void;
   onSelectBranchNode?: (nodeId: string) => void;
+  onSelectBranch?: (branchId: string) => void;
   onNewChat: () => void;
   onViewChange: (view: SidebarView) => void;
 }
@@ -45,6 +46,7 @@ export function AppSidebar({
   branchTreeNodes,
   onSelectChat,
   onSelectBranchNode,
+  onSelectBranch,
   onNewChat,
   onViewChange,
 }: AppSidebarProps) {
@@ -154,7 +156,7 @@ export function AppSidebar({
           {/* Current Chat branch tree */}
           {branchTreeNodes && branchTreeNodes.length > 0 && (
             <div className="mt-2">
-              <ChatBranchTree nodes={branchTreeNodes} onSelectNode={onSelectBranchNode} />
+              <ChatBranchTree nodes={branchTreeNodes} onSelectNode={onSelectBranchNode} onSelectBranch={onSelectBranch} />
             </div>
           )}
 
