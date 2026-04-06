@@ -433,7 +433,7 @@ export default function Index() {
         bookmarkedMessages={store.bookmarkedMessages}
         activeChatId={store.activeChatId}
         activeView={activeView}
-        branchTreeNodes={activeView === "chat" && store.activeChat && store.activeChat.messages.length > 0 ? DEMO_BRANCH_TREE : undefined}
+        branchTreeNodes={activeView === "chat" && store.activeChat && store.activeChat.messages.length > 0 ? buildBranchTreeFromMessages(store.activeChat.messages, isLoading) : undefined}
         onSelectChat={handleSelectChat}
         onSelectBranchNode={(nodeId) => console.log("Select branch node:", nodeId)}
         onNewChat={handleNewChat}
@@ -452,11 +452,11 @@ export default function Index() {
           />
         )}
 
-        {showConversationMap && activeView === "chat" ? (
+        {showConversationMap && activeView === "chat" && store.activeChat ? (
           <ConversationMap
-            title="Pathway Enrichment"
-            subtitle="from BRCA tumor / normal"
-            nodes={branchTreeToMapNodes(DEMO_BRANCH_TREE)}
+            title={store.activeChat.title}
+            subtitle=""
+            nodes={branchTreeToMapNodes(buildBranchTreeFromMessages(store.activeChat.messages, isLoading))}
             activeNodeId={activeMapNodeId}
             onSelectNode={setActiveMapNodeId}
             onAddBranch={handleAddMapBranch}
