@@ -458,6 +458,7 @@ export default function Index() {
           <TopBar
             activeModes={activeModes}
             onToggleMode={toggleMode}
+            chatTitle={store.activeChat?.title}
             branchContext={branchContext}
             onOpenConversationMap={handleOpenConversationMap}
             onCloseConversationMap={() => setShowConversationMap(false)}
