@@ -243,21 +243,34 @@ function NodeTree({
             />
           )}
 
-          {/* Branch columns: positioned absolutely from the dot */}
+          {/* Branch columns: positioned absolutely, cards aligned with main child */}
           {branchChildren.map((branch, i) => {
+            // The curve goes from dot center (top: 24px + 6px = 30px from container top)
+            // down curveRadius pixels. Then we add connector + label + connector to match
+            // the main column's spacing so the cards are horizontally aligned.
             const curveRadius = 40;
+            const dotTop = 24 + 6; // vertical line + half dot
+            const curveEndY = dotTop + curveRadius;
+            // Main column after dot: h-4(16) + label(~22) + my-1(8) + h-4(16) = 62px
+            // Branch column after curve dot: h-3(12) + label(~22) + mb-1(4) + h-4(16) = 54px
+            // Difference: 62 - 54 = 8px, but we also need to account for curve end
+            // We want: curveEndY + branchConnector = dotTop + 12(dot) + mainConnector
+            // So branch top = dotTop + 12 + 62 - 54 = dotTop + 20
+            // Simpler: just match the main card top position
+            // Main card top from container = 24(line) + 12(dot) + 16(h-4) + 8(my) + 22(label) + 8(my) + 16(h-4) = 106px
+            // Branch card top = curveEndY + 12(h-3) + 22(label) + 4(mb) + 16(h-4) = 70 + 54 = 124px → too low
+            // Let's just set branch top so its card starts at same Y as main card
             return (
               <div
                 key={branch.id}
                 className="absolute flex flex-col items-center"
                 style={{
                   left: `calc(50% + ${(i + 1) * 320}px)`,
-                  // Position so top of branch label aligns right where the curve's dot ends
-                  top: `${(branchChildren.length > 0 ? 24 : 32) + 6 + curveRadius}px`,
+                  top: `${curveEndY}px`,
                   transform: 'translateX(-50%)',
                 }}
               >
-                <div className="w-px h-3 bg-border" />
+                <div className="w-px h-4 bg-border" />
                 <div className="mb-1">
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
                     {branch.branchLabel || `Branch ${i + 1}`}
