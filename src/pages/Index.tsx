@@ -469,7 +469,7 @@ export default function Index() {
             onBringToMain={handleBringToMain}
             onReturnToMain={handleReturnToMain}
             onClose={() => setShowConversationMap(false)}
-            isOnBranch={isOnBranch}
+            isOnBranch={!!store.activeBranchId}
           />
         ) : activeView === "workspace" ? (
           <WorkspaceView onStartExample={handleStartExample} />
