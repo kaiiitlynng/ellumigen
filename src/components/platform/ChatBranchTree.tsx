@@ -30,8 +30,9 @@ interface ChatBranchTreeProps {
 const NODE_SIZE = 10; // px diameter for main nodes
 const BRANCH_NODE_SIZE = 8;
 const ROW_HEIGHT = 32; // px per row
-const MAIN_X = 14; // center X of main column dots
-const BRANCH_X = 40; // center X of branch column dots
+const BUTTON_PAD = 4; // px-1 = 4px left padding on buttons
+const MAIN_X = 18; // center X of main column dots (BUTTON_PAD + marginLeft + NODE_SIZE/2)
+const BRANCH_X = 44; // center X of branch column dots
 
 export function ChatBranchTree({ nodes, onSelectNode, onSelectBranch }: ChatBranchTreeProps) {
   return (
