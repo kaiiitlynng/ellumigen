@@ -402,7 +402,6 @@ export default function Index() {
 
   const handleOpenConversationMap = useCallback(() => {
     setShowConversationMap(true);
-    setIsOnBranch(true);
   }, []);
 
   const handleBringToMain = useCallback(() => {
