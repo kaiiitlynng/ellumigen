@@ -5,6 +5,7 @@ import type { InterfaceMode } from "@/types/chat";
 interface TopBarProps {
   activeModes: InterfaceMode[];
   onToggleMode: (mode: InterfaceMode) => void;
+  chatTitle?: string;
   branchContext?: {
     isOnBranch: boolean;
     branchTitle: string;
@@ -20,6 +21,7 @@ interface TopBarProps {
 export function TopBar({
   activeModes,
   onToggleMode,
+  chatTitle,
   branchContext,
   onOpenConversationMap,
   onCloseConversationMap,
@@ -31,62 +33,70 @@ export function TopBar({
   const hideModeTabs = isOnBranch || showConversationMap;
 
   return (
-    <header className="flex items-center justify-between px-5 py-3 border-b border-border bg-background">
-      <div className="flex items-center gap-3 min-w-0">
-        {isOnBranch && (
-          <span className="text-sm text-muted-foreground truncate">
+    <div className="flex flex-col border-b border-border bg-background">
+      {/* Thin branch context bar — only when on a branch */}
+      {isOnBranch && (
+        <div className="flex items-center justify-between px-5 py-1.5 bg-muted/50 border-b border-border">
+          <span className="text-xs text-muted-foreground truncate">
             Exploring: {branchContext.branchTitle} – from {branchContext.parentTitle}
           </span>
-        )}
-        {showConversationMap && !isOnBranch && (
-          <span className="text-sm text-muted-foreground truncate">
-            Conversation Map
-          </span>
-        )}
-      </div>
-
-      {!hideModeTabs && (
-        <ModeTabs activeModes={activeModes} onToggleMode={onToggleMode} />
-      )}
-
-      <div className="flex items-center gap-2">
-        {isOnBranch && (
-          <>
+          <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={onBringToMain}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+              className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
             >
-              <Merge className="w-3.5 h-3.5" />
+              <Merge className="w-3 h-3" />
               Bring back to Main
             </button>
             <button
               onClick={onReturnToMain}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border border-border rounded-lg hover:bg-secondary transition-colors"
+              className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium border border-border rounded-md hover:bg-secondary transition-colors"
             >
-              <ArrowLeft className="w-3.5 h-3.5" />
+              <ArrowLeft className="w-3 h-3" />
               Return to Main
             </button>
-          </>
-        )}
-        <button
-          onClick={showConversationMap ? onCloseConversationMap : onOpenConversationMap}
-          className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-            showConversationMap
-              ? "bg-primary text-primary-foreground hover:bg-primary/90"
-              : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-          }`}
-        >
-          <Map className="w-3.5 h-3.5" />
-          Conversation Map
-        </button>
-        <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground rounded-lg hover:bg-secondary transition-colors">
-          <Share2 className="w-3.5 h-3.5" />
-          Share
-        </button>
-        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-          <User className="w-4 h-4 text-primary-foreground" />
+          </div>
         </div>
-      </div>
-    </header>
+      )}
+
+      {/* Main top bar */}
+      <header className="flex items-center justify-between px-5 py-3">
+        <div className="flex items-center gap-3 min-w-0">
+          {hideModeTabs ? (
+            <>
+              <div className="w-2.5 h-2.5 rounded-full bg-primary" />
+              <span className="text-sm font-medium text-foreground truncate">
+                {chatTitle || "Chat"}
+              </span>
+            </>
+          ) : null}
+        </div>
+
+        {!hideModeTabs && (
+          <ModeTabs activeModes={activeModes} onToggleMode={onToggleMode} />
+        )}
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={showConversationMap ? onCloseConversationMap : onOpenConversationMap}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+              showConversationMap
+                ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+            }`}
+          >
+            <Map className="w-3.5 h-3.5" />
+            Conversation Map
+          </button>
+          <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground rounded-lg hover:bg-secondary transition-colors">
+            <Share2 className="w-3.5 h-3.5" />
+            Share
+          </button>
+          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+            <User className="w-4 h-4 text-primary-foreground" />
+          </div>
+        </div>
+      </header>
+    </div>
   );
 }
