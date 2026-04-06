@@ -36,7 +36,7 @@ export function TopBar({
     <div className="flex flex-col border-b border-border bg-background">
       {/* Thin branch context bar — only when on a branch */}
       {isOnBranch && (
-        <div className="flex items-center justify-between px-5 py-1.5 bg-muted/50 border-b border-border">
+        <div className="flex items-center justify-between px-5 py-2.5 bg-muted/50 border-b border-border">
           <span className="text-xs text-muted-foreground truncate">
             Exploring: {branchContext.branchTitle} – from {branchContext.parentTitle}
           </span>
