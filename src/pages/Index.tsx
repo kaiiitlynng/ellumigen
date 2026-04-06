@@ -431,6 +431,16 @@ export default function Index() {
     ? { isOnBranch: true, branchTitle: store.activeBranch.label, parentTitle: store.activeChat?.title || "" }
     : undefined;
 
+  // When on a branch, show main messages up to the branch point + branch messages
+  const viewChat = useMemo(() => {
+    if (!store.activeChat) return null;
+    if (!store.activeBranchId || !store.activeBranch) return store.activeChat;
+    const branch = store.activeBranch;
+    const parentIdx = store.activeChat.messages.findIndex((m) => m.id === branch.parentMessageId);
+    const mainPrefix = parentIdx >= 0 ? store.activeChat.messages.slice(0, parentIdx + 1) : store.activeChat.messages;
+    return { ...store.activeChat, messages: [...mainPrefix, ...branch.messages] };
+  }, [store.activeChat, store.activeBranchId, store.activeBranch]);
+
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       <AppSidebar
