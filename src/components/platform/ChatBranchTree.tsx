@@ -206,15 +206,7 @@ function BranchTreeLayout({
         branch.chain.map((item, ci) => {
           const rowIdx = branch.startRow + ci;
           return (
-            <div key={`${bi}-${item.id}`} className="absolute" style={{ top: rowIdx * ROW_HEIGHT, left: 0, height: ROW_HEIGHT }}>
-              {ci === 0 && branch.label && (
-                <span
-                  className="absolute text-[9px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground font-medium"
-                  style={{ left: BRANCH_X + BRANCH_NODE_SIZE / 2 + 8, top: 2 }}
-                >
-                  {branch.label}
-                </span>
-              )}
+            <div key={`${bi}-${item.id}`} className="absolute" style={{ top: rowIdx * ROW_HEIGHT, left: 0, height: ROW_HEIGHT, width: '100%' }}>
               <button
                 onClick={() => {
                   if (item.branchId) onSelectBranch?.(item.branchId);
@@ -235,6 +227,11 @@ function BranchTreeLayout({
                 <span className="truncate text-muted-foreground text-xs ml-1" style={{ maxWidth: 80 }}>
                   {ci === 0 ? "" : item.label}
                 </span>
+                {ci === 0 && branch.label && (
+                  <span className="shrink-0 text-[9px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground font-medium ml-auto">
+                    {branch.label}
+                  </span>
+                )}
               </button>
             </div>
           );
@@ -245,16 +242,17 @@ function BranchTreeLayout({
 }
 
 function MainDot({ status, isActive }: { status: BranchTreeNode["status"]; isActive?: boolean }) {
-  const base = "rounded-full bg-primary";
+  const base = "rounded-full" ;
+  const color = { backgroundColor: "#0070C0" };
   if (status === "active" || isActive) {
     return (
       <span className="relative flex items-center justify-center w-[10px] h-[10px]">
-        <span className={cn(base, "w-[10px] h-[10px]")} />
-        <span className="absolute w-[14px] h-[14px] rounded-full border-2 border-primary opacity-50" />
+        <span className={cn(base, "w-[10px] h-[10px]")} style={color} />
+        <span className="absolute w-[14px] h-[14px] rounded-full opacity-50" style={{ borderWidth: 2, borderColor: "#0070C0" }} />
       </span>
     );
   }
-  return <span className={cn(base, "w-[10px] h-[10px]")} />;
+  return <span className={cn(base, "w-[10px] h-[10px]")} style={color} />;
 }
 
 function BranchDot({ status, isActive }: { status: BranchTreeNode["status"]; isActive?: boolean }) {
