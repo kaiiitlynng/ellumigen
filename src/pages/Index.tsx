@@ -433,7 +433,7 @@ export default function Index() {
         bookmarkedMessages={store.bookmarkedMessages}
         activeChatId={store.activeChatId}
         activeView={activeView}
-        branchTreeNodes={activeView === "chat" && store.activeChat && store.activeChat.messages.length > 0 ? buildBranchTreeFromMessages(store.activeChat.messages, isLoading) : undefined}
+        branchTreeNodes={activeView === "chat" && store.activeChat && store.activeChat.messages.length > 0 ? buildBranchTreeFromMessages(store.activeChat.messages, store.activeChat.branches, isLoading, store.activeBranchId) : undefined}
         onSelectChat={handleSelectChat}
         onSelectBranchNode={(nodeId) => console.log("Select branch node:", nodeId)}
         onNewChat={handleNewChat}
@@ -456,7 +456,7 @@ export default function Index() {
           <ConversationMap
             title={store.activeChat.title}
             subtitle=""
-            nodes={branchTreeToMapNodes(buildBranchTreeFromMessages(store.activeChat.messages, isLoading))}
+            nodes={branchTreeToMapNodes(buildBranchTreeFromMessages(store.activeChat.messages, store.activeChat.branches, isLoading, store.activeBranchId))}
             activeNodeId={activeMapNodeId}
             onSelectNode={setActiveMapNodeId}
             onAddBranch={handleAddMapBranch}
