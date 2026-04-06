@@ -505,7 +505,7 @@ export default function Index() {
                 />
                 {!collapsedPanels.has("conversation") && (
                   <ChatView
-                    chat={store.activeChat}
+                    chat={viewChat}
                     onSendMessage={handleSendMessage}
                     onBranch={handleBranch}
                     onBookmark={handleBookmark}
