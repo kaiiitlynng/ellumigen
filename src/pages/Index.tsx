@@ -497,12 +497,14 @@ export default function Index() {
                   collapsedPanels.has("conversation") ? "w-10" : "flex-1 min-w-0"
                 }`}
               >
-                <PanelHeader
-                  label="Chat"
-                  icon={MessageSquare}
-                  isCollapsed={collapsedPanels.has("conversation")}
-                  onToggleCollapse={() => toggleCollapse("conversation")}
-                />
+                {!store.activeBranchId && !showConversationMap && (
+                  <PanelHeader
+                    label="Chat"
+                    icon={MessageSquare}
+                    isCollapsed={collapsedPanels.has("conversation")}
+                    onToggleCollapse={() => toggleCollapse("conversation")}
+                  />
+                )}
                 {!collapsedPanels.has("conversation") && (
                   <ChatView
                     chat={viewChat}
