@@ -143,11 +143,13 @@ function BranchTreeLayout({
           return (
             <g key={bi}>
               {/* Curved arc from main node to first branch node */}
+              {/* Simple right-angle connector: down then across */}
               <path
-                d={`M ${MAIN_X} ${startY} C ${MAIN_X} ${startY + 20}, ${BRANCH_X} ${firstBranchY - 20}, ${BRANCH_X} ${firstBranchY}`}
+                d={`M ${MAIN_X} ${startY} L ${MAIN_X} ${firstBranchY} L ${BRANCH_X} ${firstBranchY}`}
                 fill="none"
                 stroke="hsl(var(--muted-foreground) / 0.4)"
                 strokeWidth={2}
+                strokeLinejoin="round"
               />
               {/* Vertical line connecting branch nodes */}
               {branch.chain.length > 1 && (
