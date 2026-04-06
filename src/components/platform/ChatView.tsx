@@ -2,6 +2,7 @@ import { useRef, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import { GitBranch, Copy, ThumbsUp, ThumbsDown, Bookmark } from "lucide-react";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import type { Chat, ChatMessage } from "@/types/chat";
 import { ChatInput } from "./ChatInput";
 import { SuggestionChips } from "./SuggestionChips";
