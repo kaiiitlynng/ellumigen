@@ -109,7 +109,7 @@ export function ConversationMap({
 
       {/* Map content */}
       <div className="flex-1 overflow-auto px-6 py-4">
-        <div className="flex flex-col items-center gap-0 min-w-fit">
+        <div className="flex flex-col items-center gap-0 min-w-fit" style={{ paddingRight: '400px' }}>
           {rootNodes.map((node) => (
             <NodeTree
               key={node.id}
