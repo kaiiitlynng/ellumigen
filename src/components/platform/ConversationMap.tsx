@@ -226,13 +226,18 @@ export function ConversationMap({
   );
 }
 
+interface PendingMergeTarget {
+  id: string;
+  depth: number; // render when 0
+}
+
 function NodeTree({
   node,
   nodeMap,
   activeNodeId,
   onSelectNode,
   onAddBranch,
-  mergeTargetIds,
+  pendingMergeTargets,
   mergeSourceId,
 }: {
   node: MapNode;
@@ -240,7 +245,7 @@ function NodeTree({
   activeNodeId?: string;
   onSelectNode?: (id: string) => void;
   onAddBranch?: (parentId: string) => void;
-  mergeTargetIds?: string[];
+  pendingMergeTargets?: PendingMergeTarget[];
   mergeSourceId?: string;
 }) {
   const children = node.children.map((id) => nodeMap[id]).filter(Boolean);
@@ -249,6 +254,11 @@ function NodeTree({
   const mainChild = children.find((child) => !child.isBranch);
   const branchChildren = children.filter((child) => child.isBranch);
   const mergedBranches = mainChild ? branchChildren.filter(isMergedBranch) : [];
+
+  // Merge targets that should render on THIS node (depth === 0)
+  const readyTargets = (pendingMergeTargets || []).filter((t) => t.depth <= 0);
+  // Merge targets to pass down (decrement depth)
+  const passingTargets = (pendingMergeTargets || []).filter((t) => t.depth > 0).map((t) => ({ ...t, depth: t.depth - 1 }));
 
   return (
     <div className="flex flex-col items-center">
