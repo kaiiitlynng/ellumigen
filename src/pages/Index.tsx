@@ -405,16 +405,21 @@ export default function Index() {
   }, []);
 
   const handleBringToMain = useCallback(() => {
-    // Merge branch back to main - in real app this would merge messages
-    setIsOnBranch(false);
+    // Merge branch messages back to main
+    if (store.activeChatId && store.activeBranchId && store.activeBranch) {
+      const branchMessages = store.activeBranch.messages;
+      for (const msg of branchMessages) {
+        store.addMessage(store.activeChatId, { role: msg.role, content: msg.content, metadata: msg.metadata });
+      }
+    }
+    store.switchToBranch(null);
     setShowConversationMap(false);
-  }, []);
+  }, [store]);
 
   const handleReturnToMain = useCallback(() => {
-    // Return without merging
-    setIsOnBranch(false);
+    store.switchToBranch(null);
     setShowConversationMap(false);
-  }, []);
+  }, [store]);
 
   const handleAddMapBranch = useCallback((parentNodeId: string) => {
     // In a real app, this would create a new branch node
