@@ -185,18 +185,12 @@ export function useChatStore() {
           const branch = c.branches.find((b) => b.id === branchId);
           if (!branch) return c;
 
-          // Copy branch messages into main thread
-          const newMessages = [...c.messages];
-          for (const msg of branch.messages) {
-            newMessages.push({ ...msg, id: crypto.randomUUID(), timestamp: new Date() });
-          }
-
-          // Mark last added message as the merge target
-          const mergedAtMessageId = newMessages.length > 0 ? newMessages[newMessages.length - 1].id : undefined;
+          // Mark branch as merged, pointing to the last main-thread message
+          const lastMainMsg = c.messages[c.messages.length - 1];
+          const mergedAtMessageId = lastMainMsg?.id;
 
           return {
             ...c,
-            messages: newMessages,
             branches: c.branches.map((b) =>
               b.id === branchId ? { ...b, merged: true, mergedAtMessageId } : b
             ),
