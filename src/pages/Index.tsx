@@ -460,8 +460,10 @@ export default function Index() {
             onToggleMode={toggleMode}
             branchContext={branchContext}
             onOpenConversationMap={handleOpenConversationMap}
+            onCloseConversationMap={() => setShowConversationMap(false)}
             onBringToMain={handleBringToMain}
             onReturnToMain={handleReturnToMain}
+            showConversationMap={showConversationMap}
           />
         )}
 
