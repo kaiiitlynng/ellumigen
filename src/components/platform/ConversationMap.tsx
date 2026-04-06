@@ -13,6 +13,7 @@ export interface MapNode {
   children: string[];
   isMain?: boolean;
   branchLabel?: string;
+  isBranch?: boolean;
 }
 
 interface ConversationMapProps {
