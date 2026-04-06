@@ -9,6 +9,8 @@ import { WorkspaceView } from "@/components/platform/WorkspaceView";
 import { HistoryView } from "@/components/platform/HistoryView";
 import { UseCasesView } from "@/components/platform/UseCasesView";
 import { ArtifactsView } from "@/components/platform/ArtifactsView";
+import { ConversationMap, type MapNode } from "@/components/platform/ConversationMap";
+import type { BranchTreeNode } from "@/components/platform/ChatBranchTree";
 import { PanelHeader } from "@/components/platform/ModeTabs";
 import { useChatStore } from "@/stores/chatStore";
 import type { InterfaceMode, TaskStep, ThoughtEntry, DataTableConfig } from "@/types/chat";
@@ -108,6 +110,116 @@ const FIRST_EXCHANGE_RESPONSE = `Based on the **@TCGA-BRCA** dataset, I've perfo
 
 The analysis reveals significant differences in overall survival between Luminal A, Luminal B, HER2-enriched, and Basal-like subtypes (log-rank p < 0.001). Luminal A patients demonstrate the most favorable outcomes with a median survival of 15.2 years, while Basal-like subtype shows reduced survival at 8.7 years.`;
 
+// ── Demo branch tree for sidebar ──────────────────────────
+const DEMO_BRANCH_TREE: BranchTreeNode[] = [
+  {
+    id: "bt1",
+    label: "Preparing follow-up plan...",
+    status: "complete",
+    isMain: true,
+    emoji: "🟢",
+    children: [
+      {
+        id: "bt2",
+        label: "Clarifying follow-up prompt, awaiting...",
+        status: "complete",
+        children: [
+          {
+            id: "bt3",
+            label: "User responds to follow-up prompt",
+            status: "complete",
+            children: [
+              {
+                id: "bt4",
+                label: "Providing new response, awaiting...",
+                status: "active",
+                isActive: true,
+                children: [
+                  {
+                    id: "bt5",
+                    label: "Negative feedback, regenerating",
+                    status: "warning",
+                    emoji: "⚠️",
+                  },
+                  {
+                    id: "bt6",
+                    label: "Providing response, awaiting feedback",
+                    status: "complete",
+                  },
+                  {
+                    id: "bt7",
+                    label: "Planning next step follow-up for prompt",
+                    status: "complete",
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: "bt8",
+        label: "Creating data visualization, preparing ...",
+        status: "warning",
+        emoji: "⚠️",
+      },
+      {
+        id: "bt9",
+        label: "Summarizing dataset, preparing",
+        status: "idle",
+      },
+    ],
+  },
+  { id: "bt10", label: "Inspected user provided dataset", status: "complete" },
+  { id: "bt11", label: "Followed up with dataset inquiry", status: "complete" },
+  { id: "bt12", label: "Differential Expression - Tumor vs Normal", status: "complete" },
+];
+
+// ── Demo conversation map nodes ──────────────────────────
+const DEMO_MAP_NODES: MapNode[] = [
+  {
+    id: "mn1",
+    label: "Research Hypothesis",
+    description: "EMT signature in BRCA1-mutant tumors",
+    category: "hypothesis",
+    children: ["mn2"],
+  },
+  {
+    id: "mn2",
+    label: "Research Hypothesis",
+    description: "RNA-seq-batch-3\nTCGA-BRCA-n42",
+    category: "data",
+    parentId: "mn1",
+    children: ["mn3"],
+  },
+  {
+    id: "mn3",
+    label: "Differential expression",
+    description: "DESeq2 · FDR 0.05",
+    category: "analysis",
+    parentId: "mn2",
+    children: ["mn4", "mn5"],
+  },
+  {
+    id: "mn4",
+    label: "Pathway Enrichment",
+    description: "fgsea · Hallmarks",
+    category: "exploration",
+    parentId: "mn3",
+    branchLabel: "Branch 1",
+    children: [],
+  },
+  {
+    id: "mn5",
+    label: "UMAP clustering",
+    description: "Seurat · res 0.5",
+    category: "exploration",
+    parentId: "mn3",
+    branchLabel: "Branch 2",
+    children: [],
+  },
+];
+
 // ── Component ─────────────────────────────────────────────
 
 export default function Index() {
@@ -117,6 +229,9 @@ export default function Index() {
   const [showContextHelp, setShowContextHelp] = useState(false);
   const [activeModes, setActiveModes] = useState<InterfaceMode[]>(["conversation"]);
   const [collapsedPanels, setCollapsedPanels] = useState<Set<InterfaceMode>>(new Set());
+  const [showConversationMap, setShowConversationMap] = useState(false);
+  const [activeMapNodeId, setActiveMapNodeId] = useState<string>("mn4");
+  const [isOnBranch, setIsOnBranch] = useState(false);
 
   // Auto-open canvas panel when dragging a visualization
   useEffect(() => {
@@ -392,6 +507,32 @@ export default function Index() {
     [store]
   );
 
+  const handleOpenConversationMap = useCallback(() => {
+    setShowConversationMap(true);
+    setIsOnBranch(true);
+  }, []);
+
+  const handleBringToMain = useCallback(() => {
+    // Merge branch back to main - in real app this would merge messages
+    setIsOnBranch(false);
+    setShowConversationMap(false);
+  }, []);
+
+  const handleReturnToMain = useCallback(() => {
+    // Return without merging
+    setIsOnBranch(false);
+    setShowConversationMap(false);
+  }, []);
+
+  const handleAddMapBranch = useCallback((parentNodeId: string) => {
+    // In a real app, this would create a new branch node
+    console.log("Add branch from node:", parentNodeId);
+  }, []);
+
+  const branchContext = activeView === "chat" && isOnBranch
+    ? { isOnBranch: true, branchTitle: "Pathway Enrichment", parentTitle: "BRCA tumor / normal" }
+    : undefined;
+
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       <AppSidebar
@@ -400,17 +541,39 @@ export default function Index() {
         bookmarkedMessages={store.bookmarkedMessages}
         activeChatId={store.activeChatId}
         activeView={activeView}
+        branchTreeNodes={activeView === "chat" ? DEMO_BRANCH_TREE : undefined}
         onSelectChat={handleSelectChat}
+        onSelectBranchNode={(nodeId) => console.log("Select branch node:", nodeId)}
         onNewChat={handleNewChat}
         onViewChange={setActiveView}
       />
 
       <div className="flex-1 flex flex-col min-w-0">
         {activeView === "chat" && (
-          <TopBar activeModes={activeModes} onToggleMode={toggleMode} />
+          <TopBar
+            activeModes={activeModes}
+            onToggleMode={toggleMode}
+            branchContext={branchContext}
+            onOpenConversationMap={handleOpenConversationMap}
+            onBringToMain={handleBringToMain}
+            onReturnToMain={handleReturnToMain}
+          />
         )}
 
-        {activeView === "workspace" ? (
+        {showConversationMap && activeView === "chat" ? (
+          <ConversationMap
+            title="Pathway Enrichment"
+            subtitle="from BRCA tumor / normal"
+            nodes={DEMO_MAP_NODES}
+            activeNodeId={activeMapNodeId}
+            onSelectNode={setActiveMapNodeId}
+            onAddBranch={handleAddMapBranch}
+            onBringToMain={handleBringToMain}
+            onReturnToMain={handleReturnToMain}
+            onClose={() => setShowConversationMap(false)}
+            isOnBranch={isOnBranch}
+          />
+        ) : activeView === "workspace" ? (
           <WorkspaceView onStartExample={handleStartExample} />
         ) : activeView === "history" ? (
           <HistoryView chats={store.chats} onSelectChat={handleSelectChat} />
