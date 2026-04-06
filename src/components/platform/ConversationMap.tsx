@@ -70,6 +70,17 @@ function getMergeAnchorId(node: Pick<MapNode, "branchId" | "id">): string {
   return node.branchId || node.id;
 }
 
+/** Count the depth (number of nodes) in a branch chain */
+function getBranchDepth(node: MapNode, nodeMap: Record<string, MapNode>): number {
+  let depth = 1;
+  const children = node.children.map((id) => nodeMap[id]).filter(Boolean);
+  const mainChild = children.find((c) => !c.isBranch);
+  if (mainChild) {
+    depth += getBranchDepth(mainChild, nodeMap);
+  }
+  return depth;
+}
+
 function measureMergeConnectors(container: HTMLDivElement): {
   connectors: MergeConnector[];
   width: number;
@@ -101,7 +112,7 @@ function measureMergeConnectors(container: HTMLDivElement): {
     const startY = sourceRect.top - containerRect.top + sourceRect.height / 2;
     const endX = targetRect.left - containerRect.left + targetRect.width / 2;
     const endY = targetRect.top - containerRect.top + targetRect.height / 2;
-    const bendRadius = Math.min(MERGE_BEND_RADIUS, Math.max(24, Math.abs(startX - endX) / 4));
+    const bendRadius = Math.min(MERGE_BEND_RADIUS, Math.abs(startX - endX) / 2, Math.abs(endY - startY) / 2);
 
     // Mirror the branch-out curve: go down vertically from source, then curve horizontally into the main line
     connectors.push({
@@ -206,7 +217,7 @@ export function ConversationMap({
               activeNodeId={activeNodeId}
               onSelectNode={onSelectNode}
               onAddBranch={onAddBranch}
-              mergeTargetIds={[]}
+              pendingMergeTargets={[]}
             />
           ))}
         </div>
@@ -215,13 +226,18 @@ export function ConversationMap({
   );
 }
 
+interface PendingMergeTarget {
+  id: string;
+  depth: number; // render when 0
+}
+
 function NodeTree({
   node,
   nodeMap,
   activeNodeId,
   onSelectNode,
   onAddBranch,
-  mergeTargetIds,
+  pendingMergeTargets,
   mergeSourceId,
 }: {
   node: MapNode;
@@ -229,7 +245,7 @@ function NodeTree({
   activeNodeId?: string;
   onSelectNode?: (id: string) => void;
   onAddBranch?: (parentId: string) => void;
-  mergeTargetIds?: string[];
+  pendingMergeTargets?: PendingMergeTarget[];
   mergeSourceId?: string;
 }) {
   const children = node.children.map((id) => nodeMap[id]).filter(Boolean);
@@ -238,6 +254,11 @@ function NodeTree({
   const mainChild = children.find((child) => !child.isBranch);
   const branchChildren = children.filter((child) => child.isBranch);
   const mergedBranches = mainChild ? branchChildren.filter(isMergedBranch) : [];
+
+  // Merge targets that should render on THIS node (depth === 0)
+  const readyTargets = (pendingMergeTargets || []).filter((t) => t.depth <= 0);
+  // Merge targets to pass down (decrement depth)
+  const passingTargets = (pendingMergeTargets || []).filter((t) => t.depth > 0).map((t) => ({ ...t, depth: t.depth - 1 }));
 
   return (
     <div className="flex flex-col items-center">
@@ -264,10 +285,10 @@ function NodeTree({
           <h3 className="text-sm font-semibold text-foreground mt-2">{node.label}</h3>
           <p className="text-xs text-muted-foreground mt-1">{node.description}</p>
         </motion.button>
-        {mergeTargetIds && mergeTargetIds.map((id) => (
+        {readyTargets.map((t) => (
           <span
-            key={id}
-            data-merge-target={id}
+            key={t.id}
+            data-merge-target={t.id}
             className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-border"
             aria-hidden="true"
           />
@@ -338,7 +359,13 @@ function NodeTree({
               activeNodeId={activeNodeId}
               onSelectNode={onSelectNode}
               onAddBranch={onAddBranch}
-              mergeTargetIds={mergedBranches.map((b) => getMergeAnchorId(b))}
+              pendingMergeTargets={[
+                ...passingTargets,
+                ...mergedBranches.map((b) => ({
+                  id: getMergeAnchorId(b),
+                  depth: getBranchDepth(b, nodeMap) - 1,
+                })),
+              ]}
               mergeSourceId={mergeSourceId}
             />
           )}
