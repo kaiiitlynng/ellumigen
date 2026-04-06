@@ -90,10 +90,19 @@ export interface BranchTree {
   nodes: Record<string, BranchNode>;
 }
 
+export interface ChatBranch {
+  id: string;
+  label: string;
+  parentMessageId: string; // message ID from which this branch diverges
+  messages: ChatMessage[];
+  createdAt: Date;
+}
+
 export interface Chat {
   id: string;
   title: string;
   messages: ChatMessage[];
+  branches: ChatBranch[];
   createdAt: Date;
   updatedAt: Date;
   parentId?: string;

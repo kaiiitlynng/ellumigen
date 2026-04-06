@@ -1,4 +1,4 @@
-import { useCallback, useState, useRef, useEffect } from "react";
+import { useCallback, useState, useRef, useEffect, useMemo } from "react";
 import { MessageSquare, FileCode, Layout } from "lucide-react";
 import { AppSidebar, type SidebarView } from "@/components/platform/AppSidebar";
 import { TopBar } from "@/components/platform/TopBar";
@@ -112,6 +112,7 @@ The analysis reveals significant differences in overall survival between Luminal
 
 
 
+
 // ── Component ─────────────────────────────────────────────
 
 export default function Index() {
@@ -123,7 +124,7 @@ export default function Index() {
   const [collapsedPanels, setCollapsedPanels] = useState<Set<InterfaceMode>>(new Set());
   const [showConversationMap, setShowConversationMap] = useState(false);
   const [activeMapNodeId, setActiveMapNodeId] = useState<string>("mn4");
-  const [isOnBranch, setIsOnBranch] = useState(false);
+  
 
   // Auto-open canvas panel when dragging a visualization
   useEffect(() => {
@@ -244,7 +245,7 @@ export default function Index() {
       const chat = store.chats.find((c) => c.id === chatId);
       const isTcgaDemo = chat?.title === "TCGA-BRCA outcomes";
 
-      store.addMessage(chatId, { role: "user", content });
+      store.addMessage(chatId, { role: "user", content }, store.activeBranchId);
       setIsLoading(true);
 
       // Check for graph/table/visualization keywords FIRST (applies to all chats)
@@ -263,7 +264,7 @@ export default function Index() {
               showVolcano: true,
               showHeatmap: true,
             },
-          });
+          }, store.activeBranchId);
           setIsLoading(false);
         }, 1200);
       } else if (hasAnalyze) {
@@ -273,7 +274,7 @@ export default function Index() {
             role: "assistant",
             content: "",
             metadata: { type: "plan", plan: DEMO_PLAN },
-          });
+          }, store.activeBranchId);
           setIsLoading(false);
         }, 1200);
       } else if (hasDatasetAndSkill) {
@@ -284,7 +285,7 @@ export default function Index() {
             metadata: {
               contextUsed: ["TCGA-BRCA", "statistical-analysis"],
             },
-          });
+          }, store.activeBranchId);
           setIsLoading(false);
         }, 1200);
     } else {
@@ -315,13 +316,13 @@ export default function Index() {
             store.addMessage(chatId!, {
               role: "assistant",
               content: data.content || "I couldn't generate a response. Please try again.",
-            });
+            }, store.activeBranchId);
           } catch (err) {
             console.error("AI chat error:", err);
             store.addMessage(chatId!, {
               role: "assistant",
               content: "Sorry, I encountered an error generating a response. Please try again.",
-            });
+            }, store.activeBranchId);
           } finally {
             setIsLoading(false);
           }
@@ -401,29 +402,43 @@ export default function Index() {
 
   const handleOpenConversationMap = useCallback(() => {
     setShowConversationMap(true);
-    setIsOnBranch(true);
   }, []);
 
   const handleBringToMain = useCallback(() => {
-    // Merge branch back to main - in real app this would merge messages
-    setIsOnBranch(false);
+    // Merge branch messages back to main
+    if (store.activeChatId && store.activeBranchId && store.activeBranch) {
+      const branchMessages = store.activeBranch.messages;
+      for (const msg of branchMessages) {
+        store.addMessage(store.activeChatId, { role: msg.role, content: msg.content, metadata: msg.metadata });
+      }
+    }
+    store.switchToBranch(null);
     setShowConversationMap(false);
-  }, []);
+  }, [store]);
 
   const handleReturnToMain = useCallback(() => {
-    // Return without merging
-    setIsOnBranch(false);
+    store.switchToBranch(null);
     setShowConversationMap(false);
-  }, []);
+  }, [store]);
 
   const handleAddMapBranch = useCallback((parentNodeId: string) => {
     // In a real app, this would create a new branch node
     console.log("Add branch from node:", parentNodeId);
   }, []);
 
-  const branchContext = activeView === "chat" && isOnBranch
-    ? { isOnBranch: true, branchTitle: "Pathway Enrichment", parentTitle: "BRCA tumor / normal" }
+  const branchContext = activeView === "chat" && store.activeBranchId && store.activeBranch
+    ? { isOnBranch: true, branchTitle: store.activeBranch.label, parentTitle: store.activeChat?.title || "" }
     : undefined;
+
+  // When on a branch, show main messages up to the branch point + branch messages
+  const viewChat = useMemo(() => {
+    if (!store.activeChat) return null;
+    if (!store.activeBranchId || !store.activeBranch) return store.activeChat;
+    const branch = store.activeBranch;
+    const parentIdx = store.activeChat.messages.findIndex((m) => m.id === branch.parentMessageId);
+    const mainPrefix = parentIdx >= 0 ? store.activeChat.messages.slice(0, parentIdx + 1) : store.activeChat.messages;
+    return { ...store.activeChat, messages: [...mainPrefix, ...branch.messages] };
+  }, [store.activeChat, store.activeBranchId, store.activeBranch]);
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
@@ -433,9 +448,10 @@ export default function Index() {
         bookmarkedMessages={store.bookmarkedMessages}
         activeChatId={store.activeChatId}
         activeView={activeView}
-        branchTreeNodes={activeView === "chat" && store.activeChat && store.activeChat.messages.length > 0 ? buildBranchTreeFromMessages(store.activeChat.messages, isLoading) : undefined}
+        branchTreeNodes={activeView === "chat" && store.activeChat && store.activeChat.messages.length > 0 ? buildBranchTreeFromMessages(store.activeChat.messages, store.activeChat.branches, isLoading, store.activeBranchId) : undefined}
         onSelectChat={handleSelectChat}
-        onSelectBranchNode={(nodeId) => console.log("Select branch node:", nodeId)}
+        onSelectBranchNode={(nodeId) => { store.switchToBranch(null); }}
+        onSelectBranch={(branchId) => store.switchToBranch(branchId)}
         onNewChat={handleNewChat}
         onViewChange={setActiveView}
       />
@@ -456,14 +472,14 @@ export default function Index() {
           <ConversationMap
             title={store.activeChat.title}
             subtitle=""
-            nodes={branchTreeToMapNodes(buildBranchTreeFromMessages(store.activeChat.messages, isLoading))}
+            nodes={branchTreeToMapNodes(buildBranchTreeFromMessages(store.activeChat.messages, store.activeChat.branches, isLoading, store.activeBranchId))}
             activeNodeId={activeMapNodeId}
             onSelectNode={setActiveMapNodeId}
             onAddBranch={handleAddMapBranch}
             onBringToMain={handleBringToMain}
             onReturnToMain={handleReturnToMain}
             onClose={() => setShowConversationMap(false)}
-            isOnBranch={isOnBranch}
+            isOnBranch={!!store.activeBranchId}
           />
         ) : activeView === "workspace" ? (
           <WorkspaceView onStartExample={handleStartExample} />
@@ -489,7 +505,7 @@ export default function Index() {
                 />
                 {!collapsedPanels.has("conversation") && (
                   <ChatView
-                    chat={store.activeChat}
+                    chat={viewChat}
                     onSendMessage={handleSendMessage}
                     onBranch={handleBranch}
                     onBookmark={handleBookmark}
