@@ -238,28 +238,38 @@ function NodeTree({
 
   return (
     <div className="flex flex-col items-center">
-      <motion.button
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        onClick={() => onSelectNode?.(node.id)}
-        className={cn(
-          "w-[280px] p-4 rounded-xl border text-left transition-all hover:shadow-md",
-          isActive
-            ? "border-primary shadow-md ring-2 ring-primary/20"
-            : "border-border bg-background"
-        )}
-      >
-        <div className="flex items-start justify-between gap-2">
-          <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded", style.bg, style.text)}>
-            {style.label}
-          </span>
-          <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
-            {node.timestamp ? formatTimeAgo(node.timestamp instanceof Date ? node.timestamp : new Date(node.timestamp)) : "just now"}
-          </span>
-        </div>
-        <h3 className="text-sm font-semibold text-foreground mt-2">{node.label}</h3>
-        <p className="text-xs text-muted-foreground mt-1">{node.description}</p>
-      </motion.button>
+      <div className="relative">
+        <motion.button
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          onClick={() => onSelectNode?.(node.id)}
+          className={cn(
+            "w-[280px] p-4 rounded-xl border text-left transition-all hover:shadow-md",
+            isActive
+              ? "border-primary shadow-md ring-2 ring-primary/20"
+              : "border-border bg-background"
+          )}
+        >
+          <div className="flex items-start justify-between gap-2">
+            <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded", style.bg, style.text)}>
+              {style.label}
+            </span>
+            <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
+              {node.timestamp ? formatTimeAgo(node.timestamp instanceof Date ? node.timestamp : new Date(node.timestamp)) : "just now"}
+            </span>
+          </div>
+          <h3 className="text-sm font-semibold text-foreground mt-2">{node.label}</h3>
+          <p className="text-xs text-muted-foreground mt-1">{node.description}</p>
+        </motion.button>
+        {mergeTargetIds && mergeTargetIds.map((id) => (
+          <span
+            key={id}
+            data-merge-target={id}
+            className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-border"
+            aria-hidden="true"
+          />
+        ))}
+      </div>
 
       {(mainChild || branchChildren.length > 0) && (
         <div className="relative flex flex-col items-center">
