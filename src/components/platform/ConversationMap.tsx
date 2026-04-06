@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Plus, ArrowLeft, Merge, Map } from "lucide-react";
 import type { BranchNodeCategory } from "@/types/chat";
