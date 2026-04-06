@@ -146,7 +146,7 @@ function BranchTreeLayout({
               {/* Simple right-angle connector: down then across */}
               {/* Arc connector from main down to branch — curves outward like the conversation map */}
               <path
-                d={`M ${MAIN_X} ${startY} L ${MAIN_X} ${firstBranchY - (BRANCH_X - MAIN_X)} Q ${MAIN_X} ${firstBranchY}, ${BRANCH_X} ${firstBranchY}`}
+                d={`M ${MAIN_X} ${startY} Q ${MAIN_X} ${firstBranchY}, ${BRANCH_X} ${firstBranchY}`}
                 fill="none"
                 stroke="hsl(var(--muted-foreground) / 0.4)"
                 strokeWidth={2}
