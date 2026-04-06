@@ -151,6 +151,13 @@ export function AppSidebar({
             </button>
           </nav>
 
+          {/* Current Chat branch tree */}
+          {branchTreeNodes && branchTreeNodes.length > 0 && (
+            <div className="mt-2">
+              <ChatBranchTree nodes={branchTreeNodes} onSelectNode={onSelectBranchNode} />
+            </div>
+          )}
+
           {/* Chats section */}
           <div className="flex-1 overflow-y-auto mt-2">
             <Collapsible defaultOpen className="px-3">
