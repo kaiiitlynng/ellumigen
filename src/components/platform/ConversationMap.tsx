@@ -220,7 +220,7 @@ function NodeTree({
             const curveRadius = 40;
             const dotTop = 24 + 6;
             const curveEndY = dotTop + curveRadius;
-            const isMerged = branch.branchLabel === "merged" || branch.merged;
+            const isMerged = branch.branchLabel === "merged" || !!branch.merged;
 
             return (
               <div
