@@ -222,6 +222,7 @@ function NodeTree({
   onSelectNode,
   onAddBranch,
   mergeTargetIds,
+  mergeSourceId,
 }: {
   node: MapNode;
   nodeMap: Record<string, MapNode>;
@@ -229,6 +230,7 @@ function NodeTree({
   onSelectNode?: (id: string) => void;
   onAddBranch?: (parentId: string) => void;
   mergeTargetIds?: string[];
+  mergeSourceId?: string;
 }) {
   const children = node.children.map((id) => nodeMap[id]).filter(Boolean);
   const style = CATEGORY_STYLES[node.category];
