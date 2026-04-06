@@ -207,14 +207,12 @@ export function buildBranchTreeFromMessages(
 
       // Determine merge target index if branch is merged
       let mergeTargetMainIndex: number | undefined;
-      if (branch.merged && branch.mergedAtMessageId) {
-        mergeTargetMainIndex = mainExchanges.findIndex(
-          (ex) => ex.user.id === branch.mergedAtMessageId || ex.assistant?.id === branch.mergedAtMessageId
-        );
-        if (mergeTargetMainIndex === -1) {
-          // Fallback: merge to last main node
-          mergeTargetMainIndex = mainExchanges.length - 1;
-        }
+      if (branch.merged) {
+        // Connect to the next main node after the branch point
+        const nextMainIndex = nodeIndex + 1;
+        mergeTargetMainIndex = nextMainIndex < mainExchanges.length
+          ? nextMainIndex
+          : mainExchanges.length - 1;
       }
 
       // If branch has no messages yet, create a placeholder node
