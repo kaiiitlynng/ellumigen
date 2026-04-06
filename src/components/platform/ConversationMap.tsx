@@ -370,17 +370,8 @@ function NodeTree({
                   activeNodeId={activeNodeId}
                   onSelectNode={onSelectNode}
                   onAddBranch={onAddBranch}
+                  mergeSourceId={isMerged && mainChild ? mergeAnchorId : undefined}
                 />
-                {isMerged && mainChild && (
-                  <>
-                    <div className="w-px h-4 bg-border" />
-                    <span
-                      data-merge-source={mergeAnchorId}
-                      className="block h-2 w-2 rounded-full bg-border"
-                      aria-hidden="true"
-                    />
-                  </>
-                )}
               </div>
             );
           })}
