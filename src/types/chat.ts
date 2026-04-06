@@ -96,6 +96,8 @@ export interface ChatBranch {
   parentMessageId: string; // message ID from which this branch diverges
   messages: ChatMessage[];
   createdAt: Date;
+  merged?: boolean;
+  mergedAtMessageId?: string; // the main thread message ID where this branch merges back
 }
 
 export interface Chat {

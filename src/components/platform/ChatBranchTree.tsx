@@ -19,6 +19,8 @@ export interface BranchTreeNode {
   branchId?: string;
   branchChildren?: BranchTreeNode[];
   timestamp?: Date;
+  merged?: boolean;
+  mergeTargetMainIndex?: number; // index in the main chain where this branch merges back
 }
 
 interface ChatBranchTreeProps {
