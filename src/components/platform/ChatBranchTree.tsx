@@ -18,6 +18,7 @@ export interface BranchTreeNode {
   isBranch?: boolean;
   branchId?: string;
   branchChildren?: BranchTreeNode[];
+  timestamp?: Date;
 }
 
 interface ChatBranchTreeProps {
