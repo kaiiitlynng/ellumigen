@@ -11,8 +11,10 @@ interface TopBarProps {
     parentTitle: string;
   };
   onOpenConversationMap?: () => void;
+  onCloseConversationMap?: () => void;
   onBringToMain?: () => void;
   onReturnToMain?: () => void;
+  showConversationMap?: boolean;
 }
 
 export function TopBar({
@@ -20,21 +22,35 @@ export function TopBar({
   onToggleMode,
   branchContext,
   onOpenConversationMap,
+  onCloseConversationMap,
   onBringToMain,
   onReturnToMain,
+  showConversationMap,
 }: TopBarProps) {
+  const isOnBranch = branchContext?.isOnBranch;
+  const hideModeTabs = isOnBranch || showConversationMap;
+
   return (
     <header className="flex items-center justify-between px-5 py-3 border-b border-border bg-background">
       <div className="flex items-center gap-3 min-w-0">
-        {branchContext?.isOnBranch && (
+        {isOnBranch && (
           <span className="text-sm text-muted-foreground truncate">
             Exploring: {branchContext.branchTitle} – from {branchContext.parentTitle}
           </span>
         )}
+        {showConversationMap && !isOnBranch && (
+          <span className="text-sm text-muted-foreground truncate">
+            Conversation Map
+          </span>
+        )}
       </div>
-      <ModeTabs activeModes={activeModes} onToggleMode={onToggleMode} />
+
+      {!hideModeTabs && (
+        <ModeTabs activeModes={activeModes} onToggleMode={onToggleMode} />
+      )}
+
       <div className="flex items-center gap-2">
-        {branchContext?.isOnBranch && (
+        {isOnBranch && (
           <>
             <button
               onClick={onBringToMain}
@@ -53,8 +69,12 @@ export function TopBar({
           </>
         )}
         <button
-          onClick={onOpenConversationMap}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground rounded-lg hover:bg-secondary transition-colors"
+          onClick={showConversationMap ? onCloseConversationMap : onOpenConversationMap}
+          className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+            showConversationMap
+              ? "bg-primary text-primary-foreground hover:bg-primary/90"
+              : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+          }`}
         >
           <Map className="w-3.5 h-3.5" />
           Conversation Map
