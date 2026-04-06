@@ -70,7 +70,7 @@ function BranchTreeLayout({
     current = children.find((c) => !c.isBranch);
   }
 
-  const branchesPerMain: { chain: BranchTreeNode[]; label?: string }[][] = mainChain.map((item) => {
+  const branchesPerMain: { chain: BranchTreeNode[]; label?: string; merged?: boolean; mergeTargetMainIndex?: number }[][] = mainChain.map((item) => {
     const branchKids = item.branchChildren || (item.children || []).filter((c) => c.isBranch);
     return branchKids.map((branch) => {
       const chain: BranchTreeNode[] = [];
@@ -80,7 +80,7 @@ function BranchTreeLayout({
         const ch = c.children || [];
         c = ch.find((x) => !x.isBranch);
       }
-      return { chain, label: branch.branchLabel };
+      return { chain, label: branch.branchLabel, merged: branch.merged, mergeTargetMainIndex: branch.mergeTargetMainIndex };
     });
   });
 
