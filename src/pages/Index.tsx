@@ -421,8 +421,8 @@ export default function Index() {
     console.log("Add branch from node:", parentNodeId);
   }, []);
 
-  const branchContext = activeView === "chat" && isOnBranch
-    ? { isOnBranch: true, branchTitle: "Pathway Enrichment", parentTitle: "BRCA tumor / normal" }
+  const branchContext = activeView === "chat" && store.activeBranchId && store.activeBranch
+    ? { isOnBranch: true, branchTitle: store.activeBranch.label, parentTitle: store.activeChat?.title || "" }
     : undefined;
 
   return (
@@ -435,7 +435,8 @@ export default function Index() {
         activeView={activeView}
         branchTreeNodes={activeView === "chat" && store.activeChat && store.activeChat.messages.length > 0 ? buildBranchTreeFromMessages(store.activeChat.messages, store.activeChat.branches, isLoading, store.activeBranchId) : undefined}
         onSelectChat={handleSelectChat}
-        onSelectBranchNode={(nodeId) => console.log("Select branch node:", nodeId)}
+        onSelectBranchNode={(nodeId) => { store.switchToBranch(null); }}
+        onSelectBranch={(branchId) => store.switchToBranch(branchId)}
         onNewChat={handleNewChat}
         onViewChange={setActiveView}
       />
