@@ -168,28 +168,64 @@ function NodeTree({
         <p className="text-xs text-muted-foreground mt-1">{node.description}</p>
       </motion.button>
 
-      {/* Branch point: connector + horizontal branch lines */}
+      {/* Connectors + children */}
       {(mainChild || branchChildren.length > 0) && (
-        <div className="relative flex items-start">
-          {/* Main column continues straight down */}
+        <div className="relative">
+          {/* Vertical line from card to branch point dot */}
           <div className="flex flex-col items-center">
-            {/* Vertical connector with dot */}
-            <div className="relative flex flex-col items-center">
-              <div className="w-px h-8 bg-border" />
+            <div className="w-px h-8 bg-border" />
+            {branchChildren.length > 0 && (
+              <div className="w-3 h-3 rounded-full bg-border z-10 shrink-0" />
+            )}
+          </div>
+
+          {/* SVG curved connector overlaid from dot to branch column */}
+          {branchChildren.length > 0 && (
+            <svg
+              className="absolute pointer-events-none"
+              style={{
+                top: '32px', // align with the dot center
+                left: '50%',
+                width: `${branchChildren.length * 320}px`,
+                height: '80px',
+              }}
+              fill="none"
+            >
+              {branchChildren.map((_, i) => {
+                const endX = (i + 1) * 320 - 160;
+                return (
+                  <g key={i}>
+                    {/* Horizontal line from dot, then curve down */}
+                    <path
+                      d={`M 0 6 L ${endX - 40} 6 Q ${endX} 6 ${endX} 46`}
+                      stroke="hsl(var(--border))"
+                      strokeWidth="1"
+                      fill="none"
+                    />
+                    {/* Small dot at end of curve */}
+                    <circle cx={endX} cy="46" r="3.5" fill="hsl(var(--border))" />
+                  </g>
+                );
+              })}
+            </svg>
+          )}
+
+          {/* Main + Branch columns side by side */}
+          <div className="flex items-start" style={{ gap: branchChildren.length > 0 ? '40px' : '0' }}>
+            {/* Main column */}
+            <div className="flex flex-col items-center">
               {branchChildren.length > 0 && (
-                <div className="w-3 h-3 rounded-full bg-border z-10" />
-              )}
-            </div>
-            {mainChild && (
-              <>
-                {branchChildren.length > 0 && (
-                  <div className="my-2">
+                <>
+                  <div className="w-px h-4 bg-border" />
+                  <div className="my-1">
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-foreground text-background font-medium">
                       Main
                     </span>
                   </div>
-                )}
-                {branchChildren.length > 0 && <div className="w-px h-2 bg-border" />}
+                  <div className="w-px h-4 bg-border" />
+                </>
+              )}
+              {mainChild && (
                 <NodeTree
                   node={mainChild}
                   nodeMap={nodeMap}
@@ -197,45 +233,24 @@ function NodeTree({
                   onSelectNode={onSelectNode}
                   onAddBranch={onAddBranch}
                 />
-              </>
-            )}
-            {!mainChild && (
-              <>
-                <div className="w-px h-4 bg-border" />
-                <button
-                  onClick={() => onAddBranch?.(node.id)}
-                  className="w-7 h-7 rounded-full border border-dashed border-border flex items-center justify-center hover:bg-secondary hover:border-muted-foreground transition-colors"
-                >
-                  <Plus className="w-3.5 h-3.5 text-muted-foreground" />
-                </button>
-              </>
-            )}
-          </div>
+              )}
+              {!mainChild && (
+                <>
+                  <div className="w-px h-4 bg-border" />
+                  <button
+                    onClick={() => onAddBranch?.(node.id)}
+                    className="w-7 h-7 rounded-full border border-dashed border-border flex items-center justify-center hover:bg-secondary hover:border-muted-foreground transition-colors"
+                  >
+                    <Plus className="w-3.5 h-3.5 text-muted-foreground" />
+                  </button>
+                </>
+              )}
+            </div>
 
-          {/* Branch columns to the right with curved SVG connectors */}
-          {branchChildren.map((branch, i) => (
-            <div key={branch.id} className="flex items-start" style={{ marginLeft: '-1px' }}>
-              {/* Curved SVG connector from dot to branch */}
-              <svg
-                width="100"
-                height="60"
-                viewBox="0 0 100 60"
-                fill="none"
-                className="shrink-0"
-                style={{ marginTop: '26px' }}
-              >
-                <path
-                  d="M 0 0 C 0 30, 50 30, 50 50 L 50 50 C 50 55, 60 60, 100 60"
-                  stroke="hsl(var(--border))"
-                  strokeWidth="1"
-                  fill="none"
-                />
-                {/* Small dot at the end */}
-                <circle cx="50" cy="55" r="3" fill="hsl(var(--border))" />
-              </svg>
-              {/* Branch column */}
-              <div className="flex flex-col items-center" style={{ marginTop: '10px' }}>
-                <div className="mb-2">
+            {/* Branch columns */}
+            {branchChildren.map((branch, i) => (
+              <div key={branch.id} className="flex flex-col items-center" style={{ paddingTop: '50px' }}>
+                <div className="mb-1">
                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
                     {branch.branchLabel || `Branch ${i + 1}`}
                   </span>
@@ -249,8 +264,8 @@ function NodeTree({
                   onAddBranch={onAddBranch}
                 />
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
 
