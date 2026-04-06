@@ -217,7 +217,7 @@ export function ConversationMap({
               activeNodeId={activeNodeId}
               onSelectNode={onSelectNode}
               onAddBranch={onAddBranch}
-              mergeTargetIds={[]}
+              pendingMergeTargets={[]}
             />
           ))}
         </div>
@@ -285,10 +285,10 @@ function NodeTree({
           <h3 className="text-sm font-semibold text-foreground mt-2">{node.label}</h3>
           <p className="text-xs text-muted-foreground mt-1">{node.description}</p>
         </motion.button>
-        {mergeTargetIds && mergeTargetIds.map((id) => (
+        {readyTargets.map((t) => (
           <span
-            key={id}
-            data-merge-target={id}
+            key={t.id}
+            data-merge-target={t.id}
             className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-border"
             aria-hidden="true"
           />
@@ -359,7 +359,13 @@ function NodeTree({
               activeNodeId={activeNodeId}
               onSelectNode={onSelectNode}
               onAddBranch={onAddBranch}
-              mergeTargetIds={mergedBranches.map((b) => getMergeAnchorId(b))}
+              pendingMergeTargets={[
+                ...passingTargets,
+                ...mergedBranches.map((b) => ({
+                  id: getMergeAnchorId(b),
+                  depth: getBranchDepth(b, nodeMap) - 1,
+                })),
+              ]}
               mergeSourceId={mergeSourceId}
             />
           )}
