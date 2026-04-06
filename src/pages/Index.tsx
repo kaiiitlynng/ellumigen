@@ -1,4 +1,4 @@
-import { useCallback, useState, useRef, useEffect } from "react";
+import { useCallback, useState, useRef, useEffect, useMemo } from "react";
 import { MessageSquare, FileCode, Layout } from "lucide-react";
 import { AppSidebar, type SidebarView } from "@/components/platform/AppSidebar";
 import { TopBar } from "@/components/platform/TopBar";
