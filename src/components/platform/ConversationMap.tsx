@@ -220,12 +220,14 @@ function NodeTree({
   activeNodeId,
   onSelectNode,
   onAddBranch,
+  mergeTargetIds,
 }: {
   node: MapNode;
   nodeMap: Record<string, MapNode>;
   activeNodeId?: string;
   onSelectNode?: (id: string) => void;
   onAddBranch?: (parentId: string) => void;
+  mergeTargetIds?: string[];
 }) {
   const children = node.children.map((id) => nodeMap[id]).filter(Boolean);
   const style = CATEGORY_STYLES[node.category];
