@@ -263,7 +263,7 @@ export default function Index() {
               showVolcano: true,
               showHeatmap: true,
             },
-          });
+          }, store.activeBranchId);
           setIsLoading(false);
         }, 1200);
       } else if (hasAnalyze) {
@@ -273,7 +273,7 @@ export default function Index() {
             role: "assistant",
             content: "",
             metadata: { type: "plan", plan: DEMO_PLAN },
-          });
+          }, store.activeBranchId);
           setIsLoading(false);
         }, 1200);
       } else if (hasDatasetAndSkill) {
@@ -284,7 +284,7 @@ export default function Index() {
             metadata: {
               contextUsed: ["TCGA-BRCA", "statistical-analysis"],
             },
-          });
+          }, store.activeBranchId);
           setIsLoading(false);
         }, 1200);
     } else {
@@ -315,13 +315,13 @@ export default function Index() {
             store.addMessage(chatId!, {
               role: "assistant",
               content: data.content || "I couldn't generate a response. Please try again.",
-            });
+            }, store.activeBranchId);
           } catch (err) {
             console.error("AI chat error:", err);
             store.addMessage(chatId!, {
               role: "assistant",
               content: "Sorry, I encountered an error generating a response. Please try again.",
-            });
+            }, store.activeBranchId);
           } finally {
             setIsLoading(false);
           }
