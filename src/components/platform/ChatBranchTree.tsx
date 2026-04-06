@@ -239,7 +239,7 @@ function BranchTreeLayout({
                   <BranchDot status={item.status} isActive={item.isActive} merged={branch.merged} />
                 </div>
                 <span className="truncate text-muted-foreground text-xs ml-1" style={{ maxWidth: 80 }}>
-                  {ci === 0 ? "" : item.label}
+                  {item.label}
                 </span>
                 {ci === 0 && branch.label && (
                   <span
