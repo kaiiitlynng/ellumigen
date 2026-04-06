@@ -236,13 +236,20 @@ function BranchTreeLayout({
                     marginLeft: BRANCH_X - BUTTON_PAD - BRANCH_NODE_SIZE / 2,
                   }}
                 >
-                  <BranchDot status={item.status} isActive={item.isActive} />
+                  <BranchDot status={item.status} isActive={item.isActive} merged={branch.merged} />
                 </div>
                 <span className="truncate text-muted-foreground text-xs ml-1" style={{ maxWidth: 80 }}>
                   {ci === 0 ? "" : item.label}
                 </span>
                 {ci === 0 && branch.label && (
-                  <span className="shrink-0 text-[9px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground font-medium ml-auto">
+                  <span
+                    className={cn(
+                      "shrink-0 text-[9px] px-1.5 py-0.5 rounded-full font-medium ml-auto",
+                      branch.merged
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground"
+                    )}
+                  >
                     {branch.label}
                   </span>
                 )}
