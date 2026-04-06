@@ -101,13 +101,12 @@ function measureMergeConnectors(container: HTMLDivElement): {
     const startY = sourceRect.top - containerRect.top + sourceRect.height / 2;
     const endX = targetRect.left - containerRect.left + targetRect.width / 2;
     const endY = targetRect.top - containerRect.top + targetRect.height / 2;
-    const bendDirection = startX >= endX ? 1 : -1;
     const bendRadius = Math.min(MERGE_BEND_RADIUS, Math.max(24, Math.abs(startX - endX) / 4));
-    const bendX = endX + bendRadius * bendDirection;
 
+    // Mirror the branch-out curve: go down vertically from source, then curve horizontally into the main line
     connectors.push({
       id: mergeId,
-      path: `M ${startX} ${startY} L ${bendX} ${startY} Q ${endX} ${startY} ${endX} ${endY}`,
+      path: `M ${startX} ${startY} L ${startX} ${endY - bendRadius} Q ${startX} ${endY} ${startX - bendRadius} ${endY} L ${endX} ${endY}`,
     });
 
     width = Math.max(width, startX + 24, endX + 24);
