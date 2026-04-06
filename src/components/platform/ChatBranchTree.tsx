@@ -279,8 +279,8 @@ function MainDot({ status, isActive }: { status: BranchTreeNode["status"]; isAct
   return <span className={cn(base, "w-[10px] h-[10px]")} style={color} />;
 }
 
-function BranchDot({ status, isActive }: { status: BranchTreeNode["status"]; isActive?: boolean }) {
-  const color = { backgroundColor: "#D9D9D9" };
+function BranchDot({ status, isActive, merged }: { status: BranchTreeNode["status"]; isActive?: boolean; merged?: boolean }) {
+  const color = { backgroundColor: merged ? "#0070C0" : "#D9D9D9" };
   if (status === "active" || isActive) {
     return (
       <span className="relative flex items-center justify-center w-[8px] h-[8px]">
