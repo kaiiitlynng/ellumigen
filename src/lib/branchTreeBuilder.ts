@@ -156,7 +156,7 @@ function exchangesToNodes(
       isActive: isLatest,
       category,
       description: buildDescription(exchange.assistant),
-      emoji: status === "warning" ? "⚠️" : status === "complete" && idx === 0 && isMainThread ? "🟢" : undefined,
+      emoji: status === "warning" ? "⚠️" : undefined,
     };
   });
 }
