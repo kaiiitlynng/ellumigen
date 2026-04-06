@@ -159,20 +159,18 @@ function NodeTree({
                 height="1"
                 fill="none"
               >
-                {branchChildren.map((branch, i) => {
+                {branchChildren.map((_, i) => {
                   const endX = (i + 1) * 320;
                   const curveRadius = 40;
-                  const isMerged = branch.branchLabel === "merged" || branch.merged;
-                  const strokeColor = isMerged ? "#0070C0" : "hsl(var(--border))";
                   return (
                     <g key={i}>
                       <path
                         d={`M 0 0 L ${endX - curveRadius} 0 Q ${endX} 0 ${endX} ${curveRadius}`}
-                        stroke={strokeColor}
+                        stroke="hsl(var(--border))"
                         strokeWidth="1"
                         fill="none"
                       />
-                      <circle cx={endX} cy={curveRadius} r="3.5" fill={strokeColor} />
+                      <circle cx={endX} cy={curveRadius} r="3.5" fill="hsl(var(--border))" />
                     </g>
                   );
                 })}
@@ -222,7 +220,7 @@ function NodeTree({
             const curveRadius = 40;
             const dotTop = 24 + 6;
             const curveEndY = dotTop + curveRadius;
-            const isMerged = branch.branchLabel === "merged" || branch.merged;
+            const isMerged = branch.branchLabel === "merged" || !!branch.merged;
 
             return (
               <div
@@ -234,21 +232,13 @@ function NodeTree({
                   transform: 'translateX(-50%)',
                 }}
               >
-                <div className="w-px h-4" style={{ backgroundColor: isMerged ? '#0070C0' : 'hsl(var(--border))' }} />
+                <div className="w-px h-4 bg-border" />
                 <div className="mb-1">
-                  <span
-                    className={cn(
-                      "text-[10px] px-2 py-0.5 rounded-full font-medium",
-                      isMerged
-                        ? "text-white"
-                        : "bg-muted text-muted-foreground"
-                    )}
-                    style={isMerged ? { backgroundColor: '#0070C0' } : undefined}
-                  >
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
                     {branch.branchLabel || `Branch ${i + 1}`}
                   </span>
                 </div>
-                <div className="w-px h-4" style={{ backgroundColor: isMerged ? '#0070C0' : 'hsl(var(--border))' }} />
+                <div className="w-px h-4 bg-border" />
                 <NodeTree
                   node={branch}
                   nodeMap={nodeMap}
@@ -257,8 +247,8 @@ function NodeTree({
                   onAddBranch={onAddBranch}
                 />
 
-                {/* Merge-back connector: curves from bottom of branch back to main line */}
-                {isMerged && (
+                {/* Merge-back connector: curves from bottom of branch back to the next main node */}
+                {isMerged && mainChild && (
                   <svg
                     className="pointer-events-none overflow-visible"
                     width="1"
@@ -270,14 +260,14 @@ function NodeTree({
                       const curveR = 40;
                       return (
                         <g>
-                          <line x1={0} y1={0} x2={0} y2={curveR} stroke="#0070C0" strokeWidth="1" />
+                          <line x1={0} y1={0} x2={0} y2={curveR} stroke="hsl(var(--border))" strokeWidth="1" />
                           <path
                             d={`M 0 ${curveR} Q 0 ${curveR * 2}, ${returnX + curveR} ${curveR * 2} L ${returnX} ${curveR * 2}`}
-                            stroke="#0070C0"
+                            stroke="hsl(var(--border))"
                             strokeWidth="1"
                             fill="none"
                           />
-                          <circle cx={returnX} cy={curveR * 2} r="3.5" fill="#0070C0" />
+                          <circle cx={returnX} cy={curveR * 2} r="3.5" fill="hsl(var(--border))" />
                         </g>
                       );
                     })()}
