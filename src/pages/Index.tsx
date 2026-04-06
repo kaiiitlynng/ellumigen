@@ -118,40 +118,64 @@ const DEMO_BRANCH_TREE: BranchTreeNode[] = [
     status: "complete",
     isMain: true,
     emoji: "🟢",
+    category: "hypothesis",
+    description: "EMT signature in BRCA1-mutant tumors",
     children: [
       {
         id: "bt2",
         label: "Clarifying follow-up prompt, awaiting...",
         status: "complete",
+        category: "data",
+        description: "RNA-seq-batch-3\nTCGA-BRCA-n42",
         children: [
           {
             id: "bt3",
             label: "User responds to follow-up prompt",
             status: "complete",
+            category: "analysis",
+            description: "DESeq2 · FDR 0.05",
             children: [
               {
                 id: "bt4",
                 label: "Providing new response, awaiting...",
                 status: "active",
                 isActive: true,
+                category: "exploration",
+                description: "fgsea · Hallmarks",
+                branchLabel: "Branch 1",
                 children: [
                   {
                     id: "bt5",
                     label: "Negative feedback, regenerating",
                     status: "warning",
                     emoji: "⚠️",
+                    category: "exploration",
+                    description: "Retry analysis path",
                   },
                   {
                     id: "bt6",
                     label: "Providing response, awaiting feedback",
                     status: "complete",
+                    category: "exploration",
+                    description: "Results summary",
                   },
                   {
                     id: "bt7",
                     label: "Planning next step follow-up for prompt",
                     status: "complete",
+                    category: "exploration",
+                    description: "Next steps planning",
                   },
                 ],
+              },
+              {
+                id: "bt8b",
+                label: "UMAP clustering",
+                status: "warning",
+                emoji: "⚠️",
+                category: "exploration",
+                description: "Seurat · res 0.5",
+                branchLabel: "Branch 2",
               },
             ],
           },
@@ -162,63 +186,44 @@ const DEMO_BRANCH_TREE: BranchTreeNode[] = [
         label: "Creating data visualization, preparing ...",
         status: "warning",
         emoji: "⚠️",
+        category: "data",
+        description: "Visualization pipeline",
       },
       {
         id: "bt9",
         label: "Summarizing dataset, preparing",
         status: "idle",
+        category: "data",
+        description: "Dataset summary",
       },
     ],
   },
-  { id: "bt10", label: "Inspected user provided dataset", status: "complete" },
-  { id: "bt11", label: "Followed up with dataset inquiry", status: "complete" },
-  { id: "bt12", label: "Differential Expression - Tumor vs Normal", status: "complete" },
+  { id: "bt10", label: "Inspected user provided dataset", status: "complete", category: "data", description: "Initial dataset review" },
+  { id: "bt11", label: "Followed up with dataset inquiry", status: "complete", category: "analysis", description: "Follow-up questions" },
+  { id: "bt12", label: "Differential Expression - Tumor vs Normal", status: "complete", category: "analysis", description: "DE analysis results" },
 ];
 
-// ── Demo conversation map nodes ──────────────────────────
-const DEMO_MAP_NODES: MapNode[] = [
-  {
-    id: "mn1",
-    label: "Research Hypothesis",
-    description: "EMT signature in BRCA1-mutant tumors",
-    category: "hypothesis",
-    children: ["mn2"],
-  },
-  {
-    id: "mn2",
-    label: "Research Hypothesis",
-    description: "RNA-seq-batch-3\nTCGA-BRCA-n42",
-    category: "data",
-    parentId: "mn1",
-    children: ["mn3"],
-  },
-  {
-    id: "mn3",
-    label: "Differential expression",
-    description: "DESeq2 · FDR 0.05",
-    category: "analysis",
-    parentId: "mn2",
-    children: ["mn4", "mn5"],
-  },
-  {
-    id: "mn4",
-    label: "Pathway Enrichment",
-    description: "fgsea · Hallmarks",
-    category: "exploration",
-    parentId: "mn3",
-    branchLabel: "Branch 1",
-    children: [],
-  },
-  {
-    id: "mn5",
-    label: "UMAP clustering",
-    description: "Seurat · res 0.5",
-    category: "exploration",
-    parentId: "mn3",
-    branchLabel: "Branch 2",
-    children: [],
-  },
-];
+// ── Derive conversation map nodes from branch tree ──────────────────
+function branchTreeToMapNodes(nodes: BranchTreeNode[], parentId?: string): MapNode[] {
+  const result: MapNode[] = [];
+  for (const node of nodes) {
+    const children = node.children?.map((c) => c.id) || [];
+    result.push({
+      id: node.id,
+      label: node.label,
+      description: node.description || "",
+      category: node.category || "exploration",
+      parentId,
+      children,
+      branchLabel: node.branchLabel,
+      isMain: node.isMain,
+    });
+    if (node.children) {
+      result.push(...branchTreeToMapNodes(node.children, node.id));
+    }
+  }
+  return result;
+}
 
 // ── Component ─────────────────────────────────────────────
 
