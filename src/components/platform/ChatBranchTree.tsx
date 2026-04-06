@@ -19,6 +19,8 @@ export interface BranchTreeNode {
   branchId?: string;
   branchChildren?: BranchTreeNode[];
   timestamp?: Date;
+  merged?: boolean;
+  mergeTargetMainIndex?: number; // index in the main chain where this branch merges back
 }
 
 interface ChatBranchTreeProps {
@@ -68,7 +70,7 @@ function BranchTreeLayout({
     current = children.find((c) => !c.isBranch);
   }
 
-  const branchesPerMain: { chain: BranchTreeNode[]; label?: string }[][] = mainChain.map((item) => {
+  const branchesPerMain: { chain: BranchTreeNode[]; label?: string; merged?: boolean; mergeTargetMainIndex?: number }[][] = mainChain.map((item) => {
     const branchKids = item.branchChildren || (item.children || []).filter((c) => c.isBranch);
     return branchKids.map((branch) => {
       const chain: BranchTreeNode[] = [];
@@ -78,7 +80,7 @@ function BranchTreeLayout({
         const ch = c.children || [];
         c = ch.find((x) => !x.isBranch);
       }
-      return { chain, label: branch.branchLabel };
+      return { chain, label: branch.branchLabel, merged: branch.merged, mergeTargetMainIndex: branch.mergeTargetMainIndex };
     });
   });
 
@@ -97,7 +99,7 @@ function BranchTreeLayout({
   const totalRows = nextRow;
   const svgHeight = totalRows * ROW_HEIGHT;
 
-  const branchRenders: { mainIdx: number; chain: BranchTreeNode[]; label?: string; startRow: number }[] = [];
+  const branchRenders: { mainIdx: number; chain: BranchTreeNode[]; label?: string; startRow: number; merged?: boolean; mergeTargetMainIndex?: number }[] = [];
   branchesPerMain.forEach((branches, mainIdx) => {
     branches.forEach((branch) => {
       branchRenders.push({
@@ -105,6 +107,8 @@ function BranchTreeLayout({
         chain: branch.chain,
         label: branch.label,
         startRow: branchRowStart[mainIdx],
+        merged: branch.merged,
+        mergeTargetMainIndex: branch.mergeTargetMainIndex,
       });
     });
   });
@@ -132,22 +136,39 @@ function BranchTreeLayout({
           const startY = mainRowIndex[branch.mainIdx] * ROW_HEIGHT + ROW_HEIGHT / 2;
           const firstBranchY = branch.startRow * ROW_HEIGHT + ROW_HEIGHT / 2;
           const lastBranchY = (branch.startRow + branch.chain.length - 1) * ROW_HEIGHT + ROW_HEIGHT / 2;
+          const strokeColor = branch.merged ? "#0070C0" : "#D9D9D9";
+
+          // Calculate merge-back connector target
+          const mergeTargetY = branch.merged && branch.mergeTargetMainIndex != null && branch.mergeTargetMainIndex >= 0
+            ? mainRowIndex[branch.mergeTargetMainIndex] * ROW_HEIGHT + ROW_HEIGHT / 2
+            : null;
 
           return (
             <g key={bi}>
+              {/* Outgoing curve from main to branch */}
               <path
                 d={`M ${MAIN_X} ${startY} Q ${BRANCH_X} ${startY}, ${BRANCH_X} ${firstBranchY}`}
                 fill="none"
-                stroke="#D9D9D9"
+                stroke={strokeColor}
                 strokeWidth={2}
               />
+              {/* Vertical line through branch nodes */}
               {branch.chain.length > 1 && (
                 <line
                   x1={BRANCH_X}
                   y1={firstBranchY}
                   x2={BRANCH_X}
                   y2={lastBranchY}
-                  stroke="#D9D9D9"
+                  stroke={strokeColor}
+                  strokeWidth={2}
+                />
+              )}
+              {/* Merge-back curve from last branch node back to main */}
+              {mergeTargetY != null && (
+                <path
+                  d={`M ${BRANCH_X} ${lastBranchY} Q ${BRANCH_X} ${mergeTargetY}, ${MAIN_X} ${mergeTargetY}`}
+                  fill="none"
+                  stroke="#0070C0"
                   strokeWidth={2}
                 />
               )}
@@ -215,13 +236,20 @@ function BranchTreeLayout({
                     marginLeft: BRANCH_X - BUTTON_PAD - BRANCH_NODE_SIZE / 2,
                   }}
                 >
-                  <BranchDot status={item.status} isActive={item.isActive} />
+                  <BranchDot status={item.status} isActive={item.isActive} merged={branch.merged} />
                 </div>
                 <span className="truncate text-muted-foreground text-xs ml-1" style={{ maxWidth: 80 }}>
                   {ci === 0 ? "" : item.label}
                 </span>
                 {ci === 0 && branch.label && (
-                  <span className="shrink-0 text-[9px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground font-medium ml-auto">
+                  <span
+                    className={cn(
+                      "shrink-0 text-[9px] px-1.5 py-0.5 rounded-full font-medium ml-auto",
+                      branch.merged
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground"
+                    )}
+                  >
                     {branch.label}
                   </span>
                 )}
@@ -251,8 +279,8 @@ function MainDot({ status, isActive }: { status: BranchTreeNode["status"]; isAct
   return <span className={cn(base, "w-[10px] h-[10px]")} style={color} />;
 }
 
-function BranchDot({ status, isActive }: { status: BranchTreeNode["status"]; isActive?: boolean }) {
-  const color = { backgroundColor: "#D9D9D9" };
+function BranchDot({ status, isActive, merged }: { status: BranchTreeNode["status"]; isActive?: boolean; merged?: boolean }) {
+  const color = { backgroundColor: merged ? "#0070C0" : "#D9D9D9" };
   if (status === "active" || isActive) {
     return (
       <span className="relative flex items-center justify-center w-[8px] h-[8px]">

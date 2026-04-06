@@ -405,14 +405,9 @@ export default function Index() {
   }, []);
 
   const handleBringToMain = useCallback(() => {
-    // Merge branch messages back to main
-    if (store.activeChatId && store.activeBranchId && store.activeBranch) {
-      const branchMessages = store.activeBranch.messages;
-      for (const msg of branchMessages) {
-        store.addMessage(store.activeChatId, { role: msg.role, content: msg.content, metadata: msg.metadata });
-      }
+    if (store.activeChatId && store.activeBranchId) {
+      store.mergeBranch(store.activeChatId, store.activeBranchId);
     }
-    store.switchToBranch(null);
     setShowConversationMap(false);
   }, [store]);
 

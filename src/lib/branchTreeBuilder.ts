@@ -205,26 +205,42 @@ export function buildBranchTreeFromMessages(
         false
       );
 
+      // Determine merge target index if branch is merged
+      let mergeTargetMainIndex: number | undefined;
+      if (branch.merged && branch.mergedAtMessageId) {
+        mergeTargetMainIndex = mainExchanges.findIndex(
+          (ex) => ex.user.id === branch.mergedAtMessageId || ex.assistant?.id === branch.mergedAtMessageId
+        );
+        if (mergeTargetMainIndex === -1) {
+          // Fallback: merge to last main node
+          mergeTargetMainIndex = mainExchanges.length - 1;
+        }
+      }
+
       // If branch has no messages yet, create a placeholder node
       if (branchNodes.length === 0) {
         branchChildren.push({
           id: `branch-placeholder-${branch.id}`,
           label: branch.label || "Branch",
-          status: "active",
-          branchLabel: branch.label || "Branch",
+          status: branch.merged ? "complete" : "active",
+          branchLabel: branch.merged ? "merged" : (branch.label || "Branch"),
           isBranch: true,
           branchId: branch.id,
           category: "exploration",
-          description: "New branch — no messages yet",
+          description: branch.merged ? "Merged back to main" : "New branch — no messages yet",
           timestamp: branch.createdAt,
+          merged: branch.merged,
+          mergeTargetMainIndex,
         });
         continue;
       }
 
       // Set the first branch node's branchLabel
-      branchNodes[0].branchLabel = branch.label || "Branch";
+      branchNodes[0].branchLabel = branch.merged ? "merged" : (branch.label || "Branch");
       branchNodes[0].isBranch = true;
       branchNodes[0].branchId = branch.id;
+      branchNodes[0].merged = branch.merged;
+      branchNodes[0].mergeTargetMainIndex = mergeTargetMainIndex;
 
       // Nest branch nodes linearly
       for (let i = branchNodes.length - 2; i >= 0; i--) {
