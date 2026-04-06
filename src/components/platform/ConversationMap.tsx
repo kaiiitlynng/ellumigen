@@ -222,6 +222,7 @@ function NodeTree({
   onSelectNode,
   onAddBranch,
   mergeTargetIds,
+  mergeSourceId,
 }: {
   node: MapNode;
   nodeMap: Record<string, MapNode>;
@@ -229,6 +230,7 @@ function NodeTree({
   onSelectNode?: (id: string) => void;
   onAddBranch?: (parentId: string) => void;
   mergeTargetIds?: string[];
+  mergeSourceId?: string;
 }) {
   const children = node.children.map((id) => nodeMap[id]).filter(Boolean);
   const style = CATEGORY_STYLES[node.category];
@@ -337,6 +339,7 @@ function NodeTree({
               onSelectNode={onSelectNode}
               onAddBranch={onAddBranch}
               mergeTargetIds={mergedBranches.map((b) => getMergeAnchorId(b))}
+              mergeSourceId={mergeSourceId}
             />
           )}
 
@@ -368,24 +371,26 @@ function NodeTree({
                   activeNodeId={activeNodeId}
                   onSelectNode={onSelectNode}
                   onAddBranch={onAddBranch}
+                  mergeSourceId={isMerged && mainChild ? mergeAnchorId : undefined}
                 />
-                {isMerged && mainChild && (
-                  <>
-                    <div className="w-px h-4 bg-border" />
-                    <span
-                      data-merge-source={mergeAnchorId}
-                      className="block h-2 w-2 rounded-full bg-border"
-                      aria-hidden="true"
-                    />
-                  </>
-                )}
               </div>
             );
           })}
         </div>
       )}
 
-      {children.length === 0 && (
+      {children.length === 0 && mergeSourceId && (
+        <>
+          <div className="w-px h-4 bg-border" />
+          <span
+            data-merge-source={mergeSourceId}
+            className="block h-2 w-2 rounded-full bg-border"
+            aria-hidden="true"
+          />
+        </>
+      )}
+
+      {children.length === 0 && !mergeSourceId && (
         <>
           <div className="w-px h-4 bg-border" />
           <button
