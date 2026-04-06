@@ -206,6 +206,7 @@ export function ConversationMap({
               activeNodeId={activeNodeId}
               onSelectNode={onSelectNode}
               onAddBranch={onAddBranch}
+              mergeTargetIds={[]}
             />
           ))}
         </div>
