@@ -507,6 +507,32 @@ export default function Index() {
     [store]
   );
 
+  const handleOpenConversationMap = useCallback(() => {
+    setShowConversationMap(true);
+    setIsOnBranch(true);
+  }, []);
+
+  const handleBringToMain = useCallback(() => {
+    // Merge branch back to main - in real app this would merge messages
+    setIsOnBranch(false);
+    setShowConversationMap(false);
+  }, []);
+
+  const handleReturnToMain = useCallback(() => {
+    // Return without merging
+    setIsOnBranch(false);
+    setShowConversationMap(false);
+  }, []);
+
+  const handleAddMapBranch = useCallback((parentNodeId: string) => {
+    // In a real app, this would create a new branch node
+    console.log("Add branch from node:", parentNodeId);
+  }, []);
+
+  const branchContext = activeView === "chat" && isOnBranch
+    ? { isOnBranch: true, branchTitle: "Pathway Enrichment", parentTitle: "BRCA tumor / normal" }
+    : undefined;
+
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       <AppSidebar
@@ -515,17 +541,39 @@ export default function Index() {
         bookmarkedMessages={store.bookmarkedMessages}
         activeChatId={store.activeChatId}
         activeView={activeView}
+        branchTreeNodes={activeView === "chat" ? DEMO_BRANCH_TREE : undefined}
         onSelectChat={handleSelectChat}
+        onSelectBranchNode={(nodeId) => console.log("Select branch node:", nodeId)}
         onNewChat={handleNewChat}
         onViewChange={setActiveView}
       />
 
       <div className="flex-1 flex flex-col min-w-0">
         {activeView === "chat" && (
-          <TopBar activeModes={activeModes} onToggleMode={toggleMode} />
+          <TopBar
+            activeModes={activeModes}
+            onToggleMode={toggleMode}
+            branchContext={branchContext}
+            onOpenConversationMap={handleOpenConversationMap}
+            onBringToMain={handleBringToMain}
+            onReturnToMain={handleReturnToMain}
+          />
         )}
 
-        {activeView === "workspace" ? (
+        {showConversationMap && activeView === "chat" ? (
+          <ConversationMap
+            title="Pathway Enrichment"
+            subtitle="from BRCA tumor / normal"
+            nodes={DEMO_MAP_NODES}
+            activeNodeId={activeMapNodeId}
+            onSelectNode={setActiveMapNodeId}
+            onAddBranch={handleAddMapBranch}
+            onBringToMain={handleBringToMain}
+            onReturnToMain={handleReturnToMain}
+            onClose={() => setShowConversationMap(false)}
+            isOnBranch={isOnBranch}
+          />
+        ) : activeView === "workspace" ? (
           <WorkspaceView onStartExample={handleStartExample} />
         ) : activeView === "history" ? (
           <HistoryView chats={store.chats} onSelectChat={handleSelectChat} />
