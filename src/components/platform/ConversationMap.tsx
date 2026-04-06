@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Plus, ArrowLeft, Merge, Map } from "lucide-react";
+import { Plus } from "lucide-react";
 import type { BranchNodeCategory } from "@/types/chat";
 
 function formatTimeAgo(date?: Date): string {
@@ -69,57 +69,10 @@ export function ConversationMap({
 
   return (
     <div className="flex flex-col h-full bg-background">
-      {/* Top bar */}
-      <header className="flex items-center justify-between px-5 py-3 border-b border-border">
-        <div className="flex items-center gap-3">
-          {subtitle && (
-            <span className="text-sm text-muted-foreground">
-              Exploring: {title} – {subtitle}
-            </span>
-          )}
-          {!subtitle && (
-            <span className="text-sm text-muted-foreground">
-              {title}
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          {isOnBranch && (
-            <>
-              <button
-                onClick={onBringToMain}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-              >
-                <Merge className="w-3.5 h-3.5" />
-                Bring back to Main
-              </button>
-              <button
-                onClick={onReturnToMain}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border border-border rounded-lg hover:bg-secondary transition-colors"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                Return to Main
-              </button>
-            </>
-          )}
-        </div>
-      </header>
-
       {/* Map title bar */}
-      <div className="flex items-center justify-between px-6 py-4">
-        <div className="flex items-center gap-3">
-          <div className="w-3 h-3 rounded-full bg-blue-500" />
-          <h2 className="text-lg font-medium text-muted-foreground">{title}</h2>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={onClose}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-          >
-            <Map className="w-3.5 h-3.5" />
-            Conversation Map
-          </button>
-        </div>
+      <div className="flex items-center gap-3 px-6 py-4">
+        <div className="w-3 h-3 rounded-full bg-primary" />
+        <h2 className="text-lg font-medium text-muted-foreground">{title}</h2>
       </div>
 
       {/* Map content */}
