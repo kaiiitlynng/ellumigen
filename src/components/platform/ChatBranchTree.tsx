@@ -12,6 +12,9 @@ export interface BranchTreeNode {
   emoji?: string;
   children?: BranchTreeNode[];
   depth?: number;
+  category?: "hypothesis" | "data" | "analysis" | "exploration";
+  description?: string;
+  branchLabel?: string;
 }
 
 interface ChatBranchTreeProps {
