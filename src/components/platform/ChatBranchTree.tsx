@@ -184,7 +184,7 @@ function BranchTreeLayout({
             if (item.branchId) onSelectBranch?.(item.branchId);
             else onSelect?.(item.id);
           }}
-          className="absolute flex items-center gap-2 hover:bg-secondary rounded-md px-1 transition-colors"
+          className="absolute flex items-center gap-2 hover:bg-secondary rounded-md px-1 transition-colors w-full"
           style={{
             top: mainRowIndex[idx] * ROW_HEIGHT,
             left: 0,
@@ -205,7 +205,7 @@ function BranchTreeLayout({
             {item.label}
           </span>
           {item.isMain && (
-            <span className="shrink-0 text-[9px] px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground font-medium">
+            <span className="shrink-0 text-[9px] px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground font-medium ml-auto">
               main
             </span>
           )}
