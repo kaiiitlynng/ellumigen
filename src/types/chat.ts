@@ -72,6 +72,24 @@ export interface VisualizationFilter {
   value: any;
 }
 
+export type BranchNodeCategory = "hypothesis" | "data" | "analysis" | "exploration";
+
+export interface BranchNode {
+  id: string;
+  chatId: string;
+  label: string;
+  description: string;
+  category: BranchNodeCategory;
+  parentNodeId?: string;
+  children: string[];
+  isMain?: boolean;
+}
+
+export interface BranchTree {
+  rootNodeId: string;
+  nodes: Record<string, BranchNode>;
+}
+
 export interface Chat {
   id: string;
   title: string;
@@ -80,6 +98,7 @@ export interface Chat {
   updatedAt: Date;
   parentId?: string;
   folderId?: string;
+  branchTree?: BranchTree;
 }
 
 export interface Folder {
