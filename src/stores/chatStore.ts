@@ -177,6 +177,38 @@ export function useChatStore() {
     setActiveBranchId(branchId);
   }, []);
 
+  const mergeBranch = useCallback(
+    (chatId: string, branchId: string) => {
+      setChats((prev) =>
+        prev.map((c) => {
+          if (c.id !== chatId) return c;
+          const branch = c.branches.find((b) => b.id === branchId);
+          if (!branch) return c;
+
+          // Copy branch messages into main thread
+          const newMessages = [...c.messages];
+          for (const msg of branch.messages) {
+            newMessages.push({ ...msg, id: crypto.randomUUID(), timestamp: new Date() });
+          }
+
+          // Mark last added message as the merge target
+          const mergedAtMessageId = newMessages.length > 0 ? newMessages[newMessages.length - 1].id : undefined;
+
+          return {
+            ...c,
+            messages: newMessages,
+            branches: c.branches.map((b) =>
+              b.id === branchId ? { ...b, merged: true, mergedAtMessageId } : b
+            ),
+            updatedAt: new Date(),
+          };
+        })
+      );
+      setActiveBranchId(null);
+    },
+    []
+  );
+
   const toggleBookmark = useCallback(
     (chatId: string, messageId: string) => {
       setChats((prev) =>
@@ -203,6 +235,6 @@ export function useChatStore() {
     mode, bookmarkedMessages,
     setMode, setActiveChatId, createChat, renameChat, addMessage, removeMessage,
     updateMessageMetadata, updateExecutionStep, addThoughtEntry,
-    branchChat, switchToBranch, toggleBookmark,
+    branchChat, switchToBranch, mergeBranch, toggleBookmark,
   };
 }
