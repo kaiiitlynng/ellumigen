@@ -339,6 +339,7 @@ function NodeTree({
               onSelectNode={onSelectNode}
               onAddBranch={onAddBranch}
               mergeTargetIds={mergedBranches.map((b) => getMergeAnchorId(b))}
+              mergeSourceId={mergeSourceId}
             />
           )}
 
