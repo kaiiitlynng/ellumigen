@@ -116,7 +116,7 @@ function BranchTreeLayout({
   return (
     <div className="relative" style={{ minHeight: svgHeight }}>
       <svg
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-0 pointer-events-none z-10"
         width="100%"
         height={svgHeight}
         style={{ overflow: "visible" }}
