@@ -315,7 +315,7 @@ export function FreeformView({ onNodeAdded }: { onNodeAdded?: () => void } = {})
             transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
             transformOrigin: "0 0",
           }}
-          className="absolute inset-0"
+          className="absolute inset-0 pointer-events-none"
         >
           {nodes.map((node) => (
             <CanvasNodeComponent
@@ -380,7 +380,7 @@ function CanvasNodeComponent({
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="absolute group"
+      className="absolute group pointer-events-auto"
       style={{
         left: node.x,
         top: node.y,
