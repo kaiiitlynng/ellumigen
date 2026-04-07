@@ -203,18 +203,18 @@ export function AppSidebar({
                       key={col.id}
                       className="sidebar-item w-full text-left group"
                     >
-                      <Bookmark className={`w-3 h-3 shrink-0 fill-current ${col.color.replace('bg-', 'text-')}`} />
-                      <span className="truncate text-xs">{col.name}</span>
-                      <span className="ml-auto text-[10px] text-muted-foreground">{colBookmarks.length}</span>
+                      <Bookmark className={`w-3.5 h-3.5 shrink-0 fill-current ${col.color.replace('bg-', 'text-')}`} />
+                      <span className="truncate text-sm">{col.name}</span>
+                      <span className="ml-auto text-xs text-muted-foreground">{colBookmarks.length}</span>
                     </button>
                   );
                 })}
 
                 {bookmarkedMessages.filter((bm) => !bm.collectionId).length > 0 && (
                   <button className="sidebar-item w-full text-left">
-                    <Bookmark className="w-3 h-3 shrink-0 text-muted-foreground" />
-                    <span className="truncate text-xs">Uncategorized</span>
-                    <span className="ml-auto text-[10px] text-muted-foreground">
+                    <Bookmark className="w-3.5 h-3.5 shrink-0 text-muted-foreground" />
+                    <span className="truncate text-sm">Uncategorized</span>
+                    <span className="ml-auto text-xs text-muted-foreground">
                       {bookmarkedMessages.filter((bm) => !bm.collectionId).length}
                     </span>
                   </button>
