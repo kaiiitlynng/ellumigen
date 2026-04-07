@@ -46,7 +46,7 @@ export function TopBar({
               className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
             >
               <Merge className="w-3 h-3" />
-              Bring back to Main
+              Merge to Main
             </button>
             <button
               onClick={onReturnToMain}
