@@ -1,10 +1,8 @@
 import { useCallback, useState, useRef, useEffect, useMemo } from "react";
-import { MessageSquare, FileCode, Layout } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { AppSidebar, type SidebarView } from "@/components/platform/AppSidebar";
 import { TopBar } from "@/components/platform/TopBar";
-import { ChatView } from "@/components/platform/ChatView";
-import { NotebookView } from "@/components/platform/NotebookView";
-import { FreeformView } from "@/components/platform/FreeformView";
+import { ChatView, type MiniPanelType } from "@/components/platform/ChatView";
 import { WorkspaceView } from "@/components/platform/WorkspaceView";
 import { HistoryView } from "@/components/platform/HistoryView";
 import { UseCasesView } from "@/components/platform/UseCasesView";
