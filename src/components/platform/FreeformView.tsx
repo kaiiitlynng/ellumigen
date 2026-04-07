@@ -276,7 +276,7 @@ export function FreeformView({ onNodeAdded }: { onNodeAdded?: () => void } = {})
         ref={canvasRef}
         className="flex-1 overflow-hidden relative cursor-default"
         style={{
-          backgroundImage: `radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px)`,
+          backgroundImage: `radial-gradient(circle, hsl(var(--muted-foreground) / 0.35) 1.2px, transparent 1.2px)`,
           backgroundSize: `20px 20px`,
           backgroundPosition: `${pan.x}px ${pan.y}px`,
         }}
