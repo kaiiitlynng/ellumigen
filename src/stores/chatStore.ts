@@ -22,9 +22,9 @@ export function useChatStore() {
   const [mode, setMode] = useState<InterfaceMode>("conversation");
   const [bookmarkedMessages, setBookmarkedMessages] = useState<BookmarkedMessage[]>([]);
   const [bookmarkCollections, setBookmarkCollections] = useState<BookmarkCollection[]>([
-    { id: "col-1", name: "Methods & Protocols", color: "text-[#0070C0]", createdAt: new Date() },
-    { id: "col-2", name: "Key Findings", color: "text-[#636FCE]", createdAt: new Date() },
-    { id: "col-3", name: "Datasets", color: "text-[#F69553]", createdAt: new Date() },
+    { id: "col-1", name: "Methods & Protocols", color: "#0070C0", createdAt: new Date() },
+    { id: "col-2", name: "Key Findings", color: "#636FCE", createdAt: new Date() },
+    { id: "col-3", name: "Datasets", color: "#F69553", createdAt: new Date() },
   ]);
 
   const activeChat = chats.find((c) => c.id === activeChatId) ?? null;
@@ -271,7 +271,7 @@ export function useChatStore() {
   );
 
   const createBookmarkCollection = useCallback((name: string) => {
-    const colors = ["text-[#80D494]", "text-[#E06C75]", "text-[#56B6C2]", "text-[#C678DD]"];
+    const colors = ["#80D494", "#E06C75", "#56B6C2", "#C678DD"];
     setBookmarkCollections((prev) => [
       ...prev,
       {

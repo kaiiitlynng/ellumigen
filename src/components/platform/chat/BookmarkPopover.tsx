@@ -82,7 +82,7 @@ export function BookmarkPopover({
                 className="flex items-center justify-between w-full px-1.5 py-1 rounded-md hover:bg-secondary transition-colors"
               >
                 <div className="flex items-center gap-2">
-                  <Bookmark className={`w-3 h-3 shrink-0 fill-current ${col.color}`} />
+                  <Bookmark className="w-3 h-3 shrink-0" style={{ color: col.color, fill: col.color }} />
                   <span className="text-xs text-foreground">{col.name}</span>
                 </div>
                 {isActive ? (
