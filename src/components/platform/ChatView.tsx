@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import { GitBranch, Copy, ThumbsUp, ThumbsDown, Bookmark } from "lucide-react";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
-import type { Chat, ChatMessage } from "@/types/chat";
+import type { Chat, ChatMessage, BookmarkCollection } from "@/types/chat";
 import { ChatInput } from "./ChatInput";
 import { SuggestionChips } from "./SuggestionChips";
 import { ContextTags } from "./chat/ContextTags";
@@ -15,12 +15,17 @@ import { DataTable } from "./chat/DataTable";
 import { VolcanoPlot } from "./chat/VolcanoPlot";
 import { HeatmapChart } from "./chat/HeatmapChart";
 import { DraggableVisualization } from "./chat/DraggableVisualization";
+import { BookmarkPopover } from "./chat/BookmarkPopover";
 
 interface ChatViewProps {
   chat: Chat | null;
   onSendMessage: (message: string) => void;
   onBranch?: (messageIndex: number) => void;
   onBookmark?: (messageId: string) => void;
+  onToggleBookmarkCollection?: (messageId: string, collectionId: string) => void;
+  onCreateBookmarkCollection?: (name: string) => void;
+  getCollectionIdsForMessage?: (messageId: string) => string[];
+  bookmarkCollections?: BookmarkCollection[];
   onApprovePlan?: (messageId: string) => void;
   onRejectPlan?: (messageId: string) => void;
   isLoading?: boolean;
@@ -33,6 +38,10 @@ export function ChatView({
   onSendMessage,
   onBranch,
   onBookmark,
+  onToggleBookmarkCollection,
+  onCreateBookmarkCollection,
+  getCollectionIdsForMessage,
+  bookmarkCollections,
   onApprovePlan,
   onRejectPlan,
   isLoading,
