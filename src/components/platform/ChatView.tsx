@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import { GitBranch, Copy, ThumbsUp, ThumbsDown, Bookmark } from "lucide-react";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
-import type { Chat, ChatMessage } from "@/types/chat";
+import type { Chat, ChatMessage, BookmarkCollection } from "@/types/chat";
 import { ChatInput } from "./ChatInput";
 import { SuggestionChips } from "./SuggestionChips";
 import { ContextTags } from "./chat/ContextTags";
@@ -15,12 +15,17 @@ import { DataTable } from "./chat/DataTable";
 import { VolcanoPlot } from "./chat/VolcanoPlot";
 import { HeatmapChart } from "./chat/HeatmapChart";
 import { DraggableVisualization } from "./chat/DraggableVisualization";
+import { BookmarkPopover } from "./chat/BookmarkPopover";
 
 interface ChatViewProps {
   chat: Chat | null;
   onSendMessage: (message: string) => void;
   onBranch?: (messageIndex: number) => void;
   onBookmark?: (messageId: string) => void;
+  onToggleBookmarkCollection?: (messageId: string, collectionId: string) => void;
+  onCreateBookmarkCollection?: (name: string) => void;
+  getCollectionIdsForMessage?: (messageId: string) => string[];
+  bookmarkCollections?: BookmarkCollection[];
   onApprovePlan?: (messageId: string) => void;
   onRejectPlan?: (messageId: string) => void;
   isLoading?: boolean;
@@ -33,6 +38,10 @@ export function ChatView({
   onSendMessage,
   onBranch,
   onBookmark,
+  onToggleBookmarkCollection,
+  onCreateBookmarkCollection,
+  getCollectionIdsForMessage,
+  bookmarkCollections,
   onApprovePlan,
   onRejectPlan,
   isLoading,
@@ -79,6 +88,10 @@ export function ChatView({
                     message={msg}
                     onBranch={() => onBranch?.(i)}
                     onBookmark={() => onBookmark?.(msg.id)}
+                    onToggleBookmarkCollection={onToggleBookmarkCollection ? (colId: string) => onToggleBookmarkCollection(msg.id, colId) : undefined}
+                    onCreateBookmarkCollection={onCreateBookmarkCollection}
+                    activeCollectionIds={getCollectionIdsForMessage?.(msg.id) ?? []}
+                    bookmarkCollections={bookmarkCollections ?? []}
                     onApprovePlan={() => onApprovePlan?.(msg.id)}
                     onRejectPlan={() => onRejectPlan?.(msg.id)}
                   />
@@ -125,12 +138,20 @@ function MessageBubble({
   message,
   onBranch,
   onBookmark,
+  onToggleBookmarkCollection,
+  onCreateBookmarkCollection,
+  activeCollectionIds,
+  bookmarkCollections,
   onApprovePlan,
   onRejectPlan,
 }: {
   message: ChatMessage;
   onBranch: () => void;
   onBookmark: () => void;
+  onToggleBookmarkCollection?: (collectionId: string) => void;
+  onCreateBookmarkCollection?: (name: string) => void;
+  activeCollectionIds: string[];
+  bookmarkCollections: BookmarkCollection[];
   onApprovePlan?: () => void;
   onRejectPlan?: () => void;
 }) {
@@ -263,13 +284,13 @@ function MessageBubble({
                 <button className="p-1 rounded hover:bg-secondary transition-colors">
                   <ThumbsDown className="w-3.5 h-3.5 text-muted-foreground" />
                 </button>
-                <button
-                  onClick={onBookmark}
-                  className="p-1 rounded hover:bg-secondary transition-colors"
-                  title={message.bookmarked ? "Remove bookmark" : "Bookmark"}
-                >
-                  <Bookmark className={`w-3.5 h-3.5 ${message.bookmarked ? "fill-accent text-accent" : "text-muted-foreground"}`} />
-                </button>
+                <BookmarkPopover
+                  isBookmarked={!!message.bookmarked}
+                  activeCollectionIds={activeCollectionIds}
+                  collections={bookmarkCollections}
+                  onToggleCollection={(colId) => onToggleBookmarkCollection?.(colId)}
+                  onCreateCollection={(name) => onCreateBookmarkCollection?.(name)}
+                />
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>

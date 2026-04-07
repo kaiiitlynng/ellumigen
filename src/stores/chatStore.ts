@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import type { Chat, ChatMessage, ChatBranch, BookmarkedMessage, Folder, InterfaceMode, ThoughtEntry } from "@/types/chat";
+import type { Chat, ChatMessage, ChatBranch, BookmarkedMessage, BookmarkCollection, Folder, InterfaceMode, ThoughtEntry } from "@/types/chat";
 
 const DEMO_CHATS: Chat[] = [
   { id: "1", title: "TCGA-BRCA outcomes", messages: [], branches: [], createdAt: new Date(Date.now() - 86400000), updatedAt: new Date(Date.now() - 86400000) },
@@ -21,6 +21,11 @@ export function useChatStore() {
   const [activeBranchId, setActiveBranchId] = useState<string | null>(null);
   const [mode, setMode] = useState<InterfaceMode>("conversation");
   const [bookmarkedMessages, setBookmarkedMessages] = useState<BookmarkedMessage[]>([]);
+  const [bookmarkCollections, setBookmarkCollections] = useState<BookmarkCollection[]>([
+    { id: "col-1", name: "Methods & Protocols", color: "bg-rose-700", createdAt: new Date() },
+    { id: "col-2", name: "Key Findings", color: "bg-purple-700", createdAt: new Date() },
+    { id: "col-3", name: "Datasets", color: "bg-blue-700", createdAt: new Date() },
+  ]);
 
   const activeChat = chats.find((c) => c.id === activeChatId) ?? null;
   const activeBranch = activeChat?.branches.find((b) => b.id === activeBranchId) ?? null;
@@ -224,11 +229,75 @@ export function useChatStore() {
     [chats]
   );
 
+  const toggleBookmarkCollection = useCallback(
+    (chatId: string, messageId: string, collectionId: string) => {
+      // Ensure message is bookmarked
+      const chat = chats.find((c) => c.id === chatId);
+      const message = chat?.messages.find((m) => m.id === messageId);
+      if (!chat || !message) return;
+
+      setBookmarkedMessages((prev) => {
+        const existing = prev.find((b) => b.messageId === messageId && b.collectionId === collectionId);
+        if (existing) {
+          // Remove from this collection
+          const updated = prev.filter((b) => !(b.messageId === messageId && b.collectionId === collectionId));
+          // If no more bookmarks for this message, un-bookmark it
+          if (!updated.some((b) => b.messageId === messageId)) {
+            setChats((pc) =>
+              pc.map((c) =>
+                c.id === chatId
+                  ? { ...c, messages: c.messages.map((m) => m.id === messageId ? { ...m, bookmarked: false } : m) }
+                  : c
+              )
+            );
+          }
+          return updated;
+        }
+        // Add to this collection
+        setChats((pc) =>
+          pc.map((c) =>
+            c.id === chatId
+              ? { ...c, messages: c.messages.map((m) => m.id === messageId ? { ...m, bookmarked: true } : m) }
+              : c
+          )
+        );
+        return [
+          ...prev,
+          { messageId, chatId, chatTitle: chat.title, content: message.content, bookmarkedAt: new Date(), collectionId },
+        ];
+      });
+    },
+    [chats]
+  );
+
+  const createBookmarkCollection = useCallback((name: string) => {
+    const colors = ["bg-emerald-700", "bg-amber-700", "bg-cyan-700", "bg-pink-700", "bg-indigo-700"];
+    setBookmarkCollections((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        name,
+        color: colors[prev.length % colors.length],
+        createdAt: new Date(),
+      },
+    ]);
+  }, []);
+
+  const getCollectionIdsForMessage = useCallback(
+    (messageId: string) => {
+      return bookmarkedMessages
+        .filter((b) => b.messageId === messageId && b.collectionId)
+        .map((b) => b.collectionId!);
+    },
+    [bookmarkedMessages]
+  );
+
   return {
     chats, folders, activeChatId, activeChat, activeBranchId, activeBranch,
-    mode, bookmarkedMessages,
+    mode, bookmarkedMessages, bookmarkCollections,
     setMode, setActiveChatId, createChat, renameChat, addMessage, removeMessage,
     updateMessageMetadata, updateExecutionStep, addThoughtEntry,
     branchChat, switchToBranch, mergeBranch, toggleBookmark,
+    toggleBookmarkCollection, createBookmarkCollection, getCollectionIdsForMessage,
   };
 }

@@ -54,6 +54,15 @@ export interface BookmarkedMessage {
   chatTitle: string;
   content: string;
   bookmarkedAt: Date;
+  collectionId?: string;
+}
+
+export interface BookmarkCollection {
+  id: string;
+  name: string;
+  color: string; // tailwind color class
+  icon?: string;
+  createdAt: Date;
 }
 
 export interface Visualization {

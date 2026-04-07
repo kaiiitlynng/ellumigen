@@ -463,6 +463,7 @@ export default function Index() {
         chats={store.chats}
         folders={store.folders}
         bookmarkedMessages={store.bookmarkedMessages}
+        bookmarkCollections={store.bookmarkCollections}
         activeChatId={store.activeChatId}
         activeView={activeView}
         branchTreeNodes={activeView === "chat" && store.activeChat && store.activeChat.messages.length > 0 ? buildBranchTreeFromMessages(store.activeChat.messages, store.activeChat.branches, isLoading, store.activeBranchId) : undefined}
@@ -531,6 +532,12 @@ export default function Index() {
                     onSendMessage={handleSendMessage}
                     onBranch={handleBranch}
                     onBookmark={handleBookmark}
+                    onToggleBookmarkCollection={(messageId, colId) => {
+                      if (store.activeChatId) store.toggleBookmarkCollection(store.activeChatId, messageId, colId);
+                    }}
+                    onCreateBookmarkCollection={store.createBookmarkCollection}
+                    getCollectionIdsForMessage={store.getCollectionIdsForMessage}
+                    bookmarkCollections={store.bookmarkCollections}
                     onApprovePlan={handleApprovePlan}
                     onRejectPlan={handleRejectPlan}
                     isLoading={isLoading}
