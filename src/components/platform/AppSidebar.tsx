@@ -195,57 +195,29 @@ export function AppSidebar({
                 )}
                 <ChevronDown className="w-3 h-3 ml-auto transition-transform duration-200 [[data-state=closed]>&]:rotate-[-90deg]" />
               </CollapsibleTrigger>
-              <CollapsibleContent className="space-y-2 mt-1">
-                {/* Collection cards */}
+              <CollapsibleContent className="space-y-1 mt-1">
                 {bookmarkCollections.map((col) => {
                   const colBookmarks = bookmarkedMessages.filter((bm) => bm.collectionId === col.id);
                   return (
-                    <div key={col.id} className="bookmark-card">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <div className={`w-4 h-5 rounded-sm ${col.color} shrink-0`} />
-                          <div className="min-w-0">
-                            <p className="text-sm font-medium text-foreground truncate">
-                              {col.name}
-                            </p>
-                            <p className="text-xs text-muted-foreground mt-0.5">
-                              {colBookmarks.length} {colBookmarks.length === 1 ? "item" : "items"}
-                            </p>
-                          </div>
-                        </div>
-                        <button className="p-1 rounded hover:bg-secondary shrink-0">
-                          <MoreHorizontal className="w-3.5 h-3.5 text-muted-foreground" />
-                        </button>
-                      </div>
-                      {/* Show first 2 bookmarks as previews */}
-                      {colBookmarks.slice(0, 2).map((bm) => (
-                        <button
-                          key={bm.messageId}
-                          onClick={() => onSelectChat(bm.chatId)}
-                          className="w-full text-left pl-6 mt-1"
-                        >
-                          <p className="text-xs text-muted-foreground truncate hover:text-foreground transition-colors">
-                            {bm.content.slice(0, 50)}…
-                          </p>
-                        </button>
-                      ))}
-                    </div>
+                    <button
+                      key={col.id}
+                      className="sidebar-item w-full text-left group"
+                    >
+                      <Bookmark className={`w-3 h-3 shrink-0 fill-current ${col.color.replace('bg-', 'text-')}`} />
+                      <span className="truncate text-xs">{col.name}</span>
+                      <span className="ml-auto text-[10px] text-muted-foreground">{colBookmarks.length}</span>
+                    </button>
                   );
                 })}
 
-                {/* Uncategorized bookmarks */}
                 {bookmarkedMessages.filter((bm) => !bm.collectionId).length > 0 && (
-                  <div className="bookmark-card">
-                    <div className="flex items-center gap-2">
-                      <Bookmark className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-foreground">Uncategorized</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {bookmarkedMessages.filter((bm) => !bm.collectionId).length} items
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  <button className="sidebar-item w-full text-left">
+                    <Bookmark className="w-3 h-3 shrink-0 text-muted-foreground" />
+                    <span className="truncate text-xs">Uncategorized</span>
+                    <span className="ml-auto text-[10px] text-muted-foreground">
+                      {bookmarkedMessages.filter((bm) => !bm.collectionId).length}
+                    </span>
+                  </button>
                 )}
 
                 {bookmarkedMessages.length === 0 && bookmarkCollections.length === 0 && (
