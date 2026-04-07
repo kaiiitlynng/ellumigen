@@ -1,10 +1,6 @@
 import { Share2, User, Map, Merge, ArrowLeft } from "lucide-react";
-import { ModeTabs } from "./ModeTabs";
-import type { InterfaceMode } from "@/types/chat";
 
 interface TopBarProps {
-  activeModes: InterfaceMode[];
-  onToggleMode: (mode: InterfaceMode) => void;
   chatTitle?: string;
   branchContext?: {
     isOnBranch: boolean;
@@ -20,8 +16,6 @@ interface TopBarProps {
 }
 
 export function TopBar({
-  activeModes,
-  onToggleMode,
   chatTitle,
   branchContext,
   onOpenConversationMap,
@@ -31,7 +25,6 @@ export function TopBar({
   showConversationMap,
 }: TopBarProps) {
   const isOnBranch = branchContext?.isOnBranch;
-  const hideModeTabs = isOnBranch || showConversationMap;
 
   return (
     <div className="flex flex-col border-b border-border bg-background">
@@ -65,19 +58,11 @@ export function TopBar({
       {/* Main top bar */}
       <header className="flex items-center justify-between px-5 py-3">
         <div className="flex items-center gap-3 min-w-0">
-          {hideModeTabs ? (
-            <>
-              <div className="w-2.5 h-2.5 rounded-full bg-primary" />
-              <span className="text-sm font-medium text-foreground truncate">
-                {chatTitle || "Chat"}
-              </span>
-            </>
-          ) : null}
+          <div className="w-2.5 h-2.5 rounded-full bg-primary" />
+          <span className="text-sm font-medium text-foreground truncate">
+            {chatTitle || "Chat"}
+          </span>
         </div>
-
-        {!hideModeTabs && (
-          <ModeTabs activeModes={activeModes} onToggleMode={onToggleMode} />
-        )}
 
         <div className="flex items-center gap-2">
           <button

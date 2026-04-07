@@ -1,41 +1,4 @@
-import { MessageSquare, FileCode, Layout, ChevronLeft, ChevronRight } from "lucide-react";
-import type { InterfaceMode } from "@/types/chat";
-import { cn } from "@/lib/utils";
-
-interface ModeTabsProps {
-  activeModes: InterfaceMode[];
-  onToggleMode: (mode: InterfaceMode) => void;
-}
-
-const modes: { id: InterfaceMode; label: string; icon: React.ElementType }[] = [
-  { id: "conversation", label: "Chat", icon: MessageSquare },
-  { id: "freeform", label: "Canvas", icon: Layout },
-  { id: "notebook", label: "Code", icon: FileCode },
-];
-
-export function ModeTabs({ activeModes, onToggleMode }: ModeTabsProps) {
-  return (
-    <div className="flex items-center gap-1 p-1 rounded-xl bg-secondary">
-      {modes.map((m) => {
-        const Icon = m.icon;
-        const isActive = activeModes.includes(m.id);
-        return (
-          <button
-            key={m.id}
-            onClick={() => onToggleMode(m.id)}
-            className={cn(
-              "mode-tab flex items-center gap-1.5",
-              isActive && "mode-tab-active bg-background shadow-sm"
-            )}
-          >
-            <Icon className="w-3.5 h-3.5" />
-            {m.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface PanelHeaderProps {
   label: string;
