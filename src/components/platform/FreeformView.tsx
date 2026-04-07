@@ -315,7 +315,7 @@ export function FreeformView({ onNodeAdded }: { onNodeAdded?: () => void } = {})
             transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
             transformOrigin: "0 0",
           }}
-          className="absolute inset-0"
+          className="absolute inset-0 pointer-events-none"
         >
           {nodes.map((node) => (
             <CanvasNodeComponent
