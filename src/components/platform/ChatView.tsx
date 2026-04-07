@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
-import { GitBranch, Copy, ThumbsUp, ThumbsDown, Layout, FileCode, X } from "lucide-react";
+import { GitBranch, Copy, ThumbsUp, ThumbsDown, Layout, FileCode, X, Maximize2, Minimize2, ChevronDown, ChevronUp } from "lucide-react";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import type { Chat, ChatMessage, BookmarkCollection } from "@/types/chat";
@@ -57,6 +57,8 @@ export function ChatView({
   onToggleMiniPanel,
 }: ChatViewProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [chatInputCollapsed, setChatInputCollapsed] = useState(false);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -72,6 +74,94 @@ export function ChatView({
     }
     onSendMessage(message);
   };
+
+  // Reset fullscreen when mini panel closes
+  useEffect(() => {
+    if (!miniPanel) {
+      setIsFullscreen(false);
+      setChatInputCollapsed(false);
+    }
+  }, [miniPanel]);
+
+  const miniPanelHeader = miniPanel && (
+    <div className="flex items-center justify-between px-3 py-1.5 border-t border-border bg-secondary/30 shrink-0">
+      <div className="flex items-center gap-1.5">
+        {miniPanel === "canvas" ? (
+          <Layout className="w-3.5 h-3.5 text-muted-foreground" />
+        ) : (
+          <FileCode className="w-3.5 h-3.5 text-muted-foreground" />
+        )}
+        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+          {miniPanel === "canvas" ? "Canvas" : "Code"}
+        </span>
+      </div>
+      <div className="flex items-center gap-1">
+        <button
+          onClick={() => setIsFullscreen((prev) => !prev)}
+          className="p-1 rounded hover:bg-secondary transition-colors"
+          title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+        >
+          {isFullscreen ? (
+            <Minimize2 className="w-3.5 h-3.5 text-muted-foreground" />
+          ) : (
+            <Maximize2 className="w-3.5 h-3.5 text-muted-foreground" />
+          )}
+        </button>
+        <button
+          onClick={() => onToggleMiniPanel(miniPanel)}
+          className="p-1 rounded hover:bg-secondary transition-colors"
+          title="Close"
+        >
+          <X className="w-3.5 h-3.5 text-muted-foreground" />
+        </button>
+      </div>
+    </div>
+  );
+
+  const miniPanelContent = miniPanel && (
+    <div className="flex-1 overflow-hidden">
+      {miniPanel === "canvas" ? <FreeformView /> : <NotebookView />}
+    </div>
+  );
+
+  // Fullscreen mode: only show mini panel
+  if (isFullscreen && miniPanel) {
+    return (
+      <div className="flex flex-col h-full">
+        <div className="flex items-center justify-between px-3 py-1.5 border-b border-border bg-secondary/30 shrink-0">
+          <div className="flex items-center gap-1.5">
+            {miniPanel === "canvas" ? (
+              <Layout className="w-3.5 h-3.5 text-muted-foreground" />
+            ) : (
+              <FileCode className="w-3.5 h-3.5 text-muted-foreground" />
+            )}
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              {miniPanel === "canvas" ? "Canvas" : "Code"}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setIsFullscreen(false)}
+              className="p-1 rounded hover:bg-secondary transition-colors"
+              title="Exit fullscreen"
+            >
+              <Minimize2 className="w-3.5 h-3.5 text-muted-foreground" />
+            </button>
+            <button
+              onClick={() => onToggleMiniPanel(miniPanel)}
+              className="p-1 rounded hover:bg-secondary transition-colors"
+              title="Close"
+            >
+              <X className="w-3.5 h-3.5 text-muted-foreground" />
+            </button>
+          </div>
+        </div>
+        <div className="flex-1 overflow-hidden">
+          {miniPanel === "canvas" ? <FreeformView /> : <NotebookView />}
+        </div>
+      </div>
+    );
+  }
 
   const chatContent = (
     <div className="flex flex-col h-full">
@@ -126,59 +216,59 @@ export function ChatView({
             </div>
           </div>
 
-          <div className="sticky bottom-0 bg-background border-t border-border px-6 pb-4 pt-3">
-            <div className="max-w-3xl mx-auto">
-              <ChatInput
-                onSend={handleSend}
-                disabled={isLoading}
-                onHelpClick={() => onToggleContextHelp?.(true)}
-              />
+          {/* Collapsible chat input */}
+          {miniPanel && chatInputCollapsed ? (
+            <div className="sticky bottom-0 bg-background border-t border-border px-6 py-1.5 flex justify-center">
+              <button
+                onClick={() => setChatInputCollapsed(false)}
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ChevronUp className="w-3.5 h-3.5" />
+                Show chat input
+              </button>
             </div>
-          </div>
+          ) : (
+            <div className="sticky bottom-0 bg-background border-t border-border px-6 pb-4 pt-3">
+              <div className="max-w-3xl mx-auto">
+                <div className="flex items-start gap-2">
+                  <div className="flex-1">
+                    <ChatInput
+                      onSend={handleSend}
+                      disabled={isLoading}
+                      onHelpClick={() => onToggleContextHelp?.(true)}
+                    />
+                  </div>
+                  {miniPanel && (
+                    <button
+                      onClick={() => setChatInputCollapsed(true)}
+                      className="mt-2 p-1.5 rounded-md hover:bg-secondary transition-colors text-muted-foreground"
+                      title="Collapse chat input"
+                    >
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </>
       )}
-    </div>
-  );
-
-  // Mini panel header bar
-  const miniPanelHeader = miniPanel && (
-    <div className="flex items-center justify-between px-3 py-1.5 border-t border-border bg-secondary/30 shrink-0">
-      <div className="flex items-center gap-1.5">
-        {miniPanel === "canvas" ? (
-          <Layout className="w-3.5 h-3.5 text-muted-foreground" />
-        ) : (
-          <FileCode className="w-3.5 h-3.5 text-muted-foreground" />
-        )}
-        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-          {miniPanel === "canvas" ? "Canvas" : "Code"}
-        </span>
-      </div>
-      <button
-        onClick={() => onToggleMiniPanel(miniPanel)}
-        className="p-1 rounded hover:bg-secondary transition-colors"
-        title="Close"
-      >
-        <X className="w-3.5 h-3.5 text-muted-foreground" />
-      </button>
     </div>
   );
 
   if (miniPanel) {
     return (
       <div className="flex flex-col h-full">
-        {/* Mini panel toggle buttons in top-right */}
         <MiniPanelButtons miniPanel={miniPanel} onToggle={onToggleMiniPanel} />
         <ResizablePanelGroup direction="vertical" className="flex-1">
-          <ResizablePanel defaultSize={65} minSize={30}>
+          <ResizablePanel defaultSize={65} minSize={20}>
             {chatContent}
           </ResizablePanel>
           <ResizableHandle withHandle />
           <ResizablePanel defaultSize={35} minSize={15}>
             <div className="flex flex-col h-full">
               {miniPanelHeader}
-              <div className="flex-1 overflow-hidden">
-                {miniPanel === "canvas" ? <FreeformView /> : <NotebookView />}
-              </div>
+              {miniPanelContent}
             </div>
           </ResizablePanel>
         </ResizablePanelGroup>
@@ -273,7 +363,7 @@ function MessageBubble({
       className={`flex ${isUser ? "justify-end" : "justify-start"} gap-3`}
     >
       {!isUser && (
-        <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-1">
+        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold shrink-0 mt-1">
           AI
         </div>
       )}
@@ -417,7 +507,7 @@ function MessageBubble({
       </div>
 
       {isUser && (
-        <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-1">
+        <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-primary-foreground text-xs font-bold shrink-0 mt-1">
           U
         </div>
       )}
