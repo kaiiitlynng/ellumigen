@@ -18,6 +18,7 @@ import { DraggableVisualization } from "./chat/DraggableVisualization";
 import { BookmarkPopover } from "./chat/BookmarkPopover";
 import { FreeformView } from "./FreeformView";
 import { NotebookView } from "./NotebookView";
+import ellumigenLogo from "@/assets/EllumigenLogo.png";
 
 export type MiniPanelType = "canvas" | "code" | null;
 
