@@ -100,6 +100,19 @@ export function FreeformView({ onNodeAdded }: { onNodeAdded?: () => void } = {})
   const isPanning = useRef(false);
   const panStart = useRef({ x: 0, y: 0 });
 
+  const getCanvasCoordinates = useCallback(
+    (clientX: number, clientY: number) => {
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (!rect) return null;
+
+      return {
+        x: (clientX - rect.left - pan.x) / zoom,
+        y: (clientY - rect.top - pan.y) / zoom,
+      };
+    },
+    [pan.x, pan.y, zoom]
+  );
+
   const addNode = useCallback(
     (type: CanvasNode["type"], x?: number, y?: number) => {
       const newNode: CanvasNode = {
@@ -112,11 +125,32 @@ export function FreeformView({ onNodeAdded }: { onNodeAdded?: () => void } = {})
         content: type === "note" ? "New note…" : type === "chart" ? "Chart placeholder" : "New text block",
         color: type === "note" ? NOTE_COLORS[Math.floor(Math.random() * NOTE_COLORS.length)] : undefined,
       };
+
       setNodes((prev) => [...prev, newNode]);
       setEditingId(newNode.id);
       setActiveTool("select");
+      onNodeAdded?.();
     },
-    []
+    [onNodeAdded]
+  );
+
+  const addVisualizationNode = useCallback(
+    (type: "volcano" | "heatmap" | "datatable", title: string, x: number, y: number) => {
+      const newNode: CanvasNode = {
+        id: `node-${++nodeCounter}`,
+        type,
+        x,
+        y,
+        width: type === "datatable" ? 400 : 360,
+        height: type === "datatable" ? 300 : 280,
+        content: title,
+      };
+
+      setNodes((prev) => [...prev, newNode]);
+      setEditingId(null);
+      onNodeAdded?.();
+    },
+    [onNodeAdded]
   );
 
   const deleteNode = useCallback((id: string) => {
@@ -128,13 +162,13 @@ export function FreeformView({ onNodeAdded }: { onNodeAdded?: () => void } = {})
     setNodes((prev) => prev.map((n) => (n.id === id ? { ...n, content } : n)));
   }, []);
 
-  // Mouse handlers for dragging nodes
   const handleNodeMouseDown = useCallback(
     (e: React.MouseEvent, id: string) => {
       if (editingId === id) return;
       e.stopPropagation();
       const node = nodes.find((n) => n.id === id);
       if (!node) return;
+
       setDraggingId(id);
       setDragOffset({
         x: e.clientX / zoom - node.x - pan.x / zoom,
@@ -144,29 +178,55 @@ export function FreeformView({ onNodeAdded }: { onNodeAdded?: () => void } = {})
     [nodes, zoom, pan, editingId]
   );
 
-  // Canvas click to add node when tool is active
-  const handleCanvasClick = useCallback(
+  const handleCanvasSurfaceClick = useCallback(
     (e: React.MouseEvent) => {
       if (activeTool === "note" || activeTool === "text") {
-        const rect = canvasRef.current?.getBoundingClientRect();
-        if (!rect) return;
-        const x = (e.clientX - rect.left - pan.x) / zoom;
-        const y = (e.clientY - rect.top - pan.y) / zoom;
-        addNode(activeTool, x, y);
-      } else {
-        setEditingId(null);
+        const coords = getCanvasCoordinates(e.clientX, e.clientY);
+        if (!coords) return;
+        addNode(activeTool, coords.x, coords.y);
+        return;
       }
+
+      setEditingId(null);
     },
-    [activeTool, pan, zoom, addNode]
+    [activeTool, addNode, getCanvasCoordinates]
   );
 
-  // Canvas panning
-  const handleCanvasMouseDown = useCallback((e: React.MouseEvent) => {
-    if (e.target === canvasRef.current && activeTool === "select") {
+  const handleCanvasSurfaceMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (activeTool !== "select" || e.button !== 0) return;
       isPanning.current = true;
       panStart.current = { x: e.clientX - pan.x, y: e.clientY - pan.y };
+    },
+    [activeTool, pan.x, pan.y]
+  );
+
+  const handleCanvasSurfaceDragOver = useCallback((e: React.DragEvent) => {
+    if (e.dataTransfer.types.includes("application/ellumigen-viz")) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "copy";
     }
-  }, [pan, activeTool]);
+  }, []);
+
+  const handleCanvasSurfaceDrop = useCallback(
+    (e: React.DragEvent) => {
+      const vizData = e.dataTransfer.getData("application/ellumigen-viz");
+      if (!vizData) return;
+
+      e.preventDefault();
+
+      try {
+        const { type, title } = JSON.parse(vizData);
+        const coords = getCanvasCoordinates(e.clientX, e.clientY);
+        if (!coords) return;
+
+        addVisualizationNode(type as "volcano" | "heatmap" | "datatable", title, coords.x, coords.y);
+      } catch (error) {
+        console.error("Failed to drop visualization onto canvas", error);
+      }
+    },
+    [addVisualizationNode, getCanvasCoordinates]
+  );
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -202,7 +262,6 @@ export function FreeformView({ onNodeAdded }: { onNodeAdded?: () => void } = {})
     };
   }, [draggingId, dragOffset, zoom, pan]);
 
-  // Zoom with scroll
   useEffect(() => {
     const el = canvasRef.current;
     if (!el) return;
@@ -217,7 +276,7 @@ export function FreeformView({ onNodeAdded }: { onNodeAdded?: () => void } = {})
   }, []);
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="h-full flex flex-col overflow-hidden">
       {/* Toolbar */}
       <div className="flex items-center gap-2 px-6 py-2.5 border-b border-border bg-background">
         <ToolButton
@@ -274,48 +333,28 @@ export function FreeformView({ onNodeAdded }: { onNodeAdded?: () => void } = {})
       {/* Canvas */}
       <div
         ref={canvasRef}
-        className="flex-1 overflow-hidden relative cursor-default"
+        className={`flex-1 overflow-hidden relative ${activeTool === "select" ? "cursor-grab" : "cursor-crosshair"}`}
         style={{
           backgroundImage: `radial-gradient(circle, hsl(var(--muted-foreground) / 0.35) 1.2px, transparent 1.2px)`,
           backgroundSize: `20px 20px`,
           backgroundPosition: `${pan.x}px ${pan.y}px`,
         }}
-        onClick={handleCanvasClick}
-        onMouseDown={handleCanvasMouseDown}
-        onDragOver={(e) => {
-          if (e.dataTransfer.types.includes("application/ellumigen-viz")) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = "copy";
-          }
-        }}
-        onDrop={(e) => {
-          const vizData = e.dataTransfer.getData("application/ellumigen-viz");
-          if (!vizData) return;
-          e.preventDefault();
-          const { type, title } = JSON.parse(vizData);
-          const rect = canvasRef.current?.getBoundingClientRect();
-          if (!rect) return;
-          const x = (e.clientX - rect.left - pan.x) / zoom;
-          const y = (e.clientY - rect.top - pan.y) / zoom;
-          const vizType = type as "volcano" | "heatmap" | "datatable";
-          const newNode: CanvasNode = {
-            id: `node-${++nodeCounter}`,
-            type: vizType,
-            x,
-            y,
-            width: vizType === "datatable" ? 400 : 360,
-            height: vizType === "datatable" ? 300 : 280,
-            content: title,
-          };
-          setNodes((prev) => [...prev, newNode]);
-        }}
       >
+        <div
+          data-canvas-surface
+          className="absolute inset-0 z-0"
+          onClick={handleCanvasSurfaceClick}
+          onMouseDown={handleCanvasSurfaceMouseDown}
+          onDragOver={handleCanvasSurfaceDragOver}
+          onDrop={handleCanvasSurfaceDrop}
+        />
+
         <div
           style={{
             transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
             transformOrigin: "0 0",
           }}
-          className="absolute inset-0 pointer-events-none"
+          className="absolute inset-0 z-10 pointer-events-none"
         >
           {nodes.map((node) => (
             <CanvasNodeComponent
