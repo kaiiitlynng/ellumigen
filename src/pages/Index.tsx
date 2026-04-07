@@ -520,7 +520,7 @@ export default function Index() {
               >
                 {!store.activeBranchId && !showConversationMap && (
                   <PanelHeader
-                    label="Chat"
+                    label={store.activeChat?.title || "Chat"}
                     icon={MessageSquare}
                     isCollapsed={collapsedPanels.has("conversation")}
                     onToggleCollapse={() => toggleCollapse("conversation")}
