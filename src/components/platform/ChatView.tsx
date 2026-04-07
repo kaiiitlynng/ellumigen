@@ -138,12 +138,20 @@ function MessageBubble({
   message,
   onBranch,
   onBookmark,
+  onToggleBookmarkCollection,
+  onCreateBookmarkCollection,
+  activeCollectionIds,
+  bookmarkCollections,
   onApprovePlan,
   onRejectPlan,
 }: {
   message: ChatMessage;
   onBranch: () => void;
   onBookmark: () => void;
+  onToggleBookmarkCollection?: (collectionId: string) => void;
+  onCreateBookmarkCollection?: (name: string) => void;
+  activeCollectionIds: string[];
+  bookmarkCollections: BookmarkCollection[];
   onApprovePlan?: () => void;
   onRejectPlan?: () => void;
 }) {
