@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import type { Chat, ChatMessage, ChatBranch, BookmarkedMessage, Folder, InterfaceMode, ThoughtEntry } from "@/types/chat";
+import type { Chat, ChatMessage, ChatBranch, BookmarkedMessage, BookmarkCollection, Folder, InterfaceMode, ThoughtEntry } from "@/types/chat";
 
 const DEMO_CHATS: Chat[] = [
   { id: "1", title: "TCGA-BRCA outcomes", messages: [], branches: [], createdAt: new Date(Date.now() - 86400000), updatedAt: new Date(Date.now() - 86400000) },
@@ -21,6 +21,11 @@ export function useChatStore() {
   const [activeBranchId, setActiveBranchId] = useState<string | null>(null);
   const [mode, setMode] = useState<InterfaceMode>("conversation");
   const [bookmarkedMessages, setBookmarkedMessages] = useState<BookmarkedMessage[]>([]);
+  const [bookmarkCollections, setBookmarkCollections] = useState<BookmarkCollection[]>([
+    { id: "col-1", name: "Methods & Protocols", color: "bg-rose-700", createdAt: new Date() },
+    { id: "col-2", name: "Key Findings", color: "bg-purple-700", createdAt: new Date() },
+    { id: "col-3", name: "Datasets", color: "bg-blue-700", createdAt: new Date() },
+  ]);
 
   const activeChat = chats.find((c) => c.id === activeChatId) ?? null;
   const activeBranch = activeChat?.branches.find((b) => b.id === activeBranchId) ?? null;
