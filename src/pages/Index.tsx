@@ -118,52 +118,23 @@ export default function Index() {
   const [isLoading, setIsLoading] = useState(false);
   const [activeView, setActiveView] = useState<SidebarView>("workspace");
   const [showContextHelp, setShowContextHelp] = useState(false);
-  const [activeModes, setActiveModes] = useState<InterfaceMode[]>(["conversation"]);
-  const [collapsedPanels, setCollapsedPanels] = useState<Set<InterfaceMode>>(new Set());
+  const [miniPanel, setMiniPanel] = useState<MiniPanelType>(null);
   const [showConversationMap, setShowConversationMap] = useState(false);
   const [activeMapNodeId, setActiveMapNodeId] = useState<string>("mn4");
-  
 
   // Auto-open canvas panel when dragging a visualization
   useEffect(() => {
     const handleDragOver = (e: DragEvent) => {
       if (e.dataTransfer?.types.includes("application/ellumigen-viz")) {
-        setActiveModes((prev) => {
-          if (!prev.includes("freeform")) return [...prev, "freeform"];
-          return prev;
-        });
-        setCollapsedPanels((prev) => {
-          if (prev.has("freeform")) {
-            const next = new Set(prev);
-            next.delete("freeform");
-            return next;
-          }
-          return prev;
-        });
+        setMiniPanel("canvas");
       }
     };
     window.addEventListener("dragover", handleDragOver);
     return () => window.removeEventListener("dragover", handleDragOver);
   }, []);
 
-  const toggleMode = useCallback((mode: InterfaceMode) => {
-    setActiveModes((prev) => {
-      if (prev.includes(mode)) {
-        // Don't allow removing the last panel
-        if (prev.length === 1) return prev;
-        return prev.filter((m) => m !== mode);
-      }
-      return [...prev, mode];
-    });
-  }, []);
-
-  const toggleCollapse = useCallback((mode: InterfaceMode) => {
-    setCollapsedPanels((prev) => {
-      const next = new Set(prev);
-      if (next.has(mode)) next.delete(mode);
-      else next.add(mode);
-      return next;
-    });
+  const toggleMiniPanel = useCallback((panel: "canvas" | "code") => {
+    setMiniPanel((prev) => (prev === panel ? null : panel));
   }, []);
 
   // Refs for managing the execution animation
