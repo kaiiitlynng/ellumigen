@@ -531,6 +531,12 @@ export default function Index() {
                     onSendMessage={handleSendMessage}
                     onBranch={handleBranch}
                     onBookmark={handleBookmark}
+                    onToggleBookmarkCollection={(messageId, colId) => {
+                      if (store.activeChatId) store.toggleBookmarkCollection(store.activeChatId, messageId, colId);
+                    }}
+                    onCreateBookmarkCollection={store.createBookmarkCollection}
+                    getCollectionIdsForMessage={store.getCollectionIdsForMessage}
+                    bookmarkCollections={store.bookmarkCollections}
                     onApprovePlan={handleApprovePlan}
                     onRejectPlan={handleRejectPlan}
                     isLoading={isLoading}
