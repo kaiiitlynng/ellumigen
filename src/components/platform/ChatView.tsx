@@ -284,13 +284,13 @@ function MessageBubble({
                 <button className="p-1 rounded hover:bg-secondary transition-colors">
                   <ThumbsDown className="w-3.5 h-3.5 text-muted-foreground" />
                 </button>
-                <button
-                  onClick={onBookmark}
-                  className="p-1 rounded hover:bg-secondary transition-colors"
-                  title={message.bookmarked ? "Remove bookmark" : "Bookmark"}
-                >
-                  <Bookmark className={`w-3.5 h-3.5 ${message.bookmarked ? "fill-accent text-accent" : "text-muted-foreground"}`} />
-                </button>
+                <BookmarkPopover
+                  isBookmarked={!!message.bookmarked}
+                  activeCollectionIds={activeCollectionIds}
+                  collections={bookmarkCollections}
+                  onToggleCollection={(colId) => onToggleBookmarkCollection?.(colId)}
+                  onCreateCollection={(name) => onCreateBookmarkCollection?.(name)}
+                />
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
