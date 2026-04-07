@@ -15,7 +15,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
 } from "lucide-react";
-import type { Chat, Folder, BookmarkedMessage } from "@/types/chat";
+import type { Chat, Folder, BookmarkedMessage, BookmarkCollection } from "@/types/chat";
 import { ChatBranchTree, type BranchTreeNode } from "./ChatBranchTree";
 import ellumigenLogo from "@/assets/EllumigenLogo.png";
 import { cn } from "@/lib/utils";
@@ -27,6 +27,7 @@ interface AppSidebarProps {
   chats: Chat[];
   folders: Folder[];
   bookmarkedMessages: BookmarkedMessage[];
+  bookmarkCollections: BookmarkCollection[];
   activeChatId: string | null;
   activeView: SidebarView;
   branchTreeNodes?: BranchTreeNode[];
@@ -41,6 +42,7 @@ export function AppSidebar({
   chats,
   folders,
   bookmarkedMessages,
+  bookmarkCollections,
   activeChatId,
   activeView,
   branchTreeNodes,
