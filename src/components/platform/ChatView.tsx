@@ -363,9 +363,7 @@ function MessageBubble({
       className={`flex ${isUser ? "justify-end" : "justify-start"} gap-3`}
     >
       {!isUser && (
-        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold shrink-0 mt-1">
-          AI
-        </div>
+        <img src={ellumigenLogo} alt="Ellumigen" className="w-8 h-8 rounded-full shrink-0 mt-1 object-cover" />
       )}
 
       <div className={`max-w-[85%]`}>
