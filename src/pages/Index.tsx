@@ -463,6 +463,7 @@ export default function Index() {
         chats={store.chats}
         folders={store.folders}
         bookmarkedMessages={store.bookmarkedMessages}
+        bookmarkCollections={store.bookmarkCollections}
         activeChatId={store.activeChatId}
         activeView={activeView}
         branchTreeNodes={activeView === "chat" && store.activeChat && store.activeChat.messages.length > 0 ? buildBranchTreeFromMessages(store.activeChat.messages, store.activeChat.branches, isLoading, store.activeBranchId) : undefined}
