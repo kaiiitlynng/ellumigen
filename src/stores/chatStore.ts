@@ -229,11 +229,75 @@ export function useChatStore() {
     [chats]
   );
 
+  const toggleBookmarkCollection = useCallback(
+    (chatId: string, messageId: string, collectionId: string) => {
+      // Ensure message is bookmarked
+      const chat = chats.find((c) => c.id === chatId);
+      const message = chat?.messages.find((m) => m.id === messageId);
+      if (!chat || !message) return;
+
+      setBookmarkedMessages((prev) => {
+        const existing = prev.find((b) => b.messageId === messageId && b.collectionId === collectionId);
+        if (existing) {
+          // Remove from this collection
+          const updated = prev.filter((b) => !(b.messageId === messageId && b.collectionId === collectionId));
+          // If no more bookmarks for this message, un-bookmark it
+          if (!updated.some((b) => b.messageId === messageId)) {
+            setChats((pc) =>
+              pc.map((c) =>
+                c.id === chatId
+                  ? { ...c, messages: c.messages.map((m) => m.id === messageId ? { ...m, bookmarked: false } : m) }
+                  : c
+              )
+            );
+          }
+          return updated;
+        }
+        // Add to this collection
+        setChats((pc) =>
+          pc.map((c) =>
+            c.id === chatId
+              ? { ...c, messages: c.messages.map((m) => m.id === messageId ? { ...m, bookmarked: true } : m) }
+              : c
+          )
+        );
+        return [
+          ...prev,
+          { messageId, chatId, chatTitle: chat.title, content: message.content, bookmarkedAt: new Date(), collectionId },
+        ];
+      });
+    },
+    [chats]
+  );
+
+  const createBookmarkCollection = useCallback((name: string) => {
+    const colors = ["bg-emerald-700", "bg-amber-700", "bg-cyan-700", "bg-pink-700", "bg-indigo-700"];
+    setBookmarkCollections((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        name,
+        color: colors[prev.length % colors.length],
+        createdAt: new Date(),
+      },
+    ]);
+  }, []);
+
+  const getCollectionIdsForMessage = useCallback(
+    (messageId: string) => {
+      return bookmarkedMessages
+        .filter((b) => b.messageId === messageId && b.collectionId)
+        .map((b) => b.collectionId!);
+    },
+    [bookmarkedMessages]
+  );
+
   return {
     chats, folders, activeChatId, activeChat, activeBranchId, activeBranch,
-    mode, bookmarkedMessages,
+    mode, bookmarkedMessages, bookmarkCollections,
     setMode, setActiveChatId, createChat, renameChat, addMessage, removeMessage,
     updateMessageMetadata, updateExecutionStep, addThoughtEntry,
     branchChat, switchToBranch, mergeBranch, toggleBookmark,
+    toggleBookmarkCollection, createBookmarkCollection, getCollectionIdsForMessage,
   };
 }
