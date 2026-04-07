@@ -203,7 +203,7 @@ export function AppSidebar({
                       key={col.id}
                       className="sidebar-item w-full text-left group"
                     >
-                      <Bookmark className={`w-3.5 h-3.5 shrink-0 fill-current ${col.color.replace('bg-', 'text-')}`} />
+                      <Bookmark className={`w-3.5 h-3.5 shrink-0 fill-current ${col.color}`} />
                       <span className="truncate text-sm">{col.name}</span>
                       <span className="ml-auto text-xs text-muted-foreground">{colBookmarks.length}</span>
                     </button>

@@ -271,7 +271,7 @@ export function useChatStore() {
   );
 
   const createBookmarkCollection = useCallback((name: string) => {
-    const colors = ["bg-emerald-700", "bg-amber-700", "bg-cyan-700", "bg-pink-700", "bg-indigo-700"];
+    const colors = ["text-[#80D494]", "text-[#E06C75]", "text-[#56B6C2]", "text-[#C678DD]"];
     setBookmarkCollections((prev) => [
       ...prev,
       {
