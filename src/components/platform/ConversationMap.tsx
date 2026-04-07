@@ -203,7 +203,7 @@ export function ConversationMap({
   }, [activeNodeId, nodes]);
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full min-h-0 bg-background">
       <div className="flex items-center gap-3 px-6 py-4">
         <div className="w-3 h-3 rounded-full bg-primary" />
         <h2 className="text-lg font-medium text-muted-foreground">{title}</h2>
