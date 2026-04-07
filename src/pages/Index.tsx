@@ -447,7 +447,7 @@ export default function Index() {
   }, [mapNodes, store]);
 
   const branchContext = activeView === "chat" && store.activeBranchId && store.activeBranch
-    ? { isOnBranch: true, branchTitle: store.activeBranch.label, parentTitle: store.activeChat?.title || "" }
+    ? { isOnBranch: true, branchTitle: store.activeBranch.label, parentTitle: store.activeChat?.title || "", isMerged: !!store.activeBranch.merged }
     : undefined;
 
   // When on a branch, show only the branch's own messages (blank slate)

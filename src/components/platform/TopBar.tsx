@@ -10,6 +10,7 @@ interface TopBarProps {
     isOnBranch: boolean;
     branchTitle: string;
     parentTitle: string;
+    isMerged?: boolean;
   };
   onOpenConversationMap?: () => void;
   onCloseConversationMap?: () => void;
@@ -38,16 +39,18 @@ export function TopBar({
       {isOnBranch && (
         <div className="flex items-center justify-between px-5 py-2.5 bg-muted/50 border-b border-border">
           <span className="text-xs text-muted-foreground truncate">
-            Exploring: {branchContext.branchTitle} – from {branchContext.parentTitle}
+            {branchContext?.isMerged ? "Merged" : "Exploring"}: {branchContext?.branchTitle} – {branchContext?.isMerged ? "into" : "from"} {branchContext?.parentTitle}
           </span>
           <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={onBringToMain}
-              className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-            >
-              <Merge className="w-3 h-3" />
-              Merge to Main
-            </button>
+            {!branchContext?.isMerged && (
+              <button
+                onClick={onBringToMain}
+                className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+              >
+                <Merge className="w-3 h-3" />
+                Merge to Main
+              </button>
+            )}
             <button
               onClick={onReturnToMain}
               className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium border border-border rounded-md hover:bg-secondary transition-colors"
