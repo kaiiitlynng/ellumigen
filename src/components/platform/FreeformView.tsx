@@ -274,8 +274,10 @@ export function FreeformView({ onNodeAdded }: { onNodeAdded?: () => void } = {})
       {/* Canvas */}
       <div
         ref={canvasRef}
-        className="flex-1 overflow-hidden relative bg-[repeating-conic-gradient(hsl(var(--border))_0%_25%,transparent_0%_50%)] bg-[length:24px_24px] cursor-default"
+        className="flex-1 overflow-hidden relative cursor-default"
         style={{
+          backgroundImage: `radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px)`,
+          backgroundSize: `20px 20px`,
           backgroundPosition: `${pan.x}px ${pan.y}px`,
         }}
         onClick={handleCanvasClick}
