@@ -446,8 +446,6 @@ export default function Index() {
       <div className="flex-1 flex flex-col min-w-0">
         {activeView === "chat" && (
           <TopBar
-            activeModes={activeModes}
-            onToggleMode={toggleMode}
             chatTitle={store.activeChat?.title}
             branchContext={branchContext}
             onOpenConversationMap={handleOpenConversationMap}
@@ -480,74 +478,26 @@ export default function Index() {
         ) : activeView === "artifacts" ? (
           <ArtifactsView />
         ) : (
-          <div className="flex-1 flex overflow-hidden">
-            {activeModes.includes("conversation") && (
-              <div
-                className={`flex flex-col border-r border-border transition-all duration-200 ${
-                  collapsedPanels.has("conversation") ? "w-10" : "flex-1 min-w-0"
-                }`}
-              >
-                {!store.activeBranchId && !showConversationMap && (
-                  <PanelHeader
-                    label={store.activeChat?.title || "Chat"}
-                    icon={MessageSquare}
-                    isCollapsed={collapsedPanels.has("conversation")}
-                    onToggleCollapse={() => toggleCollapse("conversation")}
-                  />
-                )}
-                {!collapsedPanels.has("conversation") && (
-                  <ChatView
-                    chat={viewChat}
-                    onSendMessage={handleSendMessage}
-                    onBranch={handleBranch}
-                    onBookmark={handleBookmark}
-                    onToggleBookmarkCollection={(messageId, colId) => {
-                      if (store.activeChatId) store.toggleBookmarkCollection(store.activeChatId, messageId, colId);
-                    }}
-                    onCreateBookmarkCollection={store.createBookmarkCollection}
-                    getCollectionIdsForMessage={store.getCollectionIdsForMessage}
-                    bookmarkCollections={store.bookmarkCollections}
-                    onApprovePlan={handleApprovePlan}
-                    onRejectPlan={handleRejectPlan}
-                    isLoading={isLoading}
-                    showContextHelp={showContextHelp}
-                    onToggleContextHelp={setShowContextHelp}
-                  />
-                )}
-              </div>
-            )}
-
-            {activeModes.includes("freeform") && (
-              <div
-                className={`flex flex-col border-r border-border transition-all duration-200 ${
-                  collapsedPanels.has("freeform") ? "w-10" : "flex-1 min-w-0"
-                }`}
-              >
-                <PanelHeader
-                  label="Canvas"
-                  icon={Layout}
-                  isCollapsed={collapsedPanels.has("freeform")}
-                  onToggleCollapse={() => toggleCollapse("freeform")}
-                />
-                {!collapsedPanels.has("freeform") && <FreeformView />}
-              </div>
-            )}
-
-            {activeModes.includes("notebook") && (
-              <div
-                className={`flex flex-col transition-all duration-200 ${
-                  collapsedPanels.has("notebook") ? "w-10" : "flex-1 min-w-0"
-                }`}
-              >
-                <PanelHeader
-                  label="Code"
-                  icon={FileCode}
-                  isCollapsed={collapsedPanels.has("notebook")}
-                  onToggleCollapse={() => toggleCollapse("notebook")}
-                />
-                {!collapsedPanels.has("notebook") && <NotebookView />}
-              </div>
-            )}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <ChatView
+              chat={viewChat}
+              onSendMessage={handleSendMessage}
+              onBranch={handleBranch}
+              onBookmark={handleBookmark}
+              onToggleBookmarkCollection={(messageId, colId) => {
+                if (store.activeChatId) store.toggleBookmarkCollection(store.activeChatId, messageId, colId);
+              }}
+              onCreateBookmarkCollection={store.createBookmarkCollection}
+              getCollectionIdsForMessage={store.getCollectionIdsForMessage}
+              bookmarkCollections={store.bookmarkCollections}
+              onApprovePlan={handleApprovePlan}
+              onRejectPlan={handleRejectPlan}
+              isLoading={isLoading}
+              showContextHelp={showContextHelp}
+              onToggleContextHelp={setShowContextHelp}
+              miniPanel={miniPanel}
+              onToggleMiniPanel={toggleMiniPanel}
+            />
           </div>
         )}
       </div>
