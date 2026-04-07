@@ -10,6 +10,7 @@ interface TopBarProps {
     isOnBranch: boolean;
     branchTitle: string;
     parentTitle: string;
+    isMerged?: boolean;
   };
   onOpenConversationMap?: () => void;
   onCloseConversationMap?: () => void;
