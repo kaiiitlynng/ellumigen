@@ -49,69 +49,68 @@ export function BookmarkPopover({
           />
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-56 p-0" side="top" align="start">
+      <PopoverContent className="w-48 p-0" side="top" align="start">
         {/* Header */}
-        <div className="flex items-center justify-between px-3 py-2 border-b border-border">
-          <div className="flex items-center gap-2">
-            <Bookmark className="w-4 h-4 text-foreground fill-foreground" />
-            <span className="text-sm font-medium text-foreground">
+        <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-border">
+          <div className="flex items-center gap-1.5">
+            <Bookmark className="w-3 h-3 text-foreground fill-foreground" />
+            <span className="text-xs font-medium text-foreground">
               {isBookmarked ? "Saved!" : "Save to..."}
             </span>
           </div>
         </div>
 
         {/* Collections label + Add New */}
-        <div className="flex items-center justify-between px-3 py-2">
-          <span className="text-xs font-medium text-muted-foreground">Collections</span>
+        <div className="flex items-center justify-between px-2.5 py-1.5">
+          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Collections</span>
           <button
             onClick={() => setIsCreating(true)}
-            className="text-xs px-2 py-0.5 rounded border border-border text-muted-foreground hover:bg-secondary transition-colors"
+            className="text-[10px] px-1.5 py-0.5 rounded border border-border text-muted-foreground hover:bg-secondary transition-colors"
           >
             ADD NEW
           </button>
         </div>
 
         {/* Collection list */}
-        <div className="px-2 pb-2 space-y-0.5">
+        <div className="px-1.5 pb-1.5 space-y-0.5">
           {collections.map((col) => {
             const isActive = activeCollectionIds.includes(col.id);
             return (
               <button
                 key={col.id}
                 onClick={() => onToggleCollection(col.id)}
-                className="flex items-center justify-between w-full px-2 py-1.5 rounded-md hover:bg-secondary transition-colors"
+                className="flex items-center justify-between w-full px-1.5 py-1 rounded-md hover:bg-secondary transition-colors"
               >
-                <div className="flex items-center gap-2.5">
-                  <div className={`w-4 h-5 rounded-sm ${col.color}`} />
-                  <span className="text-sm text-foreground">{col.name}</span>
+                <div className="flex items-center gap-2">
+                  <Bookmark className={`w-3 h-3 shrink-0 fill-current ${col.color.replace('bg-', 'text-')}`} />
+                  <span className="text-xs text-foreground">{col.name}</span>
                 </div>
                 {isActive ? (
-                  <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                    <Check className="w-3 h-3 text-primary-foreground" />
+                  <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+                    <Check className="w-2.5 h-2.5 text-primary-foreground" />
                   </div>
                 ) : (
-                  <div className="w-5 h-5 rounded-full border border-border" />
+                  <div className="w-4 h-4 rounded-full border border-border" />
                 )}
               </button>
             );
           })}
 
-          {/* Inline create */}
           {isCreating && (
-            <div className="flex items-center gap-1 px-2 pt-1">
+            <div className="flex items-center gap-1 px-1.5 pt-0.5">
               <input
                 autoFocus
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleCreate()}
                 placeholder="Collection name"
-                className="flex-1 text-sm bg-secondary rounded px-2 py-1 text-foreground placeholder:text-muted-foreground outline-none"
+                className="flex-1 text-xs bg-secondary rounded px-1.5 py-0.5 text-foreground placeholder:text-muted-foreground outline-none"
               />
               <button
                 onClick={handleCreate}
-                className="p-1 rounded hover:bg-secondary transition-colors"
+                className="p-0.5 rounded hover:bg-secondary transition-colors"
               >
-                <Plus className="w-4 h-4 text-muted-foreground" />
+                <Plus className="w-3 h-3 text-muted-foreground" />
               </button>
             </div>
           )}
