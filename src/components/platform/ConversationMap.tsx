@@ -83,17 +83,37 @@ function getBranchDepth(node: MapNode, nodeMap: Record<string, MapNode>): number
 
 function measureMergeConnectors(container: HTMLDivElement): {
   connectors: MergeConnector[];
+  branchGaps: Record<string, number>;
   width: number;
   height: number;
 } {
   const containerRect = container.getBoundingClientRect();
   const targetElements = Array.from(container.querySelectorAll<HTMLElement>("[data-merge-target]"));
+  const branchElements = Array.from(container.querySelectorAll<HTMLElement>("[data-branch-subtree-parent]"));
   const targetMap = new Map(
     targetElements.flatMap((element) => {
       const mergeId = element.dataset.mergeTarget;
       return mergeId ? [[mergeId, element] as const] : [];
     })
   );
+  const branchGaps = Array.from(container.querySelectorAll<HTMLElement>("[data-main-slot]"))
+    .reduce<Record<string, number>>((acc, element) => {
+      const nodeId = element.dataset.mainSlot;
+      if (!nodeId) return acc;
+
+      const slotTop = element.getBoundingClientRect().top;
+      const maxGap = branchElements.reduce((largestGap, branchElement) => {
+        if (branchElement.dataset.branchSubtreeParent !== nodeId) return largestGap;
+        const branchRect = branchElement.getBoundingClientRect();
+        return Math.max(largestGap, branchRect.bottom - slotTop);
+      }, 0);
+
+      if (maxGap > 0) {
+        acc[nodeId] = Math.ceil(maxGap);
+      }
+
+      return acc;
+    }, {});
 
   const connectors: MergeConnector[] = [];
   let width = container.scrollWidth;
@@ -126,6 +146,7 @@ function measureMergeConnectors(container: HTMLDivElement): {
 
   return {
     connectors,
+    branchGaps,
     width: Math.ceil(width),
     height: Math.ceil(height),
   };
@@ -147,6 +168,7 @@ export function ConversationMap({
   const nodeMap = Object.fromEntries(nodes.map((n) => [n.id, n]));
   const contentRef = useRef<HTMLDivElement | null>(null);
   const [mergeConnectors, setMergeConnectors] = useState<MergeConnector[]>([]);
+  const [branchGaps, setBranchGaps] = useState<Record<string, number>>({});
   const [overlaySize, setOverlaySize] = useState({ width: 0, height: 0 });
 
   useLayoutEffect(() => {
@@ -158,6 +180,7 @@ export function ConversationMap({
     const updateConnectors = () => {
       const nextMeasurement = measureMergeConnectors(container);
       setMergeConnectors(nextMeasurement.connectors);
+      setBranchGaps(nextMeasurement.branchGaps);
       setOverlaySize({ width: nextMeasurement.width, height: nextMeasurement.height });
     };
 
@@ -217,7 +240,7 @@ export function ConversationMap({
               activeNodeId={activeNodeId}
               onSelectNode={onSelectNode}
               onAddBranch={onAddBranch}
-              pendingMergeTargets={[]}
+              branchGapMap={branchGaps}
             />
           ))}
         </div>
@@ -226,27 +249,24 @@ export function ConversationMap({
   );
 }
 
-interface PendingMergeTarget {
-  id: string;
-  depth: number; // render when 0
-}
-
 function NodeTree({
   node,
   nodeMap,
   activeNodeId,
   onSelectNode,
   onAddBranch,
-  pendingMergeTargets,
   mergeSourceId,
+  mergeTargetIds,
+  branchGapMap,
 }: {
   node: MapNode;
   nodeMap: Record<string, MapNode>;
   activeNodeId?: string;
   onSelectNode?: (id: string) => void;
   onAddBranch?: (parentId: string) => void;
-  pendingMergeTargets?: PendingMergeTarget[];
   mergeSourceId?: string;
+  mergeTargetIds?: string[];
+  branchGapMap?: Record<string, number>;
 }) {
   const children = node.children.map((id) => nodeMap[id]).filter(Boolean);
   const style = CATEGORY_STYLES[node.category];
@@ -254,11 +274,7 @@ function NodeTree({
   const mainChild = children.find((child) => !child.isBranch);
   const branchChildren = children.filter((child) => child.isBranch);
   const mergedBranches = mainChild ? branchChildren.filter(isMergedBranch) : [];
-
-  // Merge targets that should render on THIS node (depth === 0)
-  const readyTargets = (pendingMergeTargets || []).filter((t) => t.depth <= 0);
-  // Merge targets to pass down (decrement depth)
-  const passingTargets = (pendingMergeTargets || []).filter((t) => t.depth > 0).map((t) => ({ ...t, depth: t.depth - 1 }));
+  const branchGap = branchGapMap?.[node.id] ?? 0;
 
   return (
     <div className="flex flex-col items-center">
@@ -285,10 +301,10 @@ function NodeTree({
           <h3 className="text-sm font-semibold text-foreground mt-2">{node.label}</h3>
           <p className="text-xs text-muted-foreground mt-1">{node.description}</p>
         </motion.button>
-        {readyTargets.map((t) => (
+        {(mergeTargetIds || []).map((mergeTargetId) => (
           <span
-            key={t.id}
-            data-merge-target={t.id}
+            key={mergeTargetId}
+            data-merge-target={mergeTargetId}
             className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-border"
             aria-hidden="true"
           />
@@ -340,6 +356,14 @@ function NodeTree({
             </>
           )}
 
+          {branchChildren.length > 0 && mainChild && (
+            <div data-main-slot={node.id} className="h-0 w-0" aria-hidden="true" />
+          )}
+
+          {mainChild && branchGap > 0 && (
+            <div aria-hidden="true" className="w-px bg-border" style={{ height: `${branchGap}px` }} />
+          )}
+
           {branchChildren.length > 0 && !mainChild && (
             <>
               <div className="w-px h-4 bg-border" />
@@ -359,13 +383,8 @@ function NodeTree({
               activeNodeId={activeNodeId}
               onSelectNode={onSelectNode}
               onAddBranch={onAddBranch}
-              pendingMergeTargets={[
-                ...passingTargets,
-                ...mergedBranches.map((b) => ({
-                  id: getMergeAnchorId(b),
-                  depth: getBranchDepth(b, nodeMap) - 1,
-                })),
-              ]}
+              mergeTargetIds={mergedBranches.map((branchNode) => getMergeAnchorId(branchNode))}
+              branchGapMap={branchGapMap}
               mergeSourceId={mergeSourceId}
             />
           )}
@@ -379,6 +398,7 @@ function NodeTree({
               <div
                 key={branch.id}
                 className="absolute flex flex-col items-center"
+                data-branch-subtree-parent={node.id}
                 style={{
                   left: `calc(50% + ${(index + 1) * BRANCH_COLUMN_OFFSET}px)`,
                   top: `${curveEndY}px`,
@@ -398,6 +418,7 @@ function NodeTree({
                   activeNodeId={activeNodeId}
                   onSelectNode={onSelectNode}
                   onAddBranch={onAddBranch}
+                  branchGapMap={branchGapMap}
                   mergeSourceId={isMerged && mainChild ? mergeAnchorId : undefined}
                 />
               </div>
