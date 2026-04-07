@@ -1,11 +1,11 @@
 import { useRef, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
-import { GitBranch, Copy, ThumbsUp, ThumbsDown, Bookmark } from "lucide-react";
+import { GitBranch, Copy, ThumbsUp, ThumbsDown, Layout, FileCode, X } from "lucide-react";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import type { Chat, ChatMessage, BookmarkCollection } from "@/types/chat";
 import { ChatInput } from "./ChatInput";
-import { SuggestionChips } from "./SuggestionChips";
 import { ContextTags } from "./chat/ContextTags";
 import { ProposedPlan } from "./chat/ProposedPlan";
 import { TaskExecution } from "./chat/TaskExecution";
@@ -16,6 +16,10 @@ import { VolcanoPlot } from "./chat/VolcanoPlot";
 import { HeatmapChart } from "./chat/HeatmapChart";
 import { DraggableVisualization } from "./chat/DraggableVisualization";
 import { BookmarkPopover } from "./chat/BookmarkPopover";
+import { FreeformView } from "./FreeformView";
+import { NotebookView } from "./NotebookView";
+
+export type MiniPanelType = "canvas" | "code" | null;
 
 interface ChatViewProps {
   chat: Chat | null;
@@ -31,6 +35,8 @@ interface ChatViewProps {
   isLoading?: boolean;
   showContextHelp?: boolean;
   onToggleContextHelp?: (show: boolean) => void;
+  miniPanel: MiniPanelType;
+  onToggleMiniPanel: (panel: "canvas" | "code") => void;
 }
 
 export function ChatView({
@@ -47,6 +53,8 @@ export function ChatView({
   isLoading,
   showContextHelp,
   onToggleContextHelp,
+  miniPanel,
+  onToggleMiniPanel,
 }: ChatViewProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -65,7 +73,7 @@ export function ChatView({
     onSendMessage(message);
   };
 
-  return (
+  const chatContent = (
     <div className="flex flex-col h-full">
       {isEmpty ? (
         <div className="flex-1 flex flex-col justify-end px-6 pb-12">
@@ -110,7 +118,6 @@ export function ChatView({
                 </motion.div>
               )}
 
-              {/* Context control help */}
               <AnimatePresence>
                 {showContextHelp && (
                   <ContextControlHelp onClose={() => onToggleContextHelp?.(false)} />
@@ -130,6 +137,106 @@ export function ChatView({
           </div>
         </>
       )}
+    </div>
+  );
+
+  // Mini panel header bar
+  const miniPanelHeader = miniPanel && (
+    <div className="flex items-center justify-between px-3 py-1.5 border-t border-border bg-secondary/30 shrink-0">
+      <div className="flex items-center gap-1.5">
+        {miniPanel === "canvas" ? (
+          <Layout className="w-3.5 h-3.5 text-muted-foreground" />
+        ) : (
+          <FileCode className="w-3.5 h-3.5 text-muted-foreground" />
+        )}
+        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+          {miniPanel === "canvas" ? "Canvas" : "Code"}
+        </span>
+      </div>
+      <button
+        onClick={() => onToggleMiniPanel(miniPanel)}
+        className="p-1 rounded hover:bg-secondary transition-colors"
+        title="Close"
+      >
+        <X className="w-3.5 h-3.5 text-muted-foreground" />
+      </button>
+    </div>
+  );
+
+  if (miniPanel) {
+    return (
+      <div className="flex flex-col h-full">
+        {/* Mini panel toggle buttons in top-right */}
+        <MiniPanelButtons miniPanel={miniPanel} onToggle={onToggleMiniPanel} />
+        <ResizablePanelGroup direction="vertical" className="flex-1">
+          <ResizablePanel defaultSize={65} minSize={30}>
+            {chatContent}
+          </ResizablePanel>
+          <ResizableHandle withHandle />
+          <ResizablePanel defaultSize={35} minSize={15}>
+            <div className="flex flex-col h-full">
+              {miniPanelHeader}
+              <div className="flex-1 overflow-hidden">
+                {miniPanel === "canvas" ? <FreeformView /> : <NotebookView />}
+              </div>
+            </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col h-full">
+      <MiniPanelButtons miniPanel={miniPanel} onToggle={onToggleMiniPanel} />
+      {chatContent}
+    </div>
+  );
+}
+
+function MiniPanelButtons({
+  miniPanel,
+  onToggle,
+}: {
+  miniPanel: MiniPanelType;
+  onToggle: (panel: "canvas" | "code") => void;
+}) {
+  return (
+    <div className="flex items-center justify-end gap-1 px-3 py-1.5 border-b border-border bg-secondary/20 shrink-0">
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => onToggle("canvas")}
+              className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
+                miniPanel === "canvas"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+              }`}
+            >
+              <Layout className="w-3.5 h-3.5" />
+              Canvas
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom"><p>Open Canvas workspace</p></TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => onToggle("code")}
+              className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
+                miniPanel === "code"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+              }`}
+            >
+              <FileCode className="w-3.5 h-3.5" />
+              Code
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom"><p>Open Code editor</p></TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </div>
   );
 }
@@ -165,14 +272,13 @@ function MessageBubble({
       transition={{ duration: 0.25 }}
       className={`flex ${isUser ? "justify-end" : "justify-start"} gap-3`}
     >
-      {/* Avatar */}
       {!isUser && (
         <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-1">
           AI
         </div>
       )}
 
-      <div className={`max-w-[85%] ${isUser ? "" : ""}`}>
+      <div className={`max-w-[85%]`}>
         {isUser ? (
           <div>
             <div className="bg-foreground text-background rounded-2xl rounded-br-md px-4 py-3">
@@ -247,7 +353,6 @@ function MessageBubble({
           </div>
         ) : (
           <div>
-            {/* Context used badges */}
             {message.metadata?.contextUsed && message.metadata.contextUsed.length > 0 && (
               <ContextTags tags={message.metadata.contextUsed} variant="assistant" />
             )}
@@ -272,7 +377,6 @@ function MessageBubble({
                   },
                 }}
               >{message.content}</ReactMarkdown>
-
 
               <div className="flex items-center gap-1 mt-3 -ml-1">
                 <button className="p-1 rounded hover:bg-secondary transition-colors">
@@ -312,7 +416,6 @@ function MessageBubble({
         )}
       </div>
 
-      {/* User avatar */}
       {isUser && (
         <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-1">
           U

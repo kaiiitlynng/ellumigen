@@ -1,10 +1,8 @@
 import { useCallback, useState, useRef, useEffect, useMemo } from "react";
-import { MessageSquare, FileCode, Layout } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { AppSidebar, type SidebarView } from "@/components/platform/AppSidebar";
 import { TopBar } from "@/components/platform/TopBar";
-import { ChatView } from "@/components/platform/ChatView";
-import { NotebookView } from "@/components/platform/NotebookView";
-import { FreeformView } from "@/components/platform/FreeformView";
+import { ChatView, type MiniPanelType } from "@/components/platform/ChatView";
 import { WorkspaceView } from "@/components/platform/WorkspaceView";
 import { HistoryView } from "@/components/platform/HistoryView";
 import { UseCasesView } from "@/components/platform/UseCasesView";
@@ -120,52 +118,23 @@ export default function Index() {
   const [isLoading, setIsLoading] = useState(false);
   const [activeView, setActiveView] = useState<SidebarView>("workspace");
   const [showContextHelp, setShowContextHelp] = useState(false);
-  const [activeModes, setActiveModes] = useState<InterfaceMode[]>(["conversation"]);
-  const [collapsedPanels, setCollapsedPanels] = useState<Set<InterfaceMode>>(new Set());
+  const [miniPanel, setMiniPanel] = useState<MiniPanelType>(null);
   const [showConversationMap, setShowConversationMap] = useState(false);
   const [activeMapNodeId, setActiveMapNodeId] = useState<string>("mn4");
-  
 
   // Auto-open canvas panel when dragging a visualization
   useEffect(() => {
     const handleDragOver = (e: DragEvent) => {
       if (e.dataTransfer?.types.includes("application/ellumigen-viz")) {
-        setActiveModes((prev) => {
-          if (!prev.includes("freeform")) return [...prev, "freeform"];
-          return prev;
-        });
-        setCollapsedPanels((prev) => {
-          if (prev.has("freeform")) {
-            const next = new Set(prev);
-            next.delete("freeform");
-            return next;
-          }
-          return prev;
-        });
+        setMiniPanel("canvas");
       }
     };
     window.addEventListener("dragover", handleDragOver);
     return () => window.removeEventListener("dragover", handleDragOver);
   }, []);
 
-  const toggleMode = useCallback((mode: InterfaceMode) => {
-    setActiveModes((prev) => {
-      if (prev.includes(mode)) {
-        // Don't allow removing the last panel
-        if (prev.length === 1) return prev;
-        return prev.filter((m) => m !== mode);
-      }
-      return [...prev, mode];
-    });
-  }, []);
-
-  const toggleCollapse = useCallback((mode: InterfaceMode) => {
-    setCollapsedPanels((prev) => {
-      const next = new Set(prev);
-      if (next.has(mode)) next.delete(mode);
-      else next.add(mode);
-      return next;
-    });
+  const toggleMiniPanel = useCallback((panel: "canvas" | "code") => {
+    setMiniPanel((prev) => (prev === panel ? null : panel));
   }, []);
 
   // Refs for managing the execution animation
@@ -477,8 +446,6 @@ export default function Index() {
       <div className="flex-1 flex flex-col min-w-0">
         {activeView === "chat" && (
           <TopBar
-            activeModes={activeModes}
-            onToggleMode={toggleMode}
             chatTitle={store.activeChat?.title}
             branchContext={branchContext}
             onOpenConversationMap={handleOpenConversationMap}
@@ -511,74 +478,26 @@ export default function Index() {
         ) : activeView === "artifacts" ? (
           <ArtifactsView />
         ) : (
-          <div className="flex-1 flex overflow-hidden">
-            {activeModes.includes("conversation") && (
-              <div
-                className={`flex flex-col border-r border-border transition-all duration-200 ${
-                  collapsedPanels.has("conversation") ? "w-10" : "flex-1 min-w-0"
-                }`}
-              >
-                {!store.activeBranchId && !showConversationMap && (
-                  <PanelHeader
-                    label={store.activeChat?.title || "Chat"}
-                    icon={MessageSquare}
-                    isCollapsed={collapsedPanels.has("conversation")}
-                    onToggleCollapse={() => toggleCollapse("conversation")}
-                  />
-                )}
-                {!collapsedPanels.has("conversation") && (
-                  <ChatView
-                    chat={viewChat}
-                    onSendMessage={handleSendMessage}
-                    onBranch={handleBranch}
-                    onBookmark={handleBookmark}
-                    onToggleBookmarkCollection={(messageId, colId) => {
-                      if (store.activeChatId) store.toggleBookmarkCollection(store.activeChatId, messageId, colId);
-                    }}
-                    onCreateBookmarkCollection={store.createBookmarkCollection}
-                    getCollectionIdsForMessage={store.getCollectionIdsForMessage}
-                    bookmarkCollections={store.bookmarkCollections}
-                    onApprovePlan={handleApprovePlan}
-                    onRejectPlan={handleRejectPlan}
-                    isLoading={isLoading}
-                    showContextHelp={showContextHelp}
-                    onToggleContextHelp={setShowContextHelp}
-                  />
-                )}
-              </div>
-            )}
-
-            {activeModes.includes("freeform") && (
-              <div
-                className={`flex flex-col border-r border-border transition-all duration-200 ${
-                  collapsedPanels.has("freeform") ? "w-10" : "flex-1 min-w-0"
-                }`}
-              >
-                <PanelHeader
-                  label="Canvas"
-                  icon={Layout}
-                  isCollapsed={collapsedPanels.has("freeform")}
-                  onToggleCollapse={() => toggleCollapse("freeform")}
-                />
-                {!collapsedPanels.has("freeform") && <FreeformView />}
-              </div>
-            )}
-
-            {activeModes.includes("notebook") && (
-              <div
-                className={`flex flex-col transition-all duration-200 ${
-                  collapsedPanels.has("notebook") ? "w-10" : "flex-1 min-w-0"
-                }`}
-              >
-                <PanelHeader
-                  label="Code"
-                  icon={FileCode}
-                  isCollapsed={collapsedPanels.has("notebook")}
-                  onToggleCollapse={() => toggleCollapse("notebook")}
-                />
-                {!collapsedPanels.has("notebook") && <NotebookView />}
-              </div>
-            )}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <ChatView
+              chat={viewChat}
+              onSendMessage={handleSendMessage}
+              onBranch={handleBranch}
+              onBookmark={handleBookmark}
+              onToggleBookmarkCollection={(messageId, colId) => {
+                if (store.activeChatId) store.toggleBookmarkCollection(store.activeChatId, messageId, colId);
+              }}
+              onCreateBookmarkCollection={store.createBookmarkCollection}
+              getCollectionIdsForMessage={store.getCollectionIdsForMessage}
+              bookmarkCollections={store.bookmarkCollections}
+              onApprovePlan={handleApprovePlan}
+              onRejectPlan={handleRejectPlan}
+              isLoading={isLoading}
+              showContextHelp={showContextHelp}
+              onToggleContextHelp={setShowContextHelp}
+              miniPanel={miniPanel}
+              onToggleMiniPanel={toggleMiniPanel}
+            />
           </div>
         )}
       </div>
