@@ -88,6 +88,10 @@ export function ChatView({
                     message={msg}
                     onBranch={() => onBranch?.(i)}
                     onBookmark={() => onBookmark?.(msg.id)}
+                    onToggleBookmarkCollection={onToggleBookmarkCollection ? (colId: string) => onToggleBookmarkCollection(msg.id, colId) : undefined}
+                    onCreateBookmarkCollection={onCreateBookmarkCollection}
+                    activeCollectionIds={getCollectionIdsForMessage?.(msg.id) ?? []}
+                    bookmarkCollections={bookmarkCollections ?? []}
                     onApprovePlan={() => onApprovePlan?.(msg.id)}
                     onRejectPlan={() => onRejectPlan?.(msg.id)}
                   />
