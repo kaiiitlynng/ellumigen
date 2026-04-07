@@ -104,7 +104,7 @@ export function NotebookView() {
   }, [cells, runCell]);
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="h-full flex flex-col overflow-hidden">
       {/* Toolbar */}
       <div className="flex items-center gap-2 px-6 py-3 border-b border-border bg-background">
         <button

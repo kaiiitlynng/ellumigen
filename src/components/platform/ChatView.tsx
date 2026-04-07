@@ -119,7 +119,7 @@ export function ChatView({
   );
 
   const miniPanelContent = miniPanel && (
-    <div className="flex-1 overflow-hidden">
+    <div className="flex h-full flex-col overflow-hidden">
       {miniPanel === "canvas" ? <FreeformView /> : <NotebookView />}
     </div>
   );

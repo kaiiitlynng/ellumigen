@@ -276,7 +276,7 @@ export function FreeformView({ onNodeAdded }: { onNodeAdded?: () => void } = {})
   }, []);
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="h-full flex flex-col overflow-hidden">
       {/* Toolbar */}
       <div className="flex items-center gap-2 px-6 py-2.5 border-b border-border bg-background">
         <ToolButton
