@@ -497,6 +497,7 @@ export default function Index() {
               onToggleContextHelp={setShowContextHelp}
               miniPanel={miniPanel}
               onToggleMiniPanel={toggleMiniPanel}
+              isNewChat={!store.activeBranchId}
             />
           </div>
         )}
