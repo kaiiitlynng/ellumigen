@@ -8,6 +8,7 @@ import type { Chat, ChatMessage, BookmarkCollection } from "@/types/chat";
 import { ChatInput } from "./ChatInput";
 import { ContextTags } from "./chat/ContextTags";
 import { ProposedPlan } from "./chat/ProposedPlan";
+import { SuggestionChips } from "./SuggestionChips";
 import { TaskExecution } from "./chat/TaskExecution";
 import { ThoughtProcess } from "./chat/ThoughtProcess";
 import { ContextControlHelp } from "./chat/ContextControlHelp";
