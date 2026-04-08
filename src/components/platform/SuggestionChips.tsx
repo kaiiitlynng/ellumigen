@@ -13,7 +13,7 @@ const suggestions = [
 
 export function SuggestionChips({ onSelect }: SuggestionChipsProps) {
   return (
-    <div className="flex flex-wrap items-center justify-center gap-2">
+    <div className="flex flex-nowrap items-center justify-center gap-2">
       {suggestions.map((s) => {
         const Icon = s.icon;
         return (
