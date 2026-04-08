@@ -58,6 +58,7 @@ export function ChatView({
   onToggleContextHelp,
   miniPanel,
   onToggleMiniPanel,
+  isNewChat,
 }: ChatViewProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -69,7 +70,7 @@ export function ChatView({
     }
   }, [chat?.messages, chat?.messages.length]);
 
-  const isEmpty = !chat || chat.messages.length === 0;
+  const isEmpty = isNewChat && (!chat || chat.messages.length === 0);
 
   const handleSend = (message: string) => {
     if (message.toLowerCase().includes("help")) {
