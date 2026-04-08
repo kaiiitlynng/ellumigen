@@ -167,13 +167,20 @@ export function ChatView({
   const chatContent = (
     <div className="flex flex-col h-full">
       {isEmpty ? (
-        <div className="flex-1 flex flex-col justify-end px-6 pb-12">
-          <div className="w-full max-w-xl mx-auto">
-            <ChatInput
-              onSend={handleSend}
-              disabled={isLoading}
-              onHelpClick={() => onToggleContextHelp?.(true)}
-            />
+        <div className="flex-1 flex flex-col items-center justify-center px-6">
+          <div className="w-full max-w-xl mx-auto flex flex-col items-center gap-6">
+            <div className="text-center space-y-2">
+              <h1 className="text-3xl font-semibold text-foreground">Start exploring</h1>
+              <p className="text-muted-foreground text-sm">Ask me questions about your data and generate research hypotheses</p>
+            </div>
+            <div className="w-full">
+              <ChatInput
+                onSend={handleSend}
+                disabled={isLoading}
+                onHelpClick={() => onToggleContextHelp?.(true)}
+              />
+            </div>
+            <SuggestionChips onSelect={handleSend} />
           </div>
         </div>
       ) : (
