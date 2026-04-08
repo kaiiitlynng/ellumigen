@@ -39,6 +39,7 @@ interface ChatViewProps {
   onToggleContextHelp?: (show: boolean) => void;
   miniPanel: MiniPanelType;
   onToggleMiniPanel: (panel: "canvas" | "code") => void;
+  isNewChat?: boolean;
 }
 
 export function ChatView({
