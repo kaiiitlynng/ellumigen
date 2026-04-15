@@ -156,12 +156,12 @@ export function WorkspaceView({ onStartExample }: WorkspaceViewProps) {
                           <span className="text-xs text-muted-foreground">{project.collaborators} Collaborators</span>
                         </div>
                         {project.status ? (
-                          <span className={`flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border border-border ${project.status.color}`}>
+                          <span className={`flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md ${project.status.bgColor} ${project.status.textColor}`}>
                             <span className="w-1.5 h-1.5 rounded-full bg-current" />
                             {project.status.label}
                           </span>
                         ) : project.updatedAt ? (
-                          <span className="text-xs text-muted-foreground">{project.updatedAt}</span>
+                          <span className="text-xs text-muted-foreground px-2.5 py-1 rounded-md bg-muted">{project.updatedAt}</span>
                         ) : null}
                       </div>
 
@@ -202,12 +202,12 @@ export function WorkspaceView({ onStartExample }: WorkspaceViewProps) {
                       <div className="flex items-center justify-between mb-3">
                         <Lock className="w-4 h-4 text-muted-foreground" />
                         {chat.status ? (
-                          <span className={`flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border border-border ${chat.status.color}`}>
+                          <span className={`flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md ${chat.status.bgColor} ${chat.status.textColor}`}>
                             <span className="w-1.5 h-1.5 rounded-full bg-current" />
                             {chat.status.label}
                           </span>
                         ) : chat.updatedAt ? (
-                          <span className="text-[10px] text-muted-foreground">{chat.updatedAt}</span>
+                          <span className="text-[10px] text-muted-foreground px-2 py-0.5 rounded-md bg-muted">{chat.updatedAt}</span>
                         ) : null}
                       </div>
                       <h3 className="text-sm font-semibold text-foreground leading-snug mb-1">{chat.title}</h3>
