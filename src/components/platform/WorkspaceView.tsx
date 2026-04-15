@@ -124,7 +124,7 @@ interface WorkspaceViewProps {
 export function WorkspaceView({ onStartExample }: WorkspaceViewProps) {
   return (
     <div className="flex-1 overflow-y-auto bg-gradient-to-b from-sky-200/60 via-sky-100/30 to-background">
-      <div className="flex">
+      <div className="flex items-start">
         {/* Main content */}
         <div className="flex-1 p-8 md:p-10">
           {/* Welcome header — sits on the gradient */}
@@ -223,7 +223,7 @@ export function WorkspaceView({ onStartExample }: WorkspaceViewProps) {
         </div>
 
         {/* Right sidebar */}
-        <aside className="hidden xl:block w-72 p-6 pt-8 shrink-0 space-y-6">
+        <aside className="hidden xl:block w-72 p-6 pt-[6.5rem] shrink-0 space-y-6">
           {/* Quickstart — white container over gradient */}
           <div className="bg-background rounded-2xl border border-border p-5">
             <h3 className="text-base font-semibold text-foreground mb-3">Quickstart</h3>
