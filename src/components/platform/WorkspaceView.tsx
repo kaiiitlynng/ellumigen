@@ -16,7 +16,7 @@ const DEMO_PROJECTS: Project[] = [
     title: "Project Name",
     dataset: "@Dataset-Name",
     collaborators: 3,
-    status: { label: "Currently Running", color: "text-orange-500" },
+    status: { label: "Currently Running", textColor: "text-orange-700", bgColor: "bg-orange-100" },
     stats: { chats: 3, notebooks: 1, canvas: 4 },
   },
   {
@@ -32,7 +32,7 @@ const DEMO_PROJECTS: Project[] = [
     title: "Project Name",
     dataset: "@Dataset-Name",
     collaborators: 3,
-    status: { label: "Recent Updates", color: "text-emerald-500" },
+    status: { label: "Recent Updates", textColor: "text-emerald-700", bgColor: "bg-emerald-100" },
     stats: { chats: 1, notebooks: 0, canvas: 4 },
   },
   {
@@ -40,7 +40,7 @@ const DEMO_PROJECTS: Project[] = [
     title: "Project Name",
     dataset: "@Dataset-Name",
     collaborators: 3,
-    status: { label: "Currently Running", color: "text-orange-500" },
+    status: { label: "Currently Running", textColor: "text-orange-700", bgColor: "bg-orange-100" },
     stats: { chats: 3, notebooks: 1, canvas: 4 },
   },
 ];
@@ -49,7 +49,7 @@ interface ChatCard {
   id: string;
   title: string;
   dataset: string;
-  status?: { label: string; color: string };
+  status?: { label: string; textColor: string; bgColor: string };
   updatedAt?: string;
 }
 
@@ -58,13 +58,13 @@ const DEMO_CHATS: ChatCard[] = [
     id: "c1",
     title: "Differential Expression – Tumor vs Normal",
     dataset: "@Dataset-Name",
-    status: { label: "Currently Running", color: "text-orange-500" },
+    status: { label: "Currently Running", textColor: "text-orange-700", bgColor: "bg-orange-100" },
   },
   {
     id: "c2",
     title: "Differential Expression – Tumor vs Normal",
     dataset: "@Dataset-Name",
-    status: { label: "New Chat – 1 min ago", color: "text-emerald-500" },
+    status: { label: "New Chat – 1 min ago", textColor: "text-emerald-700", bgColor: "bg-emerald-100" },
   },
   {
     id: "c3",
