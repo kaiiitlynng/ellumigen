@@ -64,7 +64,7 @@ export function TopBar({
             {chatTitle || "Chat"}
           </span>
           {chatSubtitle && (
-            <span className="text-xs" style={{ color: 'hsl(var(--gold))' }}>{chatSubtitle}</span>
+            <span className="text-xs text-blue-500">{chatSubtitle}</span>
           )}
         </div>
 
