@@ -151,7 +151,7 @@ export function AppSidebar({
               className={cn("sidebar-item w-full", activeView === "usecases" && "sidebar-item-active")}
             >
               <Sparkles className="w-4 h-4" />
-              Use Cases
+              Suggestions
             </button>
           </nav>
 
