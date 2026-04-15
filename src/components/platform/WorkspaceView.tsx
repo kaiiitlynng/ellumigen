@@ -166,7 +166,7 @@ export function WorkspaceView({ onStartExample }: WorkspaceViewProps) {
                       </div>
 
                       <h3 className="text-base font-semibold text-foreground mb-0.5">{project.title}</h3>
-                      <p className="text-sm mb-4" style={{ color: 'hsl(var(--gold))' }}>{project.dataset}</p>
+                      <p className="text-sm mb-4 text-blue-500">{project.dataset}</p>
 
                       <div className="flex items-center gap-0 border-t border-border pt-3">
                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground flex-1">
@@ -211,7 +211,7 @@ export function WorkspaceView({ onStartExample }: WorkspaceViewProps) {
                         ) : null}
                       </div>
                       <h3 className="text-sm font-semibold text-foreground leading-snug mb-1">{chat.title}</h3>
-                      <p className="text-xs" style={{ color: 'hsl(var(--gold))' }}>{chat.dataset}</p>
+                      <p className="text-xs text-blue-500">{chat.dataset}</p>
                     </div>
                   ))}
                 </div>
