@@ -1,8 +1,10 @@
-import { Share2, User, Map, Merge, ArrowLeft, Settings } from "lucide-react";
+import { Share2, User, Map, Merge, ArrowLeft, Settings, Clock } from "lucide-react";
 
 interface TopBarProps {
   chatTitle?: string;
   chatSubtitle?: string;
+  isLoading?: boolean;
+  lastMessageTime?: string;
   branchContext?: {
     isOnBranch: boolean;
     branchTitle: string;
@@ -19,6 +21,8 @@ interface TopBarProps {
 export function TopBar({
   chatTitle,
   chatSubtitle,
+  isLoading,
+  lastMessageTime,
   branchContext,
   onOpenConversationMap,
   onCloseConversationMap,
@@ -70,10 +74,16 @@ export function TopBar({
 
         <div className="flex items-center gap-2">
           {/* Status badge */}
-          <span className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border border-border text-orange-500">
-            <Settings className="w-3 h-3 animate-spin" style={{ animationDuration: '3s' }} />
-            Currently Running
-          </span>
+          {isLoading ? (
+            <span className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border border-border text-orange-500">
+              <Settings className="w-3 h-3 animate-spin" style={{ animationDuration: '3s' }} />
+              Currently Running
+            </span>
+          ) : lastMessageTime ? (
+            <span className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full bg-muted text-muted-foreground">
+              {lastMessageTime}
+            </span>
+          ) : null}
           <button
             onClick={showConversationMap ? onCloseConversationMap : onOpenConversationMap}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
