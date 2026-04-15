@@ -1,35 +1,103 @@
-import { Lock, Share2, ChevronDown, FileEdit, Globe, FileText } from "lucide-react";
+import { Lock, Share2, ChevronDown, FileEdit, Globe, FileText, MessageSquare, Layout, BookOpen, MoreHorizontal, Bookmark, Users } from "lucide-react";
 
 interface Project {
   id: string;
   title: string;
-  description: string;
-  visibility: "private" | "shared";
-  updatedAt: string;
+  dataset: string;
+  collaborators: number;
+  status?: { label: string; color: string };
+  updatedAt?: string;
+  stats: { chats: number; notebooks: number; canvas: number };
 }
 
 const DEMO_PROJECTS: Project[] = [
   {
     id: "p1",
-    title: "Differential Expression — Tumor vs Normal",
-    description: "RNA-seq analysis",
-    visibility: "private",
-    updatedAt: "20 min ago",
+    title: "Project Name",
+    dataset: "@Dataset-Name",
+    collaborators: 3,
+    status: { label: "Currently Running", color: "text-orange-500" },
+    stats: { chats: 3, notebooks: 1, canvas: 4 },
   },
   {
     id: "p2",
-    title: "Single-Cell Clustering — Immune Cell Dataset",
-    description: "UMAP visualization",
-    visibility: "shared",
-    updatedAt: "2 hrs ago",
+    title: "Project Name",
+    dataset: "@Dataset-Name",
+    collaborators: 3,
+    updatedAt: "20 min ago",
+    stats: { chats: 3, notebooks: 1, canvas: 4 },
   },
   {
     id: "p3",
-    title: "Variant Calling — WGS Sample Batch 14",
-    description: "Genome pipeline",
-    visibility: "private",
+    title: "Project Name",
+    dataset: "@Dataset-Name",
+    collaborators: 3,
+    status: { label: "Recent Updates", color: "text-emerald-500" },
+    stats: { chats: 1, notebooks: 0, canvas: 4 },
+  },
+  {
+    id: "p4",
+    title: "Project Name",
+    dataset: "@Dataset-Name",
+    collaborators: 3,
+    status: { label: "Currently Running", color: "text-orange-500" },
+    stats: { chats: 3, notebooks: 1, canvas: 4 },
+  },
+];
+
+interface ChatCard {
+  id: string;
+  title: string;
+  dataset: string;
+  status?: { label: string; color: string };
+  updatedAt?: string;
+}
+
+const DEMO_CHATS: ChatCard[] = [
+  {
+    id: "c1",
+    title: "Differential Expression – Tumor vs Normal",
+    dataset: "@Dataset-Name",
+    status: { label: "Currently Running", color: "text-orange-500" },
+  },
+  {
+    id: "c2",
+    title: "Differential Expression – Tumor vs Normal",
+    dataset: "@Dataset-Name",
+    status: { label: "New Chat – 1 min ago", color: "text-emerald-500" },
+  },
+  {
+    id: "c3",
+    title: "Differential Expression – Tumor vs Normal",
+    dataset: "@Dataset-Name",
+    updatedAt: "20 min ago",
+  },
+  {
+    id: "c4",
+    title: "Differential Expression – Tumor vs Normal",
+    dataset: "@Dataset-Name",
     updatedAt: "Yesterday",
   },
+];
+
+interface QuickstartItem {
+  id: string;
+  text: string;
+  chatTitle: string;
+  userMessage: string;
+  assistantMessage: string;
+}
+
+interface BookmarkItem {
+  id: string;
+  title: string;
+  datasets: string;
+  time: string;
+}
+
+const DEMO_BOOKMARKS: BookmarkItem[] = [
+  { id: "b1", title: "Pan-Cancer RNA-seq Expression Atlas", datasets: "12 datasets", time: "2 hrs ago" },
+  { id: "b2", title: "Pan-Cancer RNA-seq Expression Atlas", datasets: "12 datasets", time: "2 hrs ago" },
 ];
 
 interface ExampleTemplate {
@@ -48,99 +116,15 @@ const EXAMPLE_TEMPLATES: ExampleTemplate[] = [
     text: "Start a new computational biology workflow",
     chatTitle: "Computational Biology Workflow",
     userMessage: "I'd like to start a new computational biology workflow. Can you help me set up a pipeline for analyzing gene expression data?",
-    assistantMessage: `## Getting Started with Your Workflow
-
-Great choice! Here's a recommended workflow for gene expression analysis:
-
-### Step 1: Data Acquisition
-- Select your dataset source (GEO, TCGA, or upload your own)
-- Define sample groups and metadata
-
-### Step 2: Quality Control
-- Assess raw data quality with FastQC
-- Trim adapters and low-quality bases
-
-### Step 3: Alignment & Quantification
-- Align reads to reference genome (STAR/HISAT2)
-- Quantify transcript abundance (featureCounts/Salmon)
-
-### Step 4: Differential Expression
-- Normalize counts (DESeq2/edgeR)
-- Identify differentially expressed genes
-
-### Step 5: Downstream Analysis
-- Pathway enrichment (GSEA, GO analysis)
-- Visualization (volcano plots, heatmaps)
-
-What dataset would you like to work with? You can reference datasets using the **@** symbol (e.g., @TCGA-BRCA) or upload your own data.`,
+    assistantMessage: `## Getting Started with Your Workflow\n\nGreat choice! Here's a recommended workflow for gene expression analysis:\n\n### Step 1: Data Acquisition\n- Select your dataset source (GEO, TCGA, or upload your own)\n- Define sample groups and metadata\n\nWhat dataset would you like to work with?`,
   },
   {
     id: "e2",
     icon: Globe,
-    text: "Perform analyses such as PCA and UMAP",
+    text: "Perform PCA Analysis",
     chatTitle: "PCA & UMAP Analysis",
-    userMessage: "Can you perform PCA and UMAP dimensionality reduction on a single-cell RNA-seq dataset to identify cell clusters?",
-    assistantMessage: `## Dimensionality Reduction Analysis
-
-I'll walk you through PCA and UMAP analysis for single-cell clustering:
-
-### PCA Results
-- **Components analyzed**: 50 principal components
-- **Variance explained by PC1**: 12.4%
-- **Variance explained by PC2**: 8.7%
-- **Elbow point**: PC 15 (recommended cutoff)
-
-### UMAP Clustering
-Using the top 15 PCs, UMAP reveals **8 distinct cell clusters**:
-
-| Cluster | Cell Count | Marker Genes | Putative Identity |
-|---------|-----------|--------------|-------------------|
-| 0 | 2,341 | CD3D, CD3E | T cells |
-| 1 | 1,892 | CD14, LYZ | Monocytes |
-| 2 | 1,456 | MS4A1, CD79A | B cells |
-| 3 | 987 | NKG7, GNLY | NK cells |
-| 4 | 654 | FCGR3A | CD16+ Monocytes |
-| 5 | 432 | FCER1A, CST3 | Dendritic cells |
-| 6 | 298 | PPBP | Megakaryocytes |
-| 7 | 156 | IL7R, CCR7 | Naive T cells |
-
-Would you like me to generate the UMAP visualization or explore specific clusters in more detail?`,
-  },
-  {
-    id: "e3",
-    icon: FileText,
-    text: "Create informative plots (e.g., box plots, scatter plots)",
-    chatTitle: "Data Visualization",
-    userMessage: "Help me create publication-quality plots for my gene expression data — I need box plots comparing expression across groups and scatter plots for correlation analysis.",
-    assistantMessage: `## Visualization Suite
-
-I can generate several publication-ready plot types for your data:
-
-### Available Visualizations
-
-1. **Box Plots** — Compare gene expression across sample groups
-   - Customizable: outlier display, jitter points, significance brackets
-   - Support for grouped and faceted layouts
-
-2. **Scatter Plots** — Correlation between two genes or conditions
-   - With regression line and R² value
-   - Color-coded by sample group or metadata
-
-3. **Volcano Plots** — Differential expression overview
-   - Highlight significant genes with labels
-   - Adjustable FC and p-value thresholds
-
-4. **Heatmaps** — Expression patterns across genes and samples
-   - Hierarchical clustering with dendrograms
-   - Custom color scales and annotations
-
-### Next Steps
-To get started, please provide:
-- Your **dataset** (use @ to reference, e.g., @TCGA-BRCA)
-- The **genes or comparisons** you're interested in
-- Any **formatting preferences** (color scheme, figure dimensions)
-
-Which plot type would you like to create first?`,
+    userMessage: "Can you perform PCA and UMAP dimensionality reduction on a single-cell RNA-seq dataset?",
+    assistantMessage: `## Dimensionality Reduction Analysis\n\nI'll walk you through PCA and UMAP analysis for single-cell clustering.`,
   },
 ];
 
@@ -150,74 +134,140 @@ interface WorkspaceViewProps {
 
 export function WorkspaceView({ onStartExample }: WorkspaceViewProps) {
   return (
-    <div className="flex-1 overflow-y-auto p-8 md:p-12">
-      <div className="max-w-5xl mx-auto">
-        {/* Header */}
-        <h1 className="text-2xl font-bold text-foreground mb-8">Your Workspace</h1>
+    <div className="flex-1 overflow-y-auto">
+      <div className="flex">
+        {/* Main content */}
+        <div className="flex-1 p-8 md:p-10">
+          <div className="max-w-4xl">
+            {/* Welcome header */}
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-8">
+              Welcome back! There are four updates on your projects.
+            </h1>
 
-        {/* Projects section */}
-        <div className="mb-10">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-foreground">Projects</h2>
-            <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-border rounded-lg text-muted-foreground hover:bg-secondary transition-colors">
-              Filter by
-              <ChevronDown className="w-3.5 h-3.5" />
-            </button>
+            {/* Your Workspaces */}
+            <section className="mb-10">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-foreground">Your Workspaces</h2>
+                <span className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-xs text-muted-foreground">2</span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {DEMO_PROJECTS.map((project) => (
+                  <button
+                    key={project.id}
+                    className="text-left p-5 rounded-xl border border-border bg-background hover:bg-secondary/30 transition-colors cursor-pointer"
+                  >
+                    {/* Top row: collaborators + status/time */}
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="flex -space-x-1.5">
+                          {Array.from({ length: Math.min(project.collaborators, 3) }).map((_, i) => (
+                            <div key={i} className="w-6 h-6 rounded-full bg-muted border-2 border-background" />
+                          ))}
+                        </div>
+                        <span className="text-xs text-muted-foreground">{project.collaborators} Collaborators</span>
+                      </div>
+                      {project.status ? (
+                        <span className={`flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border border-border ${project.status.color}`}>
+                          <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                          {project.status.label}
+                        </span>
+                      ) : project.updatedAt ? (
+                        <span className="text-xs text-muted-foreground">{project.updatedAt}</span>
+                      ) : null}
+                    </div>
+
+                    {/* Title + dataset */}
+                    <h3 className="text-base font-semibold text-foreground mb-0.5">{project.title}</h3>
+                    <p className="text-sm text-accent-foreground/70 mb-4" style={{ color: 'hsl(var(--gold))' }}>{project.dataset}</p>
+
+                    {/* Stats row */}
+                    <div className="flex items-center gap-0 border-t border-border pt-3">
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground flex-1">
+                        <MessageSquare className="w-3.5 h-3.5" />
+                        {project.stats.chats} Chats
+                      </div>
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground flex-1 border-l border-border pl-3">
+                        <BookOpen className="w-3.5 h-3.5" />
+                        {project.stats.notebooks} Notebooks
+                      </div>
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground flex-1 border-l border-border pl-3">
+                        <Layout className="w-3.5 h-3.5" />
+                        {project.stats.canvas} Canvas
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            {/* Your Chats */}
+            <section>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-foreground">Your Chats</h2>
+                <span className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-xs text-muted-foreground">1</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {DEMO_CHATS.map((chat) => (
+                  <button
+                    key={chat.id}
+                    className="text-left p-4 rounded-xl border border-border bg-background hover:bg-secondary/30 transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <Lock className="w-4 h-4 text-muted-foreground" />
+                      {chat.status ? (
+                        <span className={`flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border border-border ${chat.status.color}`}>
+                          <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                          {chat.status.label}
+                        </span>
+                      ) : chat.updatedAt ? (
+                        <span className="text-[10px] text-muted-foreground">{chat.updatedAt}</span>
+                      ) : null}
+                    </div>
+                    <h3 className="text-sm font-semibold text-foreground leading-snug mb-1">{chat.title}</h3>
+                    <p className="text-xs" style={{ color: 'hsl(var(--gold))' }}>{chat.dataset}</p>
+                  </button>
+                ))}
+              </div>
+            </section>
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {DEMO_PROJECTS.map((project) => (
+        {/* Right sidebar */}
+        <aside className="hidden xl:block w-72 border-l border-border p-6 shrink-0">
+          {/* Quickstart */}
+          <h3 className="text-base font-semibold text-foreground mb-3">Quickstart</h3>
+          <div className="space-y-1 mb-8">
+            {EXAMPLE_TEMPLATES.map((example) => (
               <button
-                key={project.id}
-                className="text-left p-5 rounded-xl border border-border bg-background hover:bg-secondary/50 transition-colors cursor-pointer group"
+                key={example.id}
+                onClick={() => onStartExample?.(example.chatTitle, example.userMessage, example.assistantMessage)}
+                className="flex items-start gap-2.5 w-full p-3 rounded-lg border border-border hover:bg-secondary/50 transition-colors text-left"
               >
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-3">
-                  {project.visibility === "private" ? (
-                    <>
-                      <Lock className="w-3.5 h-3.5" />
-                      Private
-                    </>
-                  ) : (
-                    <>
-                      <Share2 className="w-3.5 h-3.5" />
-                      Shared
-                    </>
-                  )}
-                </div>
-                <h3 className="text-sm font-semibold text-foreground leading-snug mb-2">
-                  {project.title}
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  {project.description} · {project.updatedAt}
-                </p>
+                <MessageSquare className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                <span className="text-sm text-foreground leading-snug">{example.text}</span>
               </button>
             ))}
           </div>
-        </div>
 
-        {/* Examples section */}
-        <div>
-          <h2 className="text-lg font-semibold text-foreground mb-4">Examples</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {EXAMPLE_TEMPLATES.map((example) => {
-              const Icon = example.icon;
-              return (
-                <button
-                  key={example.id}
-                  onClick={() => onStartExample?.(example.chatTitle, example.userMessage, example.assistantMessage)}
-                  className="text-left p-5 rounded-xl border border-border bg-background hover:bg-secondary/50 transition-colors cursor-pointer"
-                >
-                  <div className="mb-8">
-                    <Icon className="w-5 h-5 text-muted-foreground" />
-                  </div>
-                  <p className="text-sm font-medium text-foreground leading-snug">
-                    {example.text}
-                  </p>
+          {/* Bookmarks */}
+          <h3 className="text-base font-semibold text-foreground mb-3">Bookmarks</h3>
+          <div className="space-y-1">
+            {DEMO_BOOKMARKS.map((bm) => (
+              <div
+                key={bm.id}
+                className="flex items-start justify-between p-3 rounded-lg border border-border"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-foreground leading-snug truncate">{bm.title}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{bm.datasets} · {bm.time}</p>
+                </div>
+                <button className="p-1 rounded hover:bg-secondary transition-colors shrink-0">
+                  <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
                 </button>
-              );
-            })}
+              </div>
+            ))}
           </div>
-        </div>
+        </aside>
       </div>
     </div>
   );
