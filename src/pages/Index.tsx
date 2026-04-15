@@ -447,6 +447,7 @@ export default function Index() {
         {activeView === "chat" && (
           <TopBar
             chatTitle={store.activeChat?.title}
+            chatSubtitle="Dataset name"
             branchContext={branchContext}
             onOpenConversationMap={handleOpenConversationMap}
             onCloseConversationMap={() => setShowConversationMap(false)}
