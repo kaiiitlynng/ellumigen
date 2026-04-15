@@ -80,14 +80,6 @@ const DEMO_CHATS: ChatCard[] = [
   },
 ];
 
-interface QuickstartItem {
-  id: string;
-  text: string;
-  chatTitle: string;
-  userMessage: string;
-  assistantMessage: string;
-}
-
 interface BookmarkItem {
   id: string;
   title: string;
@@ -102,7 +94,6 @@ const DEMO_BOOKMARKS: BookmarkItem[] = [
 
 interface ExampleTemplate {
   id: string;
-  icon: React.ComponentType<{ className?: string }>;
   text: string;
   chatTitle: string;
   userMessage: string;
@@ -112,15 +103,13 @@ interface ExampleTemplate {
 const EXAMPLE_TEMPLATES: ExampleTemplate[] = [
   {
     id: "e1",
-    icon: FileEdit,
     text: "Start a new computational biology workflow",
     chatTitle: "Computational Biology Workflow",
     userMessage: "I'd like to start a new computational biology workflow. Can you help me set up a pipeline for analyzing gene expression data?",
-    assistantMessage: `## Getting Started with Your Workflow\n\nGreat choice! Here's a recommended workflow for gene expression analysis:\n\n### Step 1: Data Acquisition\n- Select your dataset source (GEO, TCGA, or upload your own)\n- Define sample groups and metadata\n\nWhat dataset would you like to work with?`,
+    assistantMessage: `## Getting Started with Your Workflow\n\nGreat choice! Here's a recommended workflow for gene expression analysis.`,
   },
   {
     id: "e2",
-    icon: Globe,
     text: "Perform PCA Analysis",
     chatTitle: "PCA & UMAP Analysis",
     userMessage: "Can you perform PCA and UMAP dimensionality reduction on a single-cell RNA-seq dataset?",
@@ -134,16 +123,19 @@ interface WorkspaceViewProps {
 
 export function WorkspaceView({ onStartExample }: WorkspaceViewProps) {
   return (
-    <div className="flex-1 overflow-y-auto">
+    <div className="flex-1 overflow-y-auto bg-gradient-to-b from-sky-200/60 via-sky-100/30 to-background">
       <div className="flex">
         {/* Main content */}
         <div className="flex-1 p-8 md:p-10">
-          <div className="max-w-4xl">
-            {/* Welcome header */}
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-8">
+          {/* Welcome header — sits on the gradient */}
+          <div className="max-w-4xl mb-6">
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">
               Welcome back! There are four updates on your projects.
             </h1>
+          </div>
 
+          {/* White container for the cards */}
+          <div className="max-w-4xl bg-background rounded-2xl border border-border p-6 md:p-8">
             {/* Your Workspaces */}
             <section className="mb-10">
               <div className="flex items-center justify-between mb-4">
@@ -152,11 +144,11 @@ export function WorkspaceView({ onStartExample }: WorkspaceViewProps) {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {DEMO_PROJECTS.map((project) => (
-                  <button
+                  <div
                     key={project.id}
                     className="text-left p-5 rounded-xl border border-border bg-background hover:bg-secondary/30 transition-colors cursor-pointer"
                   >
-                    {/* Top row: collaborators + status/time */}
+                    {/* Top row */}
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <div className="flex -space-x-1.5">
@@ -176,11 +168,9 @@ export function WorkspaceView({ onStartExample }: WorkspaceViewProps) {
                       ) : null}
                     </div>
 
-                    {/* Title + dataset */}
                     <h3 className="text-base font-semibold text-foreground mb-0.5">{project.title}</h3>
-                    <p className="text-sm text-accent-foreground/70 mb-4" style={{ color: 'hsl(var(--gold))' }}>{project.dataset}</p>
+                    <p className="text-sm mb-4" style={{ color: 'hsl(var(--gold))' }}>{project.dataset}</p>
 
-                    {/* Stats row */}
                     <div className="flex items-center gap-0 border-t border-border pt-3">
                       <div className="flex items-center gap-1.5 text-xs text-muted-foreground flex-1">
                         <MessageSquare className="w-3.5 h-3.5" />
@@ -195,7 +185,7 @@ export function WorkspaceView({ onStartExample }: WorkspaceViewProps) {
                         {project.stats.canvas} Canvas
                       </div>
                     </div>
-                  </button>
+                  </div>
                 ))}
               </div>
             </section>
@@ -208,7 +198,7 @@ export function WorkspaceView({ onStartExample }: WorkspaceViewProps) {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {DEMO_CHATS.map((chat) => (
-                  <button
+                  <div
                     key={chat.id}
                     className="text-left p-4 rounded-xl border border-border bg-background hover:bg-secondary/30 transition-colors cursor-pointer"
                   >
@@ -225,7 +215,7 @@ export function WorkspaceView({ onStartExample }: WorkspaceViewProps) {
                     </div>
                     <h3 className="text-sm font-semibold text-foreground leading-snug mb-1">{chat.title}</h3>
                     <p className="text-xs" style={{ color: 'hsl(var(--gold))' }}>{chat.dataset}</p>
-                  </button>
+                  </div>
                 ))}
               </div>
             </section>
@@ -233,15 +223,17 @@ export function WorkspaceView({ onStartExample }: WorkspaceViewProps) {
         </div>
 
         {/* Right sidebar */}
-        <aside className="hidden xl:block w-72 border-l border-border p-6 shrink-0">
+        <aside className="hidden xl:block w-72 border-l border-border bg-background p-6 shrink-0">
           {/* Quickstart */}
           <h3 className="text-base font-semibold text-foreground mb-3">Quickstart</h3>
-          <div className="space-y-1 mb-8">
-            {EXAMPLE_TEMPLATES.map((example) => (
+          <div className="space-y-0 mb-8 rounded-lg border border-border overflow-hidden">
+            {EXAMPLE_TEMPLATES.map((example, i) => (
               <button
                 key={example.id}
                 onClick={() => onStartExample?.(example.chatTitle, example.userMessage, example.assistantMessage)}
-                className="flex items-start gap-2.5 w-full p-3 rounded-lg border border-border hover:bg-secondary/50 transition-colors text-left"
+                className={`flex items-start gap-2.5 w-full p-3 hover:bg-secondary/50 transition-colors text-left ${
+                  i < EXAMPLE_TEMPLATES.length - 1 ? 'border-b border-border' : ''
+                }`}
               >
                 <MessageSquare className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
                 <span className="text-sm text-foreground leading-snug">{example.text}</span>
@@ -251,7 +243,7 @@ export function WorkspaceView({ onStartExample }: WorkspaceViewProps) {
 
           {/* Bookmarks */}
           <h3 className="text-base font-semibold text-foreground mb-3">Bookmarks</h3>
-          <div className="space-y-1">
+          <div className="space-y-2">
             {DEMO_BOOKMARKS.map((bm) => (
               <div
                 key={bm.id}
