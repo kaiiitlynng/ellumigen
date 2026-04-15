@@ -5,7 +5,7 @@ interface Project {
   title: string;
   dataset: string;
   collaborators: number;
-  status?: { label: string; color: string };
+  status?: { label: string; textColor: string; bgColor: string };
   updatedAt?: string;
   stats: { chats: number; notebooks: number; canvas: number };
 }
@@ -16,7 +16,7 @@ const DEMO_PROJECTS: Project[] = [
     title: "Project Name",
     dataset: "@Dataset-Name",
     collaborators: 3,
-    status: { label: "Currently Running", color: "text-orange-500" },
+    status: { label: "Currently Running", textColor: "text-orange-700", bgColor: "bg-orange-100" },
     stats: { chats: 3, notebooks: 1, canvas: 4 },
   },
   {
@@ -32,7 +32,7 @@ const DEMO_PROJECTS: Project[] = [
     title: "Project Name",
     dataset: "@Dataset-Name",
     collaborators: 3,
-    status: { label: "Recent Updates", color: "text-emerald-500" },
+    status: { label: "Recent Updates", textColor: "text-emerald-700", bgColor: "bg-emerald-100" },
     stats: { chats: 1, notebooks: 0, canvas: 4 },
   },
   {
@@ -40,7 +40,7 @@ const DEMO_PROJECTS: Project[] = [
     title: "Project Name",
     dataset: "@Dataset-Name",
     collaborators: 3,
-    status: { label: "Currently Running", color: "text-orange-500" },
+    status: { label: "Currently Running", textColor: "text-orange-700", bgColor: "bg-orange-100" },
     stats: { chats: 3, notebooks: 1, canvas: 4 },
   },
 ];
@@ -49,7 +49,7 @@ interface ChatCard {
   id: string;
   title: string;
   dataset: string;
-  status?: { label: string; color: string };
+  status?: { label: string; textColor: string; bgColor: string };
   updatedAt?: string;
 }
 
@@ -58,13 +58,13 @@ const DEMO_CHATS: ChatCard[] = [
     id: "c1",
     title: "Differential Expression – Tumor vs Normal",
     dataset: "@Dataset-Name",
-    status: { label: "Currently Running", color: "text-orange-500" },
+    status: { label: "Currently Running", textColor: "text-orange-700", bgColor: "bg-orange-100" },
   },
   {
     id: "c2",
     title: "Differential Expression – Tumor vs Normal",
     dataset: "@Dataset-Name",
-    status: { label: "New Chat – 1 min ago", color: "text-emerald-500" },
+    status: { label: "New Chat – 1 min ago", textColor: "text-emerald-700", bgColor: "bg-emerald-100" },
   },
   {
     id: "c3",
@@ -156,12 +156,12 @@ export function WorkspaceView({ onStartExample }: WorkspaceViewProps) {
                           <span className="text-xs text-muted-foreground">{project.collaborators} Collaborators</span>
                         </div>
                         {project.status ? (
-                          <span className={`flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border border-border ${project.status.color}`}>
+                          <span className={`flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md ${project.status.bgColor} ${project.status.textColor}`}>
                             <span className="w-1.5 h-1.5 rounded-full bg-current" />
                             {project.status.label}
                           </span>
                         ) : project.updatedAt ? (
-                          <span className="text-xs text-muted-foreground">{project.updatedAt}</span>
+                          <span className="text-xs text-muted-foreground px-2.5 py-1 rounded-md bg-muted">{project.updatedAt}</span>
                         ) : null}
                       </div>
 
@@ -202,12 +202,12 @@ export function WorkspaceView({ onStartExample }: WorkspaceViewProps) {
                       <div className="flex items-center justify-between mb-3">
                         <Lock className="w-4 h-4 text-muted-foreground" />
                         {chat.status ? (
-                          <span className={`flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border border-border ${chat.status.color}`}>
+                          <span className={`flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md ${chat.status.bgColor} ${chat.status.textColor}`}>
                             <span className="w-1.5 h-1.5 rounded-full bg-current" />
                             {chat.status.label}
                           </span>
                         ) : chat.updatedAt ? (
-                          <span className="text-[10px] text-muted-foreground">{chat.updatedAt}</span>
+                          <span className="text-[10px] text-muted-foreground px-2 py-0.5 rounded-md bg-muted">{chat.updatedAt}</span>
                         ) : null}
                       </div>
                       <h3 className="text-sm font-semibold text-foreground leading-snug mb-1">{chat.title}</h3>
