@@ -211,11 +211,15 @@ export function ChatView({
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="flex gap-1 py-4"
+                  className="flex items-center gap-3 py-4"
                 >
-                  <div className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <div className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <div className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: "300ms" }} />
+                  <img src={ellumigenLogo} alt="Processing" className="w-8 h-8 rounded-full object-cover" />
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2 h-2 rounded-full bg-foreground/40 animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <div className="w-2 h-2 rounded-full bg-foreground/40 animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <div className="w-2 h-2 rounded-full bg-foreground/40 animate-bounce" style={{ animationDelay: "300ms" }} />
+                    <span className="text-sm text-muted-foreground ml-2">Processing analysis...</span>
+                  </div>
                 </motion.div>
               )}
 
