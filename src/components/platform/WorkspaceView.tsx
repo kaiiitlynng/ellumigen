@@ -223,41 +223,45 @@ export function WorkspaceView({ onStartExample }: WorkspaceViewProps) {
         </div>
 
         {/* Right sidebar */}
-        <aside className="hidden xl:block w-72 border-l border-border bg-background p-6 shrink-0">
-          {/* Quickstart */}
-          <h3 className="text-base font-semibold text-foreground mb-3">Quickstart</h3>
-          <div className="space-y-0 mb-8 rounded-lg border border-border overflow-hidden">
-            {EXAMPLE_TEMPLATES.map((example, i) => (
-              <button
-                key={example.id}
-                onClick={() => onStartExample?.(example.chatTitle, example.userMessage, example.assistantMessage)}
-                className={`flex items-start gap-2.5 w-full p-3 hover:bg-secondary/50 transition-colors text-left ${
-                  i < EXAMPLE_TEMPLATES.length - 1 ? 'border-b border-border' : ''
-                }`}
-              >
-                <MessageSquare className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                <span className="text-sm text-foreground leading-snug">{example.text}</span>
-              </button>
-            ))}
+        <aside className="hidden xl:block w-72 p-6 pt-8 shrink-0 space-y-6">
+          {/* Quickstart — white container over gradient */}
+          <div className="bg-background rounded-2xl border border-border p-5">
+            <h3 className="text-base font-semibold text-foreground mb-3">Quickstart</h3>
+            <div className="space-y-0 rounded-lg border border-border overflow-hidden">
+              {EXAMPLE_TEMPLATES.map((example, i) => (
+                <button
+                  key={example.id}
+                  onClick={() => onStartExample?.(example.chatTitle, example.userMessage, example.assistantMessage)}
+                  className={`flex items-start gap-2.5 w-full p-3 hover:bg-secondary/50 transition-colors text-left ${
+                    i < EXAMPLE_TEMPLATES.length - 1 ? 'border-b border-border' : ''
+                  }`}
+                >
+                  <MessageSquare className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                  <span className="text-sm text-foreground leading-snug">{example.text}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Bookmarks */}
-          <h3 className="text-base font-semibold text-foreground mb-3">Bookmarks</h3>
-          <div className="space-y-2">
-            {DEMO_BOOKMARKS.map((bm) => (
-              <div
-                key={bm.id}
-                className="flex items-start justify-between p-3 rounded-lg border border-border"
-              >
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-foreground leading-snug truncate">{bm.title}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{bm.datasets} · {bm.time}</p>
+          {/* Bookmarks — white container over gradient */}
+          <div className="bg-background rounded-2xl border border-border p-5">
+            <h3 className="text-base font-semibold text-foreground mb-3">Bookmarks</h3>
+            <div className="space-y-2">
+              {DEMO_BOOKMARKS.map((bm) => (
+                <div
+                  key={bm.id}
+                  className="flex items-start justify-between p-3 rounded-lg border border-border"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-foreground leading-snug truncate">{bm.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{bm.datasets} · {bm.time}</p>
+                  </div>
+                  <button className="p-1 rounded hover:bg-secondary transition-colors shrink-0">
+                    <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
+                  </button>
                 </div>
-                <button className="p-1 rounded hover:bg-secondary transition-colors shrink-0">
-                  <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
-                </button>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </aside>
       </div>
