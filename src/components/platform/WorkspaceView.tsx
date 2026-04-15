@@ -124,146 +124,141 @@ interface WorkspaceViewProps {
 export function WorkspaceView({ onStartExample }: WorkspaceViewProps) {
   return (
     <div className="flex-1 overflow-y-auto bg-gradient-to-b from-sky-200/60 via-sky-100/30 to-background">
-      <div className="flex items-start gap-4">
-        {/* Main content */}
-        <div className="flex-1 p-8 md:p-10 pr-0">
-          {/* Welcome header — sits on the gradient */}
-          <div className="max-w-4xl mb-6">
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-              Welcome back! There are four updates on your projects.
-            </h1>
-          </div>
-
-          {/* White container for the cards */}
-          <div className="max-w-4xl bg-background rounded-2xl border border-border p-6 md:p-8">
-            {/* Your Workspaces */}
-            <section className="mb-10">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-foreground">Your Workspaces</h2>
-                <span className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-xs text-muted-foreground">2</span>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {DEMO_PROJECTS.map((project) => (
-                  <div
-                    key={project.id}
-                    className="text-left p-5 rounded-xl border border-border bg-background hover:bg-secondary/30 transition-colors cursor-pointer"
-                  >
-                    {/* Top row */}
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <div className="flex -space-x-1.5">
-                          {Array.from({ length: Math.min(project.collaborators, 3) }).map((_, i) => (
-                            <div key={i} className="w-6 h-6 rounded-full bg-muted border-2 border-background" />
-                          ))}
-                        </div>
-                        <span className="text-xs text-muted-foreground">{project.collaborators} Collaborators</span>
-                      </div>
-                      {project.status ? (
-                        <span className={`flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border border-border ${project.status.color}`}>
-                          <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                          {project.status.label}
-                        </span>
-                      ) : project.updatedAt ? (
-                        <span className="text-xs text-muted-foreground">{project.updatedAt}</span>
-                      ) : null}
-                    </div>
-
-                    <h3 className="text-base font-semibold text-foreground mb-0.5">{project.title}</h3>
-                    <p className="text-sm mb-4" style={{ color: 'hsl(var(--gold))' }}>{project.dataset}</p>
-
-                    <div className="flex items-center gap-0 border-t border-border pt-3">
-                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground flex-1">
-                        <MessageSquare className="w-3.5 h-3.5" />
-                        {project.stats.chats} Chats
-                      </div>
-                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground flex-1 border-l border-border pl-3">
-                        <BookOpen className="w-3.5 h-3.5" />
-                        {project.stats.notebooks} Notebooks
-                      </div>
-                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground flex-1 border-l border-border pl-3">
-                        <Layout className="w-3.5 h-3.5" />
-                        {project.stats.canvas} Canvas
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* Your Chats */}
-            <section>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-foreground">Your Chats</h2>
-                <span className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-xs text-muted-foreground">1</span>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {DEMO_CHATS.map((chat) => (
-                  <div
-                    key={chat.id}
-                    className="text-left p-4 rounded-xl border border-border bg-background hover:bg-secondary/30 transition-colors cursor-pointer"
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <Lock className="w-4 h-4 text-muted-foreground" />
-                      {chat.status ? (
-                        <span className={`flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border border-border ${chat.status.color}`}>
-                          <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                          {chat.status.label}
-                        </span>
-                      ) : chat.updatedAt ? (
-                        <span className="text-[10px] text-muted-foreground">{chat.updatedAt}</span>
-                      ) : null}
-                    </div>
-                    <h3 className="text-sm font-semibold text-foreground leading-snug mb-1">{chat.title}</h3>
-                    <p className="text-xs" style={{ color: 'hsl(var(--gold))' }}>{chat.dataset}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-          </div>
+      <div className="mx-auto max-w-[1400px] px-4 py-6 md:px-6 md:py-8">
+        <div className="mb-4 xl:max-w-[calc(100%-19rem)]">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+            Welcome back! There are four updates on your projects.
+          </h1>
         </div>
 
-        {/* Right sidebar */}
-        <aside className="hidden xl:block w-72 pr-6 pt-[6.5rem] shrink-0 space-y-4">
-          {/* Quickstart — white container over gradient */}
-          <div className="bg-background rounded-2xl border border-border p-5">
-            <h3 className="text-base font-semibold text-foreground mb-3">Quickstart</h3>
-            <div className="space-y-0 rounded-lg border border-border overflow-hidden">
-              {EXAMPLE_TEMPLATES.map((example, i) => (
-                <button
-                  key={example.id}
-                  onClick={() => onStartExample?.(example.chatTitle, example.userMessage, example.assistantMessage)}
-                  className={`flex items-start gap-2.5 w-full p-3 hover:bg-secondary/50 transition-colors text-left ${
-                    i < EXAMPLE_TEMPLATES.length - 1 ? 'border-b border-border' : ''
-                  }`}
-                >
-                  <MessageSquare className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                  <span className="text-sm text-foreground leading-snug">{example.text}</span>
-                </button>
-              ))}
+        <div className="flex items-start gap-4">
+          <div className="min-w-0 flex-1">
+            <div className="bg-background rounded-2xl border border-border p-6 md:p-8">
+              {/* Your Workspaces */}
+              <section className="mb-10">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-foreground">Your Workspaces</h2>
+                  <span className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-xs text-muted-foreground">2</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {DEMO_PROJECTS.map((project) => (
+                    <div
+                      key={project.id}
+                      className="text-left p-5 rounded-xl border border-border bg-background hover:bg-secondary/30 transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <div className="flex -space-x-1.5">
+                            {Array.from({ length: Math.min(project.collaborators, 3) }).map((_, i) => (
+                              <div key={i} className="w-6 h-6 rounded-full bg-muted border-2 border-background" />
+                            ))}
+                          </div>
+                          <span className="text-xs text-muted-foreground">{project.collaborators} Collaborators</span>
+                        </div>
+                        {project.status ? (
+                          <span className={`flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border border-border ${project.status.color}`}>
+                            <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                            {project.status.label}
+                          </span>
+                        ) : project.updatedAt ? (
+                          <span className="text-xs text-muted-foreground">{project.updatedAt}</span>
+                        ) : null}
+                      </div>
+
+                      <h3 className="text-base font-semibold text-foreground mb-0.5">{project.title}</h3>
+                      <p className="text-sm mb-4" style={{ color: 'hsl(var(--gold))' }}>{project.dataset}</p>
+
+                      <div className="flex items-center gap-0 border-t border-border pt-3">
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground flex-1">
+                          <MessageSquare className="w-3.5 h-3.5" />
+                          {project.stats.chats} Chats
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground flex-1 border-l border-border pl-3">
+                          <BookOpen className="w-3.5 h-3.5" />
+                          {project.stats.notebooks} Notebooks
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground flex-1 border-l border-border pl-3">
+                          <Layout className="w-3.5 h-3.5" />
+                          {project.stats.canvas} Canvas
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* Your Chats */}
+              <section>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-foreground">Your Chats</h2>
+                  <span className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-xs text-muted-foreground">1</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {DEMO_CHATS.map((chat) => (
+                    <div
+                      key={chat.id}
+                      className="text-left p-4 rounded-xl border border-border bg-background hover:bg-secondary/30 transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <Lock className="w-4 h-4 text-muted-foreground" />
+                        {chat.status ? (
+                          <span className={`flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border border-border ${chat.status.color}`}>
+                            <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                            {chat.status.label}
+                          </span>
+                        ) : chat.updatedAt ? (
+                          <span className="text-[10px] text-muted-foreground">{chat.updatedAt}</span>
+                        ) : null}
+                      </div>
+                      <h3 className="text-sm font-semibold text-foreground leading-snug mb-1">{chat.title}</h3>
+                      <p className="text-xs" style={{ color: 'hsl(var(--gold))' }}>{chat.dataset}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
             </div>
           </div>
 
-          {/* Bookmarks — white container over gradient */}
-          <div className="bg-background rounded-2xl border border-border p-5">
-            <h3 className="text-base font-semibold text-foreground mb-3">Bookmarks</h3>
-            <div className="space-y-2">
-              {DEMO_BOOKMARKS.map((bm) => (
-                <div
-                  key={bm.id}
-                  className="flex items-start justify-between p-3 rounded-lg border border-border"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-foreground leading-snug truncate">{bm.title}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{bm.datasets} · {bm.time}</p>
-                  </div>
-                  <button className="p-1 rounded hover:bg-secondary transition-colors shrink-0">
-                    <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
+          <aside className="hidden xl:block w-72 shrink-0 space-y-4">
+            <div className="bg-background rounded-2xl border border-border p-5">
+              <h3 className="text-base font-semibold text-foreground mb-3">Quickstart</h3>
+              <div className="space-y-0 rounded-lg border border-border overflow-hidden">
+                {EXAMPLE_TEMPLATES.map((example, i) => (
+                  <button
+                    key={example.id}
+                    onClick={() => onStartExample?.(example.chatTitle, example.userMessage, example.assistantMessage)}
+                    className={`flex items-start gap-2.5 w-full p-3 hover:bg-secondary/50 transition-colors text-left ${
+                      i < EXAMPLE_TEMPLATES.length - 1 ? "border-b border-border" : ""
+                    }`}
+                  >
+                    <MessageSquare className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                    <span className="text-sm text-foreground leading-snug">{example.text}</span>
                   </button>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        </aside>
+
+            <div className="bg-background rounded-2xl border border-border p-5">
+              <h3 className="text-base font-semibold text-foreground mb-3">Bookmarks</h3>
+              <div className="space-y-2">
+                {DEMO_BOOKMARKS.map((bm) => (
+                  <div
+                    key={bm.id}
+                    className="flex items-start justify-between p-3 rounded-lg border border-border"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-foreground leading-snug truncate">{bm.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{bm.datasets} · {bm.time}</p>
+                    </div>
+                    <button className="p-1 rounded hover:bg-secondary transition-colors shrink-0">
+                      <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </aside>
+        </div>
       </div>
     </div>
   );
