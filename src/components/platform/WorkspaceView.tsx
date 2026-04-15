@@ -64,7 +64,7 @@ const DEMO_CHATS: ChatCard[] = [
     id: "c2",
     title: "Differential Expression – Tumor vs Normal",
     dataset: "@Dataset-Name",
-    status: { label: "New Chat – 1 min ago", textColor: "text-emerald-700", bgColor: "bg-emerald-100" },
+    status: { label: "New Chat", textColor: "text-emerald-700", bgColor: "bg-emerald-100" },
   },
   {
     id: "c3",
