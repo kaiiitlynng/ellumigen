@@ -211,11 +211,15 @@ export function ChatView({
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="flex gap-1 py-4"
+                  className="flex items-center gap-3 py-4"
                 >
-                  <div className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <div className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <div className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: "300ms" }} />
+                  <img src={ellumigenLogo} alt="Processing" className="w-8 h-8 rounded-full object-cover" />
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2 h-2 rounded-full bg-foreground/40 animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <div className="w-2 h-2 rounded-full bg-foreground/40 animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <div className="w-2 h-2 rounded-full bg-foreground/40 animate-bounce" style={{ animationDelay: "300ms" }} />
+                    <span className="text-sm text-muted-foreground ml-2">Processing analysis...</span>
+                  </div>
                 </motion.div>
               )}
 
@@ -380,14 +384,17 @@ function MessageBubble({
       <div className={`max-w-[85%]`}>
         {isUser ? (
           <div>
-            <div className="bg-foreground text-background rounded-2xl rounded-br-md px-4 py-3">
+            <div className="bg-sky-100 text-foreground rounded-2xl rounded-br-md px-4 py-3">
               <p className="text-sm" dangerouslySetInnerHTML={{
                 __html: message.content.replace(
                   /\/([\w-]+)/g,
-                  '<span class="text-violet-300 font-medium">/$1</span>'
+                  '<span class="text-violet-600 font-medium">/$1</span>'
                 ),
               }} />
             </div>
+            <p className="text-[10px] text-muted-foreground mt-1">
+              {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </p>
           </div>
         ) : metaType === "plan" && message.metadata?.plan ? (
           <ProposedPlan
@@ -516,7 +523,7 @@ function MessageBubble({
       </div>
 
       {isUser && (
-        <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-primary-foreground text-xs font-bold shrink-0 mt-1">
+        <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-xs font-bold shrink-0 mt-1">
           U
         </div>
       )}

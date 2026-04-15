@@ -1,7 +1,8 @@
-import { Share2, User, Map, Merge, ArrowLeft } from "lucide-react";
+import { Share2, User, Map, Merge, ArrowLeft, Settings } from "lucide-react";
 
 interface TopBarProps {
   chatTitle?: string;
+  chatSubtitle?: string;
   branchContext?: {
     isOnBranch: boolean;
     branchTitle: string;
@@ -17,6 +18,7 @@ interface TopBarProps {
 
 export function TopBar({
   chatTitle,
+  chatSubtitle,
   branchContext,
   onOpenConversationMap,
   onCloseConversationMap,
@@ -28,7 +30,7 @@ export function TopBar({
 
   return (
     <div className="flex flex-col border-b border-border bg-background">
-      {/* Thin branch context bar — only when on a branch */}
+      {/* Branch context bar */}
       {isOnBranch && (
         <div className="flex items-center justify-between px-5 py-2.5 bg-muted/50 border-b border-border">
           <span className="text-xs text-muted-foreground truncate">
@@ -57,14 +59,21 @@ export function TopBar({
 
       {/* Main top bar */}
       <header className="flex items-center justify-between px-5 py-3">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-2.5 h-2.5 rounded-full bg-primary" />
-          <span className="text-sm font-medium text-foreground truncate">
+        <div className="flex flex-col min-w-0">
+          <span className="text-base font-semibold text-foreground truncate">
             {chatTitle || "Chat"}
           </span>
+          {chatSubtitle && (
+            <span className="text-xs" style={{ color: 'hsl(var(--gold))' }}>{chatSubtitle}</span>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Status badge */}
+          <span className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full border border-border text-orange-500">
+            <Settings className="w-3 h-3 animate-spin" style={{ animationDuration: '3s' }} />
+            Currently Running
+          </span>
           <button
             onClick={showConversationMap ? onCloseConversationMap : onOpenConversationMap}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
@@ -74,15 +83,12 @@ export function TopBar({
             }`}
           >
             <Map className="w-3.5 h-3.5" />
-            Conversation Map
+            Map
           </button>
           <button className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground rounded-lg hover:bg-secondary transition-colors">
             <Share2 className="w-3.5 h-3.5" />
             Share
           </button>
-          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-            <User className="w-4 h-4 text-primary-foreground" />
-          </div>
         </div>
       </header>
     </div>

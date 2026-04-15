@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Plus, ArrowUp, HelpCircle, Hash, Database, BarChart3, FlaskConical, GitBranch, Dna, FileText } from "lucide-react";
+import { Plus, ArrowRight, HelpCircle, Hash, Database, BarChart3, FlaskConical, GitBranch, Dna, FileText, Upload } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
 interface DropdownItem {
@@ -194,7 +194,7 @@ export function ChatInput({ onSend, disabled, onHelpClick }: ChatInputProps) {
         value={value}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
-        placeholder="Type @ for datasets, / for methods..."
+        placeholder="Ask a question or describe your analysis..."
         rows={1}
         disabled={disabled}
         className="w-full resize-none bg-transparent px-4 pt-4 pb-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
@@ -204,31 +204,18 @@ export function ChatInput({ onSend, disabled, onHelpClick }: ChatInputProps) {
           <button className="p-1.5 rounded-lg hover:bg-secondary transition-colors">
             <Plus className="w-4 h-4 text-muted-foreground" />
           </button>
-          <button
-            onClick={onHelpClick}
-            className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-muted-foreground hover:bg-secondary transition-colors"
-            title="Context control help"
-          >
-            <Hash className="w-3.5 h-3.5" />
-            <span>Add Context</span>
+          <button className="p-1.5 rounded-lg hover:bg-secondary transition-colors">
+            <Upload className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>
-        <div className="flex items-center gap-1">
-          <button
-            onClick={onHelpClick}
-            className="p-1.5 rounded-lg hover:bg-secondary transition-colors"
-            title="Help"
-          >
-            <HelpCircle className="w-4 h-4 text-muted-foreground" />
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={!value.trim() || disabled}
-            className="p-1.5 rounded-lg bg-foreground text-background hover:opacity-90 transition-opacity disabled:opacity-30"
-          >
-            <ArrowUp className="w-4 h-4" />
-          </button>
-        </div>
+        <button
+          onClick={handleSubmit}
+          disabled={!value.trim() || disabled}
+          className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-foreground text-background text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-30"
+        >
+          <ArrowRight className="w-4 h-4" />
+          Send
+        </button>
       </div>
     </div>
   );
