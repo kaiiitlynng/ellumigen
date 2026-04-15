@@ -127,7 +127,7 @@ export function WorkspaceView({ onStartExample }: WorkspaceViewProps) {
       <div className="mx-auto max-w-[1400px] px-4 py-6 md:px-6 md:py-8">
         <div className="mb-4 xl:max-w-[calc(100%-19rem)]">
           <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-            Welcome back! There are four updates on your projects.
+            Overview
           </h1>
         </div>
 
