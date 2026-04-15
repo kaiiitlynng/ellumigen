@@ -5,7 +5,7 @@ interface Project {
   title: string;
   dataset: string;
   collaborators: number;
-  status?: { label: string; color: string };
+  status?: { label: string; textColor: string; bgColor: string };
   updatedAt?: string;
   stats: { chats: number; notebooks: number; canvas: number };
 }
