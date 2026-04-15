@@ -384,7 +384,7 @@ function MessageBubble({
       <div className={`max-w-[85%]`}>
         {isUser ? (
           <div>
-            <div className="bg-sky-100 text-foreground rounded-2xl rounded-br-md px-4 py-3">
+            <div className="bg-background text-foreground rounded-2xl rounded-br-md px-4 py-3 border border-border">
               <p className="text-sm" dangerouslySetInnerHTML={{
                 __html: message.content.replace(
                   /\/([\w-]+)/g,
