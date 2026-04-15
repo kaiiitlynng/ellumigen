@@ -168,7 +168,7 @@ export function ChatView({
   }
 
   const chatContent = (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-gradient-to-b from-sky-200/60 via-sky-100/30 to-background">
       {isEmpty ? (
         <div className="flex-1 flex flex-col items-center justify-center px-6">
           <div className="w-full max-w-xl mx-auto flex flex-col items-center gap-6">
