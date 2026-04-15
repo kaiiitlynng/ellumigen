@@ -448,6 +448,20 @@ export default function Index() {
           <TopBar
             chatTitle={store.activeChat?.title}
             chatSubtitle="Dataset name"
+            isLoading={isLoading}
+            lastMessageTime={(() => {
+              const msgs = store.activeChat?.messages;
+              if (!msgs || msgs.length === 0) return undefined;
+              const last = msgs[msgs.length - 1];
+              if (last.timestamp) {
+                const diff = Math.floor((Date.now() - new Date(last.timestamp).getTime()) / 60000);
+                if (diff < 1) return "Just now";
+                if (diff < 60) return `${diff} min ago`;
+                if (diff < 1440) return `${Math.floor(diff / 60)} hrs ago`;
+                return "Yesterday";
+              }
+              return "Just now";
+            })()}
             branchContext={branchContext}
             onOpenConversationMap={handleOpenConversationMap}
             onCloseConversationMap={() => setShowConversationMap(false)}
