@@ -168,7 +168,7 @@ export function ChatInput({ onSend, disabled, onHelpClick }: ChatInputProps) {
           >
             <div className="px-3 py-2 border-b border-border">
               <span className="text-xs font-medium text-muted-foreground">
-                {showDropdown === "@" ? "Datasets & Files" : "Methods & Skills"}
+                {showDropdown === "@" ? "Datasets & Files" : "Methods"}
               </span>
             </div>
             <div className="py-1 max-h-52 overflow-y-auto">
