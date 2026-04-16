@@ -12,6 +12,7 @@ import {
   Database,
   MoreHorizontal,
   Beaker,
+  FlaskConical,
   PanelLeftClose,
   PanelLeftOpen,
 } from "lucide-react";
@@ -21,7 +22,7 @@ import ellumigenLogo from "@/assets/EllumigenLogo.png";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
-export type SidebarView = "workspace" | "chat" | "history" | "usecases" | "artifacts";
+export type SidebarView = "workspace" | "chat" | "history" | "usecases" | "artifacts" | "methods";
 
 interface AppSidebarProps {
   chats: Chat[];
@@ -100,6 +101,7 @@ export function AppSidebar({
           <SidebarIconButton icon={Clock} label="History" onClick={() => onViewChange("history")} />
           <SidebarIconButton icon={Sparkles} label="Use Cases" onClick={() => onViewChange("usecases")} />
           <SidebarIconButton icon={Database} label="Artifacts" onClick={() => onViewChange("artifacts")} />
+          <SidebarIconButton icon={FlaskConical} label="Methods" onClick={() => onViewChange("methods")} />
           <SidebarIconButton icon={Bookmark} label="Bookmarks" />
         </nav>
       ) : (
@@ -145,6 +147,13 @@ export function AppSidebar({
             >
               <Database className="w-4 h-4" />
               Artifacts
+            </button>
+            <button
+              onClick={() => onViewChange("methods")}
+              className={cn("sidebar-item w-full", activeView === "methods" && "sidebar-item-active")}
+            >
+              <FlaskConical className="w-4 h-4" />
+              Methods
             </button>
             <button
               onClick={() => onViewChange("usecases")}
