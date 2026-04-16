@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Plus, ArrowRight, HelpCircle, Hash, Database, BarChart3, FlaskConical, GitBranch, Dna, FileText, Upload } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCustomMethods } from "@/stores/customMethodsStore";
+import { DEFAULT_METHODS } from "@/lib/defaultMethods";
 
 interface DropdownItem {
   id: string;
@@ -18,12 +19,12 @@ const DATASET_OPTIONS: DropdownItem[] = [
   { id: "ClinVar-Pathogenic", label: "ClinVar-Pathogenic", description: "Pathogenic variant annotations", icon: FileText },
 ];
 
-const METHOD_OPTIONS: DropdownItem[] = [
-  { id: "statistical-analysis", label: "statistical-analysis", description: "DESeq2, t-test, ANOVA, survival analysis", icon: BarChart3 },
-  { id: "pathway-enrichment", label: "pathway-enrichment", description: "GO, KEGG, Reactome enrichment", icon: GitBranch },
-  { id: "clustering", label: "clustering", description: "K-means, hierarchical, UMAP", icon: FlaskConical },
-  { id: "dimensionality-reduction", label: "dimensionality-reduction", description: "PCA, t-SNE, UMAP projections", icon: FlaskConical },
-];
+const METHOD_OPTIONS: DropdownItem[] = DEFAULT_METHODS.map((m) => ({
+  id: m.id,
+  label: m.label,
+  description: m.description,
+  icon: m.icon,
+}));
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -168,7 +169,7 @@ export function ChatInput({ onSend, disabled, onHelpClick }: ChatInputProps) {
           >
             <div className="px-3 py-2 border-b border-border">
               <span className="text-xs font-medium text-muted-foreground">
-                {showDropdown === "@" ? "Datasets & Files" : "Methods & Skills"}
+                {showDropdown === "@" ? "Datasets & Files" : "Methods"}
               </span>
             </div>
             <div className="py-1 max-h-52 overflow-y-auto">
