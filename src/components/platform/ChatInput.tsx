@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Plus, ArrowRight, HelpCircle, Hash, Database, BarChart3, FlaskConical, GitBranch, Dna, FileText, Upload } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useCustomMethods } from "@/stores/customMethodsStore";
 
 interface DropdownItem {
   id: string;
@@ -38,7 +39,19 @@ export function ChatInput({ onSend, disabled, onHelpClick }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const activeOptions = showDropdown === "@" ? DATASET_OPTIONS : showDropdown === "/" ? METHOD_OPTIONS : [];
+  const customMethods = useCustomMethods();
+  const methodOptions = useMemo<DropdownItem[]>(() => {
+    const customAsItems: DropdownItem[] = customMethods.map((m) => ({
+      id: m.id,
+      label: m.label,
+      description: m.description,
+      icon: FlaskConical,
+    }));
+    // Custom methods first so newly created ones are easy to spot
+    return [...customAsItems, ...METHOD_OPTIONS];
+  }, [customMethods]);
+
+  const activeOptions = showDropdown === "@" ? DATASET_OPTIONS : showDropdown === "/" ? methodOptions : [];
   const filteredOptions = activeOptions.filter((opt) => {
     if (triggerPos === null) return true;
     const query = value.slice(triggerPos + 1).toLowerCase();

@@ -7,6 +7,7 @@ import { WorkspaceView } from "@/components/platform/WorkspaceView";
 import { HistoryView } from "@/components/platform/HistoryView";
 import { UseCasesView } from "@/components/platform/UseCasesView";
 import { ArtifactsView } from "@/components/platform/ArtifactsView";
+import { MethodsView } from "@/components/platform/MethodsView";
 import { ConversationMap, type MapNode } from "@/components/platform/ConversationMap";
 import { PanelHeader } from "@/components/platform/ModeTabs";
 import { useChatStore } from "@/stores/chatStore";
@@ -492,6 +493,8 @@ export default function Index() {
           <UseCasesView />
         ) : activeView === "artifacts" ? (
           <ArtifactsView />
+        ) : activeView === "methods" ? (
+          <MethodsView />
         ) : (
           <div className="flex-1 flex flex-col overflow-hidden">
             <ChatView
