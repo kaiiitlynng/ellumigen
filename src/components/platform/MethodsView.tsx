@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FlaskConical, Plus, Trash2 } from "lucide-react";
+import { FlaskConical, Plus, Trash2, Lock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import {
   addCustomMethod,
   deleteCustomMethod,
 } from "@/stores/customMethodsStore";
+import { DEFAULT_METHODS } from "@/lib/defaultMethods";
 
 export function MethodsView() {
   const methods = useCustomMethods();
@@ -89,6 +90,45 @@ export function MethodsView() {
               </Button>
             </div>
           </form>
+        </section>
+
+        <section className="mb-8">
+          <h2 className="text-sm font-semibold text-foreground mb-3">
+            Default methods{" "}
+            <span className="text-muted-foreground font-normal">
+              ({DEFAULT_METHODS.length})
+            </span>
+          </h2>
+          <ul className="space-y-2">
+            {DEFAULT_METHODS.map((m) => {
+              const Icon = m.icon;
+              return (
+                <li
+                  key={m.id}
+                  className="flex items-start gap-3 rounded-lg border border-border bg-card px-4 py-3"
+                >
+                  <div className="w-8 h-8 rounded-md flex items-center justify-center shrink-0 bg-violet-500/10 text-violet-600">
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium text-foreground font-mono">
+                      /{m.label}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-0.5">
+                      {m.description}
+                    </div>
+                  </div>
+                  <span
+                    className="p-1.5 text-muted-foreground"
+                    title="Built-in method"
+                    aria-label="Built-in method"
+                  >
+                    <Lock className="w-3.5 h-3.5" />
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
         </section>
 
         <section>
