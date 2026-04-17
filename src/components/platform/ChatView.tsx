@@ -26,7 +26,7 @@ export type MiniPanelType = "canvas" | "code" | null;
 interface ChatViewProps {
   chat: Chat | null;
   onSendMessage: (message: string) => void;
-  onBranch?: (messageIndex: number) => void;
+  onBranch?: (messageId: string) => void;
   onBookmark?: (messageId: string) => void;
   onToggleBookmarkCollection?: (messageId: string, collectionId: string) => void;
   onCreateBookmarkCollection?: (name: string) => void;
@@ -40,6 +40,11 @@ interface ChatViewProps {
   miniPanel: MiniPanelType;
   onToggleMiniPanel: (panel: "canvas" | "code") => void;
   isNewChat?: boolean;
+  branchContext?: {
+    isOnBranch: boolean;
+    branchTitle: string;
+    isMerged?: boolean;
+  };
 }
 
 export function ChatView({
@@ -59,6 +64,7 @@ export function ChatView({
   miniPanel,
   onToggleMiniPanel,
   isNewChat,
+  branchContext,
 }: ChatViewProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -70,7 +76,10 @@ export function ChatView({
     }
   }, [chat?.messages, chat?.messages.length]);
 
-  const isEmpty = isNewChat && (!chat || chat.messages.length === 0);
+  const hasNoMessages = !chat || chat.messages.length === 0;
+  const isEmptyMainChat = isNewChat && hasNoMessages;
+  const isMergedBranchEmpty = !!branchContext?.isOnBranch && !!branchContext?.isMerged && hasNoMessages;
+  const isActiveBranchEmpty = !!branchContext?.isOnBranch && !branchContext?.isMerged && hasNoMessages;
 
   const handleSend = (message: string) => {
     if (message.toLowerCase().includes("help")) {
@@ -169,12 +178,30 @@ export function ChatView({
 
   const chatContent = (
     <div className="flex flex-col h-full bg-gradient-to-b from-sky-200/60 via-sky-100/30 to-background">
-      {isEmpty ? (
+      {isEmptyMainChat || isMergedBranchEmpty || isActiveBranchEmpty ? (
         <div className="flex-1 flex flex-col items-center justify-center px-6">
           <div className="w-full max-w-xl mx-auto flex flex-col items-center gap-6">
             <div className="text-center space-y-2">
-              <h1 className="text-3xl font-semibold text-foreground">Start exploring</h1>
-              <p className="text-muted-foreground text-sm">Ask me questions about your data and generate research hypotheses</p>
+              {isMergedBranchEmpty ? (
+                <>
+                  <h1 className="text-3xl font-semibold text-foreground">Branch merged to main</h1>
+                  <p className="text-muted-foreground text-sm">
+                    This branch has been merged into the main chat. If you still want to work in this branch, ask another question to continue here.
+                  </p>
+                </>
+              ) : isActiveBranchEmpty ? (
+                <>
+                  <h1 className="text-3xl font-semibold text-foreground">Continue this branch</h1>
+                  <p className="text-muted-foreground text-sm">
+                    Ask another question to keep exploring this branch.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h1 className="text-3xl font-semibold text-foreground">Start exploring</h1>
+                  <p className="text-muted-foreground text-sm">Ask me questions about your data and generate research hypotheses</p>
+                </>
+              )}
             </div>
             <div className="w-full">
               <ChatInput
@@ -183,7 +210,7 @@ export function ChatView({
                 onHelpClick={() => onToggleContextHelp?.(true)}
               />
             </div>
-            <SuggestionChips onSelect={handleSend} />
+            {!branchContext?.isOnBranch && <SuggestionChips onSelect={handleSend} />}
           </div>
         </div>
       ) : (
@@ -195,7 +222,7 @@ export function ChatView({
                   <MessageBubble
                     key={msg.id}
                     message={msg}
-                    onBranch={() => onBranch?.(i)}
+                    onBranch={() => onBranch?.(msg.id)}
                     onBookmark={() => onBookmark?.(msg.id)}
                     onToggleBookmarkCollection={onToggleBookmarkCollection ? (colId: string) => onToggleBookmarkCollection(msg.id, colId) : undefined}
                     onCreateBookmarkCollection={onCreateBookmarkCollection}
@@ -369,6 +396,41 @@ function MessageBubble({
 }) {
   const isUser = message.role === "user";
   const metaType = message.metadata?.type;
+  const assistantActions = (
+    <div className="flex items-center gap-1 mt-3 -ml-1">
+      <button className="p-1 rounded hover:bg-secondary transition-colors">
+        <Copy className="w-3.5 h-3.5 text-muted-foreground" />
+      </button>
+      <button className="p-1 rounded hover:bg-secondary transition-colors">
+        <ThumbsUp className="w-3.5 h-3.5 text-muted-foreground" />
+      </button>
+      <button className="p-1 rounded hover:bg-secondary transition-colors">
+        <ThumbsDown className="w-3.5 h-3.5 text-muted-foreground" />
+      </button>
+      <BookmarkPopover
+        isBookmarked={!!message.bookmarked}
+        activeCollectionIds={activeCollectionIds}
+        collections={bookmarkCollections}
+        onToggleCollection={(colId) => onToggleBookmarkCollection?.(colId)}
+        onCreateCollection={(name) => onCreateBookmarkCollection?.(name)}
+      />
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={onBranch}
+              className="p-1 rounded hover:bg-secondary transition-colors"
+            >
+              <GitBranch className="w-3.5 h-3.5 text-muted-foreground" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            <p>Branch</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </div>
+  );
 
   return (
     <motion.div
@@ -397,12 +459,15 @@ function MessageBubble({
             </p>
           </div>
         ) : metaType === "plan" && message.metadata?.plan ? (
-          <ProposedPlan
-            plan={message.metadata.plan}
-            onApprove={() => onApprovePlan?.()}
-            onReject={() => onRejectPlan?.()}
-            onEdit={() => {}}
-          />
+          <div className="w-full">
+            <ProposedPlan
+              plan={message.metadata.plan}
+              onApprove={() => onApprovePlan?.()}
+              onReject={() => onRejectPlan?.()}
+              onEdit={() => {}}
+            />
+            {assistantActions}
+          </div>
         ) : metaType === "executing" ? (
           <div className="w-full">
             {message.metadata?.thoughtProcess && message.metadata.thoughtProcess.length > 0 && (
@@ -418,6 +483,7 @@ function MessageBubble({
                 totalCount={message.metadata.executionSteps.length}
               />
             )}
+            {assistantActions}
           </div>
         ) : metaType === "data-table" && message.metadata?.dataTable ? (
           <div className="w-full">
@@ -430,6 +496,7 @@ function MessageBubble({
               columns={message.metadata.dataTable.columns}
               data={message.metadata.dataTable.data}
             />
+            {assistantActions}
           </div>
         ) : metaType === "visualizations" ? (
           <div className="w-full space-y-4">
@@ -456,6 +523,7 @@ function MessageBubble({
                 <HeatmapChart />
               </DraggableVisualization>
             )}
+            {assistantActions}
           </div>
         ) : (
           <div>
@@ -483,41 +551,8 @@ function MessageBubble({
                   },
                 }}
               >{message.content}</ReactMarkdown>
-
-              <div className="flex items-center gap-1 mt-3 -ml-1">
-                <button className="p-1 rounded hover:bg-secondary transition-colors">
-                  <Copy className="w-3.5 h-3.5 text-muted-foreground" />
-                </button>
-                <button className="p-1 rounded hover:bg-secondary transition-colors">
-                  <ThumbsUp className="w-3.5 h-3.5 text-muted-foreground" />
-                </button>
-                <button className="p-1 rounded hover:bg-secondary transition-colors">
-                  <ThumbsDown className="w-3.5 h-3.5 text-muted-foreground" />
-                </button>
-                <BookmarkPopover
-                  isBookmarked={!!message.bookmarked}
-                  activeCollectionIds={activeCollectionIds}
-                  collections={bookmarkCollections}
-                  onToggleCollection={(colId) => onToggleBookmarkCollection?.(colId)}
-                  onCreateCollection={(name) => onCreateBookmarkCollection?.(name)}
-                />
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        onClick={onBranch}
-                        className="p-1 rounded hover:bg-secondary transition-colors"
-                      >
-                        <GitBranch className="w-3.5 h-3.5 text-muted-foreground" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="top">
-                      <p>Branch</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
             </div>
+            {assistantActions}
           </div>
         )}
       </div>

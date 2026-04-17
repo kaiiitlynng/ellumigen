@@ -326,9 +326,9 @@ export default function Index() {
   );
 
   const handleBranch = useCallback(
-    (messageIndex: number) => {
+    (messageId: string) => {
       if (store.activeChatId) {
-        store.branchChat(store.activeChatId, messageIndex);
+        store.branchChat(store.activeChatId, messageId);
       }
     },
     [store]
@@ -516,6 +516,7 @@ export default function Index() {
               miniPanel={miniPanel}
               onToggleMiniPanel={toggleMiniPanel}
               isNewChat={!store.activeBranchId}
+              branchContext={branchContext}
             />
           </div>
         )}

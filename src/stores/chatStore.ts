@@ -142,20 +142,30 @@ export function useChatStore() {
   );
 
   /**
+   * Find a message anywhere in the chat (main thread or any branch) by id.
+   */
+  function findMessageById(chat: Chat, messageId: string): ChatMessage | null {
+    const onMain = chat.messages.find((m) => m.id === messageId);
+    if (onMain) return onMain;
+    for (const b of chat.branches) {
+      const onBranch = b.messages.find((m) => m.id === messageId);
+      if (onBranch) return onBranch;
+    }
+    return null;
+  }
+
+  /**
    * Create a branch within the current chat, forking from a specific message.
    * The branch starts empty — the user can then send messages into it.
+   * `parentMessageId` must refer to a message on the main thread or an existing branch.
    */
   const branchChat = useCallback(
-    (chatId: string, atMessageIndex: number) => {
+    (chatId: string, parentMessageId: string) => {
       const source = chats.find((c) => c.id === chatId);
       if (!source) return null;
 
-      const parentMessage = source.messages[atMessageIndex];
+      const parentMessage = findMessageById(source, parentMessageId);
       if (!parentMessage) return null;
-
-      const branchCount = source.branches.filter(
-        (b) => b.parentMessageId === parentMessage.id
-      ).length;
 
       const branch: ChatBranch = {
         id: crypto.randomUUID(),
@@ -190,14 +200,20 @@ export function useChatStore() {
           const branch = c.branches.find((b) => b.id === branchId);
           if (!branch) return c;
 
-          // Mark branch as merged, pointing to the last main-thread message
-          const lastMainMsg = c.messages[c.messages.length - 1];
-          const mergedAtMessageId = lastMainMsg?.id;
+          const lastMainBefore = c.messages[c.messages.length - 1];
+          const mergedAtMessageId = lastMainBefore?.id;
+
+          const toAppend = branch.messages;
+          const newMainMessages =
+            toAppend.length > 0 ? [...c.messages, ...toAppend] : c.messages;
 
           return {
             ...c,
+            messages: newMainMessages,
             branches: c.branches.map((b) =>
-              b.id === branchId ? { ...b, merged: true, mergedAtMessageId } : b
+              b.id === branchId
+                ? { ...b, merged: true, mergedAtMessageId, messages: [] }
+                : b
             ),
             updatedAt: new Date(),
           };

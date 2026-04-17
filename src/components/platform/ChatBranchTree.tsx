@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { ChevronDown, GitBranch } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
@@ -35,6 +34,11 @@ const ROW_HEIGHT = 32; // px per row
 const BUTTON_PAD = 4; // px-1 = 4px left padding on buttons
 const MAIN_X = 18; // center X of main column dots
 const BRANCH_X = 44; // center X of branch column dots
+
+/** Main thread stays blue; branch visuals use violet so they read clearly apart. */
+const MAIN_THREAD_COLOR = "#0070C0";
+const BRANCH_COLOR = "#9333ea"; // violet-600 — active branch lines & dots
+const BRANCH_COLOR_MUTED = "#c4b5fd"; // violet-300 — inactive branch stroke
 
 export function ChatBranchTree({ nodes, onSelectNode, onSelectBranch }: ChatBranchTreeProps) {
   return (
@@ -127,7 +131,7 @@ function BranchTreeLayout({
             y1={mainRowIndex[0] * ROW_HEIGHT + ROW_HEIGHT / 2}
             x2={MAIN_X}
             y2={mainRowIndex[mainChain.length - 1] * ROW_HEIGHT + ROW_HEIGHT / 2}
-            stroke="#0070C0"
+            stroke={MAIN_THREAD_COLOR}
             strokeWidth={2}
           />
         )}
@@ -136,7 +140,7 @@ function BranchTreeLayout({
           const startY = mainRowIndex[branch.mainIdx] * ROW_HEIGHT + ROW_HEIGHT / 2;
           const firstBranchY = branch.startRow * ROW_HEIGHT + ROW_HEIGHT / 2;
           const lastBranchY = (branch.startRow + branch.chain.length - 1) * ROW_HEIGHT + ROW_HEIGHT / 2;
-          const strokeColor = branch.merged ? "#0070C0" : "#D9D9D9";
+          const strokeColor = branch.merged ? BRANCH_COLOR : BRANCH_COLOR_MUTED;
 
           // Calculate merge-back connector target
           const mergeTargetY = branch.merged && branch.mergeTargetMainIndex != null && branch.mergeTargetMainIndex >= 0
@@ -168,7 +172,7 @@ function BranchTreeLayout({
                 <path
                   d={`M ${BRANCH_X} ${lastBranchY} Q ${BRANCH_X} ${mergeTargetY}, ${MAIN_X} ${mergeTargetY}`}
                   fill="none"
-                  stroke="#0070C0"
+                  stroke={BRANCH_COLOR}
                   strokeWidth={2}
                 />
               )}
@@ -246,8 +250,8 @@ function BranchTreeLayout({
                     className={cn(
                       "shrink-0 text-[9px] px-1.5 py-0.5 rounded-full font-medium ml-auto",
                       branch.merged
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground"
+                        ? "bg-violet-600 text-white"
+                        : "bg-violet-500/15 text-violet-700 dark:text-violet-300"
                     )}
                   >
                     {branch.label}
@@ -264,14 +268,14 @@ function BranchTreeLayout({
 
 function MainDot({ status, isActive }: { status: BranchTreeNode["status"]; isActive?: boolean }) {
   const base = "rounded-full";
-  const color = { backgroundColor: "#0070C0" };
+  const color = { backgroundColor: MAIN_THREAD_COLOR };
   if (status === "active" || isActive) {
     return (
       <span className="relative flex items-center justify-center w-[10px] h-[10px]">
         <span className={cn(base, "w-[10px] h-[10px]")} style={color} />
         <span
           className="absolute w-[14px] h-[14px] rounded-full opacity-50"
-          style={{ borderWidth: 2, borderColor: "#0070C0" }}
+          style={{ borderWidth: 2, borderColor: MAIN_THREAD_COLOR }}
         />
       </span>
     );
@@ -280,7 +284,7 @@ function MainDot({ status, isActive }: { status: BranchTreeNode["status"]; isAct
 }
 
 function BranchDot({ status, isActive, merged }: { status: BranchTreeNode["status"]; isActive?: boolean; merged?: boolean }) {
-  const color = { backgroundColor: merged ? "#0070C0" : "#D9D9D9" };
+  const color = { backgroundColor: merged ? BRANCH_COLOR : BRANCH_COLOR_MUTED };
   if (status === "active" || isActive) {
     return (
       <span className="relative flex items-center justify-center w-[8px] h-[8px]">
